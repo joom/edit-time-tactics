@@ -1,0 +1,90 @@
+\documentclass[11pt, ma]{westhesis}
+\usepackage[utf8]{inputenc}
+\usepackage{natbib, amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph, hyperref}
+\usepackage[font=small]{caption}
+\hypersetup{colorlinks = true, allcolors = {blue}}
+
+% Idris
+% in REPL run `:pp latex 80 <expr>` to get the colored verbatim
+\usepackage{inconsolata}
+\usepackage{fancyvrb}
+\usepackage[usenames,dvipsnames]{xcolor}
+\newcommand{\IdrisData}[1]{\textcolor{Maroon}{#1}}
+\newcommand{\IdrisType}[1]{\textcolor{NavyBlue}{#1}}
+\newcommand{\IdrisBound}[1]{\textcolor{Plum}{#1}}
+\newcommand{\IdrisFunction}[1]{\textcolor{Green}{#1}}
+\newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
+\newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
+\usepackage{setspace, microtype}
+\fvset{commandchars=\\\{\},formatcom=\singlespacing}
+
+\newcommand{\quadthree}{\qquad\quad}
+\newcommand{\quadfour}{\quadthree\quad}
+\newcommand{\quadfive}{\quadfour\quad}
+\newcommand{\quadsix}{\quadfive\quad}
+\newcommand{\quadseven}{\quadsix\quad}
+\newcommand{\quadeight}{\quadseven\quad}
+\newcommand{\quadten}{\quadfive\quadfive}
+
+% \allowdisplaybreaks
+
+\department{Mathematics and Computer Science}
+\submitdate{April 2018}
+\advisor{Daniel R. Licata}
+\title{Editor Interaction Through Metaprogramming in Idris}
+\author{Joomy Korkut}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[chapter]
+
+\newcommand{\T}[1]{\texttt{#1}}
+\lstset{mathescape=true,basicstyle=\ttfamily}
+
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+\begin{document}
+
+\begin{abstract}
+Metaprogramming is a technique that allows users to write programs that writes
+programs. In dependently-typed languages such as Idris, recent work on the
+elaborator reflection system paved the way for new applications of
+metaprogramming, such as tactics. The goal of this work is to use the
+elaborator reflection system to rewrite the editor interaction mode (or IDE
+mode) of Idris. The current implementation is a part of the compiler and it
+is written in Haskell. Rewriting it in Idris would allow us to make it a mere
+library, and would be a decent first step towards a self-hosting Idris compiler.
+Furthermore, it would allow users to write their own tactics through the
+elaborator reflection, and run them in the editor. This would extend the
+abilities of the editor interaction mode from the current limitations of the
+built-in type checking holes, case splitting etc.\ to anything that a tactic
+can do.
+\end{abstract}
+
+\begin{dedication}
+\epigraph{``With metaprogramming, abstraction is no longer a guilty pleasure,
+  it is simply a pleasure.''}{\textit{Jeremy Yallop, ICFP 2017}}
+\end{dedication}
+
+\begin{acknowledgements}
+  % First and foremost, I would like to thank Dan Licata, my research advisor.
+\end{acknowledgements}
+
+\frontmatter
+\maketitle
+% \makededication
+% \makeack
+\makeabstract
+
+\tableofcontents
+
+\mainmatter
+\include{introduction}
+% \include{conclusion}
+\bibliography{paper}
+\bibliographystyle{plain}
+\end{document}

@@ -411,7 +411,7 @@ Faculty Advisor: \check@val\@principaladvisor
     \begin{center}
 \renewcommand{\baselinestretch}{1.0}
 \small
-A Dissertation submitted to the Faculty of Wesleyan University in partial fulfillment of the \\
+A Thesis submitted to the Faculty of Wesleyan University in partial fulfillment of the \\
 requirements for the degree of \check@val\@degree
     \end{center}
     \vskip.25in

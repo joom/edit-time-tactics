@@ -1,14 +1,99 @@
-\section{Introduction}
-\label{sec:introduction}
+\section{Introduction} \label{sec:introduction}
 
-% \begin{figure}[ht]
-% \caption{Some Idris code}
-% \label{code:idrisExample}
-% \begin{Verbatim}
-% \IdrisKeyword{data} \IdrisType{(=)} : \IdrisImplicit{A} -> \IdrisImplicit{B} -> \IdrisType{Type} \IdrisKeyword{where}
-%   \IdrisData{Refl} : \IdrisImplicit{x} \IdrisType{=} \IdrisImplicit{x}
-% \end{Verbatim}
-% \end{figure}
+The rising popularity of statically typed languages with type inference led to
+the concept of ``type-driven development'' (TDD).
+When we know the type of an expression we have to write, TDD lets us write this
+expression incrementally and check if the type is correct at every step.  Then
+when we move into the later steps, if we lose track of how we should complete
+an expression, TDD lets us look up what type the next expression should have.
+
+The traditional development programming workflow depends on saving the
+file and trying to compile the file in order to check if there are any type
+errors. There are also integrated development environments (IDE), programs that have
+certain functionalities that help us, such as code completion, syntax checking,
+displaying compiler error messages on corresponding lines, displaying
+documentation etc.  These features are convenient, but they are different from
+TDD. While IDEs can also use types to assist the user, they do not direct the
+entire development process around types per se. TDD is not a program, it is a
+style of programming in which the development process takes the form of a
+conversation between the user's editor and the type-checker/compiler. However,
+this requires certain changes to the compiler, such as being able to type check
+incomplete expressions and definitions.\cite{tdd}
+
+The kind of change that is important for this work, however, is the editor
+interaction mode (or IDE mode) that lets the editor
+talk to the compiler.\footnote{To avoid any confusion, we should mention that
+  there are two different parts of an editor interaction mode. The first is a
+  plugin to the editor, often written in the script language of the editor,
+  such as Emacs Lisp or VimL. The second part is a separate program that does
+  the heavy lifting of the editing features that work with the language
+  itself.  \path{ghc-mod} in Haskell and \path{agda-mode} in Agda would be
+  perfect examples for the second part. We will call these parts the front
+  end and back end of the editor interaction mode. When we talk about the
+  language the editor interaction mode is implemented, we mean the language
+  used in the back end, because the language used in the front end
+  depends on the editor.}
+There are various existing examples of editor interaction:
+Proof General\cite{pg} and CoqIDE for Coq\cite{coq},
+the Emacs mode\cite{agdamode} for Agda\cite{agda},
+the Emacs mode\cite{idrismode} for Idris\cite{idris},
+jEdit\cite{isabellejedit} for Isabelle\cite{isabelle},
+and recently the editor mode of Lean\cite{lean}.
+
+% TODO mention ML and LCF, HOL and Isabelle
+
+Among these examples, Idris is the only language that prioritizes general
+purpose programming rather than theorem proving\cite{idrisfaq}, but that does
+not mean TDD is of less importance for Idris. On the contrary, this should
+be the first step of convincing the average programmer to adopt TDD.
+Furthermore, Idris programs are usually meant to be executed, unlike Coq or
+Agda programs, which are usually only meant to be type checked.\footnote{Of
+  course there are back ends for these languages, such as the OCaml
+  back end for Coq and the Haskell back end for Agda.}
+This means Idris programs ideally should not contain tactics that take a long
+time to compile and run, yet we still want to utilize complex tactics to
+generate proofs or terms. One way to handle this would be to run the tactic
+once, generate the term and replace the tactic with the term, which is not a
+pleasant workflow. Ideally we would want to do this in the editor,
+so we need a way to define an editor action using tactics.
+In this work, we will describe an extension API for the editor.
+
+Let's imagine another use case for such a feature.
+\begin{Verbatim}[commandchars=\\\{\}]
+\IdrisFunction{swap3} : \IdrisType{(}\IdrisImplicit{a}\IdrisType{,} \IdrisImplicit{b}\IdrisType{,} \IdrisImplicit{c}\IdrisType{)} -> \IdrisType{(}\IdrisImplicit{c}\IdrisType{,} \IdrisImplicit{b}\IdrisType{,} \IdrisImplicit{a}\IdrisType{)}
+\IdrisFunction{swap3} \IdrisBound{x} = \IdrisMetavar{?\IdrisMetavar{p}}
+\end{Verbatim}
+We have a 3-tuple\footnote{n-tuples are nested right-associative pairs in
+Idris.} as an argument, and we need to access every element in that tuple.
+If you case split on the argument \path{x}, that pattern will turn into
+a pair. However we need the full \path{(a, b, c)} pattern in this
+case. We can case split again on the second component of the pair and get the
+3-tuple pattern.
+For one function this repetition might not seem like a big deal, but if we need
+to do this numerously, we might want a way to automate that with a
+tactic.\footnote{Similar to the \path{unproduct} tactic in the Pruviloj library
+for Idris, but not exactly the same.}
 
 
-\cite{idris}
+
+% Suppose we are proving certain properties about a red-black tree.
+% cite Licata's OPLSS 2013 lectures
+
+
+
+
+
+% The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
+% the editor interaction mode is a part of the Idris compiler, implemented in the
+% \path{IdeMode.hs} module, and is written in Haskell. When the editor is running,
+% it runs the \path{idris} executable with the \path{--ide-mode} flag, which
+% allows socket communication with the program through a machine-readable syntax.
+% To be more precise, this program receives S-expressions\cite{mccarthy} as input
+% over the socket and sends back S-expressions as output.
+
+% The current implementation of the Idris IDE mode,
+
+In \autoref{sec:background}, we will go over the basics of the Idris
+programming language and its metaprogramming mechanics.
+
+

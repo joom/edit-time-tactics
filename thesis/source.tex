@@ -13,6 +13,7 @@
 \newcommand{\IdrisType}[1]{\textcolor{NavyBlue}{#1}}
 \newcommand{\IdrisBound}[1]{\textcolor{Plum}{#1}}
 \newcommand{\IdrisFunction}[1]{\textcolor{Green}{#1}}
+\newcommand{\IdrisMetavar}[1]{\textcolor{cyan}{#1}}
 \newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
 \usepackage{setspace, microtype}
@@ -50,19 +51,20 @@
 \begin{document}
 
 \begin{abstract}
-Metaprogramming is a technique that allows users to write programs that writes
-programs. In dependently-typed languages such as Idris, recent work on the
-elaborator reflection system paved the way for new applications of
-metaprogramming, such as tactics. The goal of this work is to use the
-elaborator reflection system to rewrite the editor interaction mode (or IDE
-mode) of Idris. The current implementation is a part of the compiler and it
-is written in Haskell. Rewriting it in Idris would allow us to make it a mere
-library, and would be a decent first step towards a self-hosting Idris compiler.
-Furthermore, it would allow users to write their own tactics through the
-elaborator reflection, and run them in the editor. This would extend the
-abilities of the editor interaction mode from the current limitations of the
-built-in type checking holes, case splitting etc.\ to anything that a tactic
-can do.
+  Metaprogramming is a technique that allows users to write programs that
+  writes programs. In dependently-typed languages such as Idris, recent work on
+  the elaborator reflection system paved the way for new applications of
+  metaprogramming, such as tactics. The goal of this work is to use the
+  elaborator reflection system to write editor interaction actions of Idris.
+  The current implementations of all Idris editor actions are a part of the
+  compiler and they are written in Haskell. This work will allow us to rewrite
+  them in Idris as metaprograms, and to move the interaction actions into a
+  separate library. Furthermore, it would allow users to write their own
+  tactics through the elaborator reflection, register them to the editor
+  through an API and then run them in the editor. This would extend the
+  abilities of the editor interaction mode from the current features of the
+  built-in type checking holes, case splitting etc.\ to anything that a tactic
+  can do.
 \end{abstract}
 
 \begin{dedication}
@@ -83,7 +85,19 @@ can do.
 \tableofcontents
 
 \mainmatter
+
+% \begin{figure}[ht]
+% \caption{Some Idris code}
+% \label{code:idrisExample}
+% \begin{Verbatim}
+% \IdrisKeyword{data} \IdrisType{(=)} : \IdrisImplicit{A} -> \IdrisImplicit{B} -> \IdrisType{Type} \IdrisKeyword{where}
+%   \IdrisData{Refl} : \IdrisImplicit{x} \IdrisType{=} \IdrisImplicit{x}
+% \end{Verbatim}
+% \end{figure}
+
 \include{introduction}
+\include{background}
+\include{applications}
 % \include{conclusion}
 \bibliography{paper}
 \bibliographystyle{plain}

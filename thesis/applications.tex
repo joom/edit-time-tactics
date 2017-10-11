@@ -2,40 +2,36 @@
 
 \subsection{Theorem Prover for Intuitionistic Propositional Logic}
 
-In this section, we describe the tactic Hezarfen\footnote{Tactic source code
-can be found at \url{http://github.com/joom/hezarfen}.}, which can decide
-intuitionistic propositional logic theorems. This is based on LJT\cite{ljt}
-and its Haskell implementation called Djinn\cite{djinn}, which generates
-Haskell expressions for a given type. However Djinn is a standalone program
-that takes commands interactively, and when it generates an expression it
-prints it on the screen.
-
-Even without the editor interaction in mind, we can improve this by having our
+In this section, we describe the tactic Hezarfen\footnote{ The name is
+  pronounced {[\textipa{hezaRf\ae n}]}, like ``has are fan'', and it means
+    polymath in Turkish.  Tactic source code is available at
+    \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
+propositional logic theorems. This is based on LJT\cite{ljt} and its Haskell
+implementation called Djinn\cite{djinn}, which generates Haskell expressions
+for a given type. However, Djinn is a standalone program that takes commands
+interactively, and when it generates an expression it prints it on the screen.
+We can improve this by having our
 theorem prover generate Idris expressions of the type \path{Raw}, one of the
-types used for the inner representation of the core language of Idris.
-We can then write a tactic that takes the goal type, which will of the
-\path{Raw}, and tries to fill the hole with the generated term.
-Let's prove a theorem using this tactic:
+types used for the inner representation of the core language of Idris.  We can
+then write a tactic that takes the goal type, which will of the \path{Raw}, and
+tries to fill the hole with the generated term.  Let's prove a theorem using
+this tactic:
 
 \begin{Verbatim}
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
 \IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfen}
 \end{Verbatim}
 
-Through the elaborator reflection, that will turn into this:\footnote{
-  Variables are renamed in the resulting definition above for presentation
-  purposes. Hezarfen is not very clever with naming variables. It just keeps
-  calling \path{gensym} with the same hint string, which means all names are
-  of the form \path{MN} \path{101} \path{"x"}, where the number is increased
-  for each machine generated name. However the expression is not
-  changed otherwise. The definition could simply be written as
+Through the elaborator reflection, that will turn into this\footnote{
+  The definition is not changed at all. If it were, it could simply be written
+  as
 
-\ttfamily{\IdrisFunction{noContradiction} \IdrisData{(}\IdrisBound{pfOfP}\IdrisData{,} \IdrisBound{pfOfNotP}\IdrisData{)} = \IdrisFunction{void} (\IdrisBound{pfOfNotP} \IdrisBound{pfOfP})} }
-\begin{Verbatim}
+\ttfamily{\IdrisFunction{noContradiction} \IdrisData{(}\IdrisBound{pfOfP}\IdrisData{,} \IdrisBound{pfOfNotP}\IdrisData{)} = \IdrisFunction{void} (\IdrisBound{pfOfNotP} \IdrisBound{pfOfP})} } when we compile the file:
+\begin{Verbatim}[commandchars=\\\{\}]
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-\IdrisFunction{noContradiction} = \textbackslash\IdrisBound{pair} =>
-      \IdrisKeyword{let} \IdrisBound{pfOfP} = \IdrisFunction{fst} \IdrisBound{pair} \IdrisKeyword{in}
-      \IdrisKeyword{let} \IdrisBound{pfOfNotP} = \IdrisFunction{snd} \IdrisBound{pair} \IdrisKeyword{in}
-      (\textbackslash\IdrisBound{x} => \IdrisFunction{void} \IdrisBound{x}) (\IdrisBound{pfOfNotP} \IdrisBound{pfOfP})
+\IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
+     \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in}
+     \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in}
+     (\textbackslash\IdrisBound{k20} => \IdrisFunction{void} \IdrisBound{k20}) (\IdrisBound{j20} \IdrisBound{i20})
 \end{Verbatim}
 

@@ -143,6 +143,10 @@ sympy-plots-for-*.tex/
 # Agda
 *.agdai
 
+# Idris
+*.ibc
+*.o
+
 # Vim
 *.vim
 

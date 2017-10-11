@@ -53,10 +53,19 @@ Agda programs, which are usually only meant to be type checked.\footnote{Of
 This means Idris programs ideally should not contain tactics that take a long
 time to compile and run, yet we still want to utilize complex tactics to
 generate proofs or terms. One way to handle this would be to run the tactic
-once, generate the term and replace the tactic with the term, which is not a
-pleasant workflow. Ideally we would want to do this in the editor,
-so we need a way to define an editor action using tactics.
-In this work, we will describe an extension API for the editor.
+once, generate the term and replace the tactic with the term manually, which is
+not a pleasant workflow. Ideally we would want to do this in the editor, so we
+need a way to define an editor action using tactics, and an extension API in
+which we can register new actions to the IDE mode.
+
+If we think of the differences between proofs with tactics, which is common in
+the Coq tradition, and proofs with proof term, which is common in the Agda
+tradition, this work will constitute a one way bridge between the two, by
+making use of the elaborator reflection to create proof terms in the editor in
+a smarter and quicker way. Especially in the cases that a proof written with
+tactics may come off as cryptic to its readers, this work might be able to
+help, because the artifact we are handing in to the reader of our proofs
+will look just like what it would be if we had not used this system.
 
 Let's imagine another use case for such a feature.
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -72,15 +81,20 @@ case. We can case split again on the second component of the pair and get the
 For one function this repetition might not seem like a big deal, but if we need
 to do this numerously, we might want a way to automate that with a
 tactic.\footnote{Similar to the \path{unproduct} tactic in the Pruviloj library
-for Idris, but not exactly the same.}
+for Idris, but for case splitting.}
 
+Case splitting on a nested tuple might seem like a mindless task. What if you
+had a data type that required you to be clever when you are case splitting,
+then doing that for every function would get exhausting.
+Red-black trees\cite{okasakiRedBlack} are a good example of that. An Agda
+formalization of this is already given by Licata\cite{licataOPLSS}, let's
+translate the same problem to Idris.
 
-
-% Suppose we are proving certain properties about a red-black tree.
-% cite Licata's OPLSS 2013 lectures
-
-
-
+Suppose we want to balance a red-black tree, where
+the right subtree is well-formed, represented with the type \path{WellRedTree}, but
+the left one is well-formed except the root, represented with the type
+\path{AlmostWellRedTree}. We also have a key and value that should be stored in
+the root. Our task is to form a well-formed red-black tree with these.
 
 
 % The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of

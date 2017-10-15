@@ -1,15 +1,17 @@
 \documentclass[11pt, ma]{westhesis}
 \usepackage[utf8]{inputenc}
-\usepackage{natbib, amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph, hyperref}
+\usepackage{amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph}
+\usepackage[square,sort&compress,numbers]{natbib}
 \usepackage[font=small]{caption}
+\usepackage{inconsolata}
+\usepackage{fancyvrb}
+\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage[T1]{tipa}
+\usepackage[backref=page]{hyperref}
 \hypersetup{colorlinks = true, allcolors = {blue}}
 
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
-\usepackage{inconsolata}
-\usepackage{fancyvrb}
-\usepackage[usenames,dvipsnames]{xcolor}
 \newcommand{\IdrisData}[1]{\textcolor{Maroon}{#1}}
 \newcommand{\IdrisType}[1]{\textcolor{NavyBlue}{#1}}
 \newcommand{\IdrisBound}[1]{\textcolor{Plum}{#1}}

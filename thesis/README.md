@@ -7,3 +7,5 @@
   * Any videos online that show how the interactive thing works?
 * Look at Isar, human readable tactic language for Isabelle
 * Look at Pombrio & Krishnamurthi's work on resugaring: blackboxes
+
+* Have a plan for the minimal viable implementation

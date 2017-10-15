@@ -19,19 +19,24 @@ this tactic:
 
 \begin{Verbatim}
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-\IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfen}
+\IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfenExpr}
 \end{Verbatim}
 
 Through the elaborator reflection, that will turn into this\footnote{
   The definition is not changed at all. If it were, it could simply be written
   as
 
-\ttfamily{\IdrisFunction{noContradiction} \IdrisData{(}\IdrisBound{pfOfP}\IdrisData{,} \IdrisBound{pfOfNotP}\IdrisData{)} = \IdrisFunction{void} (\IdrisBound{pfOfNotP} \IdrisBound{pfOfP})} } when we compile the file:
+\ttfamily{\IdrisFunction{noContradiction} \IdrisData{(}\IdrisBound{pf}\IdrisData{,} \IdrisBound{contra}\IdrisData{)} = \IdrisBound{contra} \IdrisBound{p}} } when we compile the file:
 \begin{Verbatim}[commandchars=\\\{\}]
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
 \IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
-     \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in}
-     \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in}
-     (\textbackslash\IdrisBound{k20} => \IdrisFunction{void} \IdrisBound{k20}) (\IdrisBound{j20} \IdrisBound{i20})
+     \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in} \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in} \IdrisFunction{void} (\IdrisBound{j20} \IdrisBound{i20})
 \end{Verbatim}
+
+
+
+
+% explain the nested impl rule in depth
+% and possibly one or two more, to show what they look like in general
+
 

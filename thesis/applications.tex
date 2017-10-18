@@ -1,6 +1,6 @@
 \section{Applications} \label{sec:applications}
 
-\subsection{Theorem Prover for Intuitionistic Propositional Logic}
+\subsection{Theorem Prover for Intuitionistic Propositional Logic}\label{ssec:hezarfen}
 
 In this section, we describe the tactic Hezarfen\footnote{ The name is
   pronounced {[\textipa{hezaRf\ae n}]}, like ``has are fan'', and it means
@@ -40,3 +40,12 @@ Through the elaborator reflection, that will turn into this\footnote{
 % and possibly one or two more, to show what they look like in general
 
 
+\subsection{Red-Black Trees}\label{ssec:rbt}
+
+% let's translate the same problem to Idris.
+
+% Suppose we want to balance a red-black tree, where
+% the right subtree is well-formed, represented with the type \path{WellRedTree}, but
+% the left one is well-formed except the root, represented with the type
+% \path{AlmostWellRedTree}. We also have a key and value that should be stored in
+% the root. Our task is to form a well-formed red-black tree with these.

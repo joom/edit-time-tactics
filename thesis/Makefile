@@ -9,6 +9,7 @@ compile:
 	@pydflatex $(FILENAME).tex
 	@bibtex $(FILENAME) > /dev/null
 	@pydflatex $(FILENAME).tex 2> /dev/null
+	@pydflatex $(FILENAME).tex 2> /dev/null
 	@pydflatex $(FILENAME).tex
 	@mv $(FILENAME).pdf $(OUTPUTNAME).pdf
 
@@ -16,6 +17,7 @@ debug:
 	cp $(SOURCENAME).tex $(FILENAME).tex
 	pydflatex $(FILENAME).tex
 	bibtex $(FILENAME)
+	pydflatex $(FILENAME).tex
 	pydflatex $(FILENAME).tex
 	pydflatex $(FILENAME).tex
 	mv $(FILENAME).pdf $(OUTPUTNAME).pdf

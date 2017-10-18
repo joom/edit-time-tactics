@@ -58,23 +58,23 @@ not a pleasant workflow. Ideally we would want to do this in the editor, so we
 need a way to define an editor action using tactics, and an extension API in
 which we can register new actions to the IDE mode.
 
-If we think of the differences between proofs with tactics, which is common in
-the Coq tradition, and proofs with proof term, which is common in the Agda
-tradition, this work will constitute a one way bridge between the two, by
+If we think of the differences between proofs with tactics and proofs with
+proof terms, each common in Coq and Agda traditions respectively,
+this work will constitute a one way bridge between the two, by
 making use of the elaborator reflection to create proof terms in the editor in
 a smarter and quicker way. Especially in the cases that a proof written with
-tactics may come off as cryptic to its readers, this work might be able to
+tactics can come off as cryptic to its readers, this work would be able to
 help, because the artifact we are handing in to the reader of our proofs
 will look just like what it would be if we had not used this system.
 
-Let's imagine another use case for such a feature.
+Let's imagine a use case for such a feature.
 \begin{Verbatim}[commandchars=\\\{\}]
 \IdrisFunction{swap3} : \IdrisType{(}\IdrisImplicit{a}\IdrisType{,} \IdrisImplicit{b}\IdrisType{,} \IdrisImplicit{c}\IdrisType{)} -> \IdrisType{(}\IdrisImplicit{c}\IdrisType{,} \IdrisImplicit{b}\IdrisType{,} \IdrisImplicit{a}\IdrisType{)}
 \IdrisFunction{swap3} \IdrisBound{x} = \IdrisMetavar{?\IdrisMetavar{p}}
 \end{Verbatim}
 We have a 3-tuple\footnote{n-tuples are nested right-associative pairs in
 Idris.} as an argument, and we need to access every element in that tuple.
-If you case split on the argument \path{x}, that pattern will turn into
+If we case split on the argument \path{x}, that pattern will turn into
 a pair. However we need the full \path{(a, b, c)} pattern in this
 case. We can case split again on the second component of the pair and get the
 3-tuple pattern.
@@ -83,31 +83,45 @@ to do this numerously, we might want a way to automate that with a
 tactic.\footnote{Similar to the \path{unproduct} tactic in the Pruviloj library
 for Idris, but for case splitting.}
 
-Case splitting on a nested tuple might seem like a mindless task. What if you
-had a data type that required you to be clever when you are case splitting,
+Case splitting on a nested tuple might seem like a mindless task. What if we
+had a data type that required us to be clever when we are case splitting,
 then doing that for every function would get exhausting.
-Red-black trees\cite{okasakiRedBlack} are a good example of that. An Agda
-formalization of this is already given by Licata\cite{licataOPLSS}, let's
-translate the same problem to Idris.
+Red-black trees\cite{okasakiRedBlack} are a good example of that.
+Suppose we want to balance a red-black tree, and we want to rotate the tree in
+the cases where we have two red nodes consecutively. We want to write some
+functions to rotate within the left and right subtrees. If we make use of
+dependent types to ensure certain properties about our tree, then pattern
+matching on our trees will be difficult to write by hand. However, we could
+write a tactic that does that for us. Moreover, the interesting cases are when
+we have two consequent red nodes, so we might want to list them first in our
+patterns.  An Agda formalization of the tree rotation was previously given by
+Licata\cite{licataOPLSS}. In \autoref{ssec:rbt}, we first describe an Idris
+equivalent of that code, and then define a tactic to generate cases for
+rotation.
 
-Suppose we want to balance a red-black tree, where
-the right subtree is well-formed, represented with the type \path{WellRedTree}, but
-the left one is well-formed except the root, represented with the type
-\path{AlmostWellRedTree}. We also have a key and value that should be stored in
-the root. Our task is to form a well-formed red-black tree with these.
+Case splitting is not the only clever thing we want to do in our editors.
+The current proof search mechanism in Idris is not particularly advanced.
+We might want to write an alternative proof search tactic, or maybe even a
+full-blown theorem prover for some kind of logic, and use that on our holes
+instead. In \autoref{ssec:hezarfen}, we describe Hezarfen, a theorem prover for
+intuitionistic propositional logic.
+
+Now that we have an idea about the motivations for such a feature, we should
+describe it can be implemented.
 
 
-% The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
-% the editor interaction mode is a part of the Idris compiler, implemented in the
-% \path{IdeMode.hs} module, and is written in Haskell. When the editor is running,
-% it runs the \path{idris} executable with the \path{--ide-mode} flag, which
-% allows socket communication with the program through a machine-readable syntax.
-% To be more precise, this program receives S-expressions\cite{mccarthy} as input
-% over the socket and sends back S-expressions as output.
-
-% The current implementation of the Idris IDE mode,
+The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
+the editor interaction mode is a part of the Idris compiler, and is written in Haskell. When the editor is running,
+it runs the \path{idris} executable with the \path{--ide-mode} flag, which
+allows socket communication with the program through a machine-readable
+syntax.\footnote{The Idris mode of Vim works differently, since Vim did not
+support asynchronous jobs until 8.0. This is expected to change in the near
+future.}
+To be more precise, this program receives S-expressions\cite{mccarthy} as input
+over the socket and sends back S-expressions as output.
+What we want to do is to add another command that would be recognized by our
+compiler, and specify how such a command would run, and what arguments it should
+take to communicate with the editor effectively.
 
 In \autoref{sec:background}, we will go over the basics of the Idris
 programming language and its metaprogramming mechanics.
-
-

@@ -1,0 +1,76 @@
+\section{Design} \label{sec:design}
+
+We described in \autoref{sec:introduction} what a simple editor interaction
+action like case splitting does.  What we want to do is to add another command
+that would be recognized by our compiler, and specify how such a command would
+run, and what arguments it should take to communicate with the editor
+effectively.
+
+The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
+the editor interaction mode is a part of the Idris compiler, and is written in
+Haskell. When the editor is running,
+it runs the \path{idris} executable with the \path{--ide-mode} flag, which
+allows socket communication with the program through a machine-readable
+syntax.\footnote{The Idris mode of Vim works differently, since Vim did not
+support asynchronous jobs until 8.0. This is expected to change in the near
+future.}
+To be more precise, this program receives S-expressions\cite{mccarthy} as input
+over the socket and sends back S-expressions as output. Let's see an example of
+this. Suppose we are writing a predecessor function on natural numbers and we
+want to case split on the argument.
+
+\begin{Verbatim}
+\IdrisFunction{pred} : \IdrisType{Nat} -> \IdrisType{Nat}
+\IdrisFunction{pred} \IdrisBound{x} = \IdrisMetavar{?\IdrisMetavar{p}}
+\end{Verbatim}
+
+When we put the cursor on \path{x} and run case splitting, the following
+communication happens in the background.
+
+\begin{Verbatim}
+-> ((:case-split 5 "x") 13)
+<- (:return (:ok "pred Z = ?p_1{\textbackslash}npred (S k) = ?p_2{\textbackslash}n") 13)
+\end{Verbatim}
+
+Case split command requires two arguments, the line number and the variable
+name to case split on. The line number is included in most editor actions that
+change the code. The variable name is a string that hold the necessary data.
+The number \path{13} that comes afterwards is how many rounds of communications
+have been done so far. Notice that the response also carries the same number.
+The response contains \path{:ok}, which means the case splitting succeeded,
+and then a string that contains two lines split by the new line character.
+The editor receives twose two lines and replaces that with the line we ran the
+case split command on.
+
+The most important thing to notice here is that the way the editor and the
+compiler communicate is very ``stringly typed''\footnote{A term coined by Mark
+Simpson, mentioned in a deleted Stack Overflow thread.}.  Since all of these
+editor actions are primitives, this is initially fine. However, we now want to
+create a single command that handles different kinds of actions. These actions
+possibly take multiple arguments that hold different kinds of values, such as
+names, type declarations, function definitions, or expressions.
+The data itself can still be sent as a string by the editor, but having type
+annotations would give a hint to the compiler about how to parse the given
+string into parts of a syntax tree. In other words, the command should take a
+list of strings, each tagged with a type annotation.
+
+Then the question is, how will the editor know what to tag each string with?
+It will not. For each non-trivial editor action, the user will have to extend
+the Idris mode of the editor with a function that tags each string with a type
+annotation. The resulting communication should look like this for case splitting.
+
+\begin{Verbatim}
+-> ((:elab-action :case-split 5 '((:name . "x"))) 13)
+<- (:return (:ok '((:fun-defn . "pred Z = ?p_1")
+                   (:fun-defn . "pred (S k) = ?p_2"))) 13)
+\end{Verbatim}
+
+Notice that the call to the editor states that we are calling the \path{Elab}
+action that does case splitting, and it takes a singleton argument list, which
+is a pair of a tag and a string. The tag states that the string should be
+handled as a variable name by the compiler.
+The result from the editor returns that the action succeeded and then a list of
+results.  In the result list we have two entries, each of which is a pair of a
+tag and a string.  The tags in here state that the string represents a function
+definition.
+

@@ -23,3 +23,5 @@
 * Line numbers do exist in the whole parsed file, you can look up whatever you
   need from the whole file afterwards, line numbers suffice as an argument.
    * Use `SourceLocation`
+
+* How do you check preferred names for variables in Elab?

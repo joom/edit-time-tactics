@@ -1,6 +1,6 @@
 \documentclass[11pt, ma]{westhesis}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph}
+\usepackage{amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph, afterpage}
 \usepackage[square,sort&compress,numbers]{natbib}
 \usepackage[font=small]{caption}
 \usepackage{inconsolata}
@@ -21,6 +21,7 @@
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
 \usepackage{setspace, microtype}
 \fvset{commandchars=\\\{\},formatcom=\singlespacing}
+\newcommand{\Elab}{\IdrisType{\path{Elab}}\ }
 
 \newcommand{\quadthree}{\qquad\quad}
 \newcommand{\quadfour}{\quadthree\quad}
@@ -29,6 +30,9 @@
 \newcommand{\quadseven}{\quadsix\quad}
 \newcommand{\quadeight}{\quadseven\quad}
 \newcommand{\quadten}{\quadfive\quadfive}
+\newcommand{\Red}[1]{{\color{red} #1}}
+\newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}
+
 
 % \allowdisplaybreaks
 
@@ -93,6 +97,7 @@
 % \caption{Some Idris code}
 % \label{code:idrisExample}
 % \begin{Verbatim}
+
 % \end{Verbatim}
 % \end{figure}
 

@@ -2,6 +2,39 @@
 
 \subsection{Idris}
 
-\subsection{Elaborator Reflection} \label{ssec:elabref}
+Idris is a dependently typed functional programming language. In simple terms,
+dependent types allow us to do computation in types, just like we can do
+computation in terms.\cite{davidphd} In \autoref{code:idrisExample}, we define
+two similar data types that ensure that the given natural number is even or
+odd, and compute the number within the type at every step. Later we give a
+function that takes a natural number and generates either a value of the type
+that ensures evenness or one that ensures oddity. This corresponds to a proof that for all $n \in \mathbb{N}$, $n$ is even or $n$ is odd.
 
-% \subsection{Current IDE Mode} \label{ssec:currentIdeMode}
+\begin{figure}[ht]
+\caption{Example of a dependently typed Idris code}
+\label{code:idrisExample}
+\begin{Verbatim}[commandchars=\\\{\}]
+\IdrisKeyword{data} \IdrisType{Even} : \IdrisType{Nat} -> \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{EvenZ} : \IdrisType{Even} \IdrisData{0}
+  \IdrisData{EvenSS} : \IdrisType{Even} \IdrisImplicit{n} -> \IdrisType{Even} (\IdrisData{S} (\IdrisData{S} \IdrisImplicit{n}))
+
+\IdrisKeyword{data} \IdrisType{Odd} : \IdrisType{Nat} -> \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{Odd1} : \IdrisType{Odd} \IdrisData{1}
+  \IdrisData{OddSS} : \IdrisType{Odd} \IdrisImplicit{n} -> \IdrisType{Odd} (\IdrisData{S} (\IdrisData{S} \IdrisImplicit{n}))
+
+\IdrisKeyword{total}
+\IdrisFunction{evenOrOdd} : (\IdrisBound{n} : \IdrisType{Nat}) -> \IdrisType{Either} (\IdrisType{Even} \IdrisBound{n}) (\IdrisType{Odd} \IdrisBound{n})
+\IdrisFunction{evenOrOdd} \IdrisData{0} = \IdrisData{Left} \IdrisData{EvenZ}
+\IdrisFunction{evenOrOdd} \IdrisData{1} = \IdrisData{Right} \IdrisData{Odd1}
+\IdrisFunction{evenOrOdd} (\IdrisData{S} (\IdrisData{S} \IdrisBound{n})) = \IdrisKeyword{case} \IdrisFunction{evenOrOdd} \IdrisBound{n} \IdrisKeyword{of}
+                        \IdrisData{Left} \IdrisBound{ev} => \IdrisData{Left} (\IdrisData{EvenSS} \IdrisBound{ev})
+                        \IdrisData{Right} \IdrisBound{o} => \IdrisData{Right} (\IdrisData{OddSS} \IdrisBound{o})
+\end{Verbatim}
+\end{figure}
+
+Unlike other dependently typed languages like Agda and Coq, Idris is not total
+by default. This is because Idris prioritizes general purpose programming
+rather than theorem proving. However, users can opt in to enable totality
+checking either for the entire module or specific functions, which is what we did for \path{evenOrOdd} by using the keyword \path{total}.
+
+\subsection{Elaborator Reflection} \label{ssec:elabref}

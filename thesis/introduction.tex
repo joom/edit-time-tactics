@@ -1,6 +1,6 @@
 \section{Introduction} \label{sec:introduction}
 
-The rising popularity of statically typed languages with type inference led to
+The rising popularity of statically typed functional languages led to
 the concept of ``type-driven development'' (hereinafter referred to as TDD).
 When we know the type of an expression we have to write, TDD lets us write this
 expression incrementally and check if the type is correct at every step.  Then
@@ -19,6 +19,8 @@ style of programming in which the development process takes the form of a
 conversation between the user's editor and the type-checker/compiler. However,
 this requires certain changes to the compiler, such as being able to type check
 incomplete expressions and definitions.\cite{tdd}
+
+\TODO{mention scriptable editors, and possibly macros in Visual Studio etc.}
 
 The kind of change that is important for this work, however, is the editor
 interaction mode (or IDE mode) that lets the editor
@@ -40,7 +42,7 @@ the Emacs mode\cite{idrismode} for Idris\cite{idris},
 jEdit\cite{isabellejedit} for Isabelle\cite{isabelle},
 and recently the editor mode of Lean\cite{lean}.
 
-% TODO mention ML and LCF, HOL and Isabelle
+\TODO{mention ML and LCF, HOL and Isabelle}
 
 Among these examples, Idris is the only language that prioritizes general
 purpose programming rather than theorem proving\cite{idrisfaq}, but that does

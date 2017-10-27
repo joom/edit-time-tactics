@@ -65,12 +65,17 @@ annotation. The resulting communication should look like this for case splitting
                    (:fun-defn . "pred (S k) = ?p_2"))) 13)
 \end{Verbatim}
 
-Notice that the call to the editor states that we are calling the \path{Elab}
-action that does case splitting, and it takes a singleton argument list, which
-is a pair of a tag and a string. The tag states that the string should be
-handled as a variable name by the compiler.
+Notice that the call to the editor states that we are calling the \Elab
+action that does case splitting, and it takes an argument list, which happens
+to be a singleton list that contains a pair of a tag and a string. The tag
+states that the string should be handled as a variable name by the compiler.
 The result from the editor returns that the action succeeded and then a list of
 results.  In the result list we have two entries, each of which is a pair of a
 tag and a string.  The tags in here state that the string represents a function
 definition.
 
+Now let's think of the other end of this editor action. What would the type of
+such an \Elab action be?
+
+% caseSplit : Int -> TTName -> Elab (List FunDefn)
+% caseSplit

@@ -49,3 +49,104 @@ Through the elaborator reflection, that will turn into this\footnote{
 % the left one is well-formed except the root, represented with the type
 % \path{AlmostWellRedTree}. We also have a key and value that should be stored in
 % the root. Our task is to form a well-formed red-black tree with these.
+
+\subsection{Nonlinear Patterns}
+
+In Idris, there is no way to include the equality of two variables as a condition to match the pattern in the first place.
+In Haskell, you can add a guard after the pattern that checks if those two
+given variables are equal, assuming that their type has an \path{Eq} instance.
+In OCaml, you can do the same with the \path{when} keyword.
+However, these are not ideal. Prolog users will wonder whether we can just name
+those variables the same thing, in order to check if they are equal. The answer
+is no, yet in Idris, if we have an equality proof about two things, we can use
+the same name for both since they are already the same.\footnote{In Agda the first one will have a normal name, but the other one will have the same name prepended with a dot. This is called a ``dot pattern''.} That means we would
+first have to generate an equality proof for two things, which is something we
+can do with views in Idris.
+
+Using nonlinear patterns, this is how we would write a list membership check
+function:
+
+\begin{figure}[ht]
+\caption{Code with nonlinear patterns, that we are trying to simulate}
+\label{code:nonlinear}
+\begin{Verbatim}
+\IdrisFunction{elem} : \IdrisType{Eq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
+\IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
+\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{True}
+\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{False}
+\end{Verbatim}
+\end{figure}
+
+As we said before, this is not valid Idris. However, this would work:
+
+\begin{figure}[ht]
+\caption{The code with view, that simulates nonlinear patterns}
+\label{code:nonlinearWith}
+\begin{Verbatim}
+\IdrisFunction{elem} : \IdrisType{DecEq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
+\IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
+\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) \IdrisKeyword{with} (\IdrisFunction{decEq} \IdrisBound{x} \IdrisBound{y})
+  \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{Yes} \IdrisBound{Refl} = \IdrisData{True}
+  \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{No} \IdrisBound{contra} = \IdrisData{False}
+\end{Verbatim}
+\end{figure}
+
+Even though this is a workaround and not really nonlinear patterns, we can
+write an \Elab editor action that runs on a nonlinear pattern, such as
+\autoref{code:nonlinear} and converts that into a function that uses Idris
+views, such as \autoref{code:nonlinearWith}.
+
+This can be generalized to things that are not like Prolog-style patterns.
+Brady describes a view that matches on the last element of
+a list, as presented in \autoref{code:listlast}.
+
+\begin{figure}[ht]
+\caption{Brady's view to match the last element of a list.\cite{tdd}}
+\label{code:listlast}
+\begin{Verbatim}
+\IdrisKeyword{data} \IdrisType{ListLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{Empty} : \IdrisType{ListLast} \IdrisData{[]}
+  \IdrisData{NonEmpty} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> (\IdrisBound{x} : \IdrisImplicit{a}) -> \IdrisType{ListLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]})
+
+\IdrisFunction{listLast} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> \IdrisType{ListLast} \IdrisBound{xs}
+\IdrisFunction{listLast} \IdrisData{[]} = \IdrisData{Empty}
+\IdrisFunction{listLast} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) = \IdrisKeyword{case} \IdrisFunction{listLast} \IdrisBound{xs} \IdrisKeyword{of}
+                       \IdrisData{Empty} => \IdrisData{NonEmpty} \IdrisData{[]} \IdrisBound{x}
+                       \IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{y} => \IdrisData{NonEmpty} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) \IdrisBound{y}
+\end{Verbatim}
+\end{figure}
+
+Now, suppose we want to write a function to match the last element of a list.
+If we developed such an \Elab editor action, we could write the code in
+\autoref{code:safeLast1} and get the result in \autoref{code:safeLast2}.
+
+\begin{figure}[ht]
+\caption{Matching the last element of a list, what we are trying to simulate}
+\label{code:safeLast1}
+\begin{Verbatim}
+\IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
+\IdrisFunction{safeLast} \IdrisData{[]} = \IdrisData{Nothing}
+\IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) = \IdrisData{Just} \IdrisBound{x}
+\end{Verbatim}
+\end{figure}
+
+\begin{figure}[ht]
+\caption{The code that matches the last element of a list with a view}
+\label{code:safeLast2}
+\begin{Verbatim}
+\IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
+\IdrisFunction{safeLast} \IdrisBound{l} \IdrisKeyword{with} (\IdrisFunction{listLast} \IdrisBound{l})
+  \IdrisFunction{safeLast} \IdrisData{[]} | \IdrisData{Empty} = \IdrisData{Nothing}
+  \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) | (\IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{x}) = \IdrisData{Just} \IdrisBound{x}
+\end{Verbatim}
+\end{figure}
+
+If we want to run the same tactic on all of these, we have to write an \Elab action
+that can
+\begin{enumerate}
+\item Look at a pattern and detect nonlinearities
+\item Look at a pattern and detect we used functions instead of constructors inside
+\item Look up the type of the interesting patterns
+\item Search for a view function that could be used to achieve this pattern
+\item Try to apply possible view functions by unifying the input pattern with the view type constructors
+\end{enumerate}

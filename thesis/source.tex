@@ -21,11 +21,16 @@
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
 \usepackage{setspace, microtype}
 \fvset{commandchars=\\\{\},formatcom=\singlespacing}
-\newcommand{\Elab}{\IdrisType{\path{Elab}}}
-\newcommand{\String}{\IdrisType{\path{String}}}
-\newcommand{\TT}{\IdrisType{\path{TT}}}
-\newcommand{\TyDecl}{\IdrisType{\path{TyDecl}}}
-\newcommand{\FunDefn}{\IdrisType{\path{FunDefn}}}
+\newcommand{\ty}[1]{\IdrisType{\path{#1}}}
+\newcommand{\kw}[1]{\IdrisKeyword{\path{#1}}}
+\newcommand{\fn}[1]{\IdrisFunction{\path{#1}}}
+\newcommand{\dt}[1]{\IdrisData{\path{#1}}}
+\newcommand{\Elab}{\ty{Elab}}
+\newcommand{\String}{\ty{String}}
+\newcommand{\TT}{\ty{TT}}
+\newcommand{\TyDecl}{\ty{TyDecl}}
+\newcommand{\FunDefn}{\ty{FunDefn}}
+\newcommand{\FunClause}{\ty{FunClause}}
 
 \newcommand{\quadthree}{\qquad\quad}
 \newcommand{\quadfour}{\quadthree\quad}
@@ -111,6 +116,7 @@
 \include{background}
 \include{design}
 \include{applications}
+% \include{related}
 % \include{conclusion}
 \bibliography{paper}
 \bibliographystyle{plain}

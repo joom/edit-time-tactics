@@ -1,4 +1,4 @@
-\section{Design} \label{sec:design}
+\section{Design}\label{sec:design}
 
 We described in \autoref{sec:introduction} what a simple editor interaction
 action like case splitting does.  What we want to do is to add another command
@@ -76,5 +76,106 @@ definition.
 Now let's think of the other end of this editor action. What would the type of
 such an \Elab\ action be?
 
-% caseSplit : Int -> TTName -> Elab (List FunDefn)
-% caseSplit
+\begin{Verbatim}
+caseSplit : TTName -> FunClause -> TTName -> Elab (List FunClause)
+\end{Verbatim}
+
+As a first cut, we can imagine an editor action that takes the name of the function
+we are performing the case split on, the function clause we are splitting,
+and the variable name that should occur in the aforementioned function clause,
+and will be split by the editor action. As a result, our editor action should return
+a list of function clauses, what the aforementioned function clause turns into
+after the split.
+
+The types in this editor action are reflection types. But what if we wanted to write
+a editor action takes an argument of a non-reflection type, such as \ty{Nat}, then
+how would the compiler know how to pass the editor action the right type of arguments?
+More importantly, can we check in compile time if the editor knows how to pass
+arguments to the editor action in question? An editor action should only deal
+with the types that can be sent from and to the editor.
+In other words, we want to have a subset of types, and to check in compile time
+if the types in the type signature of the editor action are all in this subset.
+
+If we were using Haskell, we could define a type family, and only have instances
+for the types we want to allow. A type family in Haskell is a type-level
+function, one might think since we are dealing with dependent types we can
+already write type-level functions! However Idris does not allow us to pattern
+match on types, because that breaks parametricity and type erasure.\cite{universePat}
+We could opt for an alternative called the universe pattern, however we should
+save the user the trouble of learning the universe we define. Moreover, any
+universe that we will define cannot be extended by the user. If the user later
+wants to define a new type of their own and to use that in the editor action,
+they should be able to do that.
+
+The solution to our problem is to have an interface.\footnote{Haskell's type
+classes and type class instances are called interfaces and implementations,
+respectively. In Haskell there can only be one instance for the same type class
+and the type, but in Idris for the same interface and the type, there can be
+multiple implementation. You can name implementations and state the
+implementation you want to use by name, when you are writing a function. For
+our purposes, they are pretty much the same.}
+We can define a new interface \ty{Editorable}, which only has implementations
+that we know how to communicate with the editor. For the user defined types,
+the user is free to give an implementation for the \ty{Editorable} interface of
+that type. Then what should such an interface consist of?
+The way that we communicate with the editor right now is through S-expressions,
+as we described earlier. Therefore we can require our types to have two
+methods, one from the type to an S-expression, and one to go from an
+S-expression to the type. In other words, one to serialize the type, and one
+the deserialize it. Let's call them \fn{toEditor} and \fn{fromEditor}, respectively.
+
+\begin{Verbatim}
+interface Editorable a where
+  fromEditor : SExp -> Maybe a
+  toEditor : a -> SExp
+\end{Verbatim}
+
+Then we would have implementations of this interface for the reflection types.
+
+\begin{Verbatim}
+err : String
+err = "Primitive instance of the Editorable interface"
+
+implementation Editorable TTName where
+  fromEditor = idris_crash err
+  toEditor   = idris_crash err
+\end{Verbatim}
+
+The implementations for \ty{TT}, \ty{TyDecl}, \ty{DataDefn}, \ty{FunDefn} and
+\ty{FunClause} will also be the same as this.
+The content that these types hold come to the compiler as a string and parsed
+as a part of an abstract syntax tree. Therefore their conversions from and to
+S-expressions should be handled by the compiler, because we do not have a way
+to parse strings into syntax trees within Idris.
+
+However, we are now free to define other instances of \ty{Editorable} that
+might be useful, such as a \String instance and a \ty{List} instance.
+
+\begin{Verbatim}
+implementation Editorable String where
+  fromEditor (StringAtom s) = Just s
+  fromEditor _ = Nothing
+  toEditor = StringAtom
+\end{Verbatim}
+
+If we have an S-expression primitive string, then we can convert that into
+an Idris \String. If we have a different kind of S-expression, we cannot.
+Conversely, if we want to convert an Idris \String\ into an S-expression, we
+just make it into a string atom. Other primitive instances like \ty{Integer},
+\ty{Bool} etc.\ follow the same reasoning.
+
+\begin{Verbatim}
+implementation Editorable a => Editorable (List a) where
+  fromEditor (SExpList xs) = sequence (map fromEditor xs)
+  fromEditor _ = Nothing
+  toEditor xs = SExpList (map toEditor xs)
+\end{Verbatim}
+
+If we have an S-expression list, then we try to parse everything inside that
+into S-expressions. If they all succeed, then we can parse the entire
+S-expression into an Idris \ty{List}. If we do not have an S-expression list,
+then we cannot parse the S-expression into an Idris \ty{List}.  When we are
+converting a list into an S-expression, it is enough to convert everything in
+the list to an S-expression separately, and then collect the separate
+S-expressions inside a list S-expression. Other instances for the \ty{Pair},
+\ty{Maybe}, \ty{Either} types follow the same reasoning.

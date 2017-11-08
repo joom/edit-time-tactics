@@ -1,25 +1,26 @@
 FILENAME=thesis
 SOURCENAME=source
 OUTPUTNAME=output
+LATEX=pydflatex
 
 default: preview
 
 compile:
 	@cp $(SOURCENAME).tex $(FILENAME).tex
-	@pydflatex $(FILENAME).tex
+	@$(LATEX) $(FILENAME).tex
 	@bibtex $(FILENAME) > /dev/null
-	@pydflatex $(FILENAME).tex 2> /dev/null
-	@pydflatex $(FILENAME).tex 2> /dev/null
-	@pydflatex $(FILENAME).tex
+	@$(LATEX) $(FILENAME).tex 2> /dev/null
+	@$(LATEX) $(FILENAME).tex 2> /dev/null
+	@$(LATEX) $(FILENAME).tex
 	@mv $(FILENAME).pdf $(OUTPUTNAME).pdf
 
 debug:
 	cp $(SOURCENAME).tex $(FILENAME).tex
-	pydflatex $(FILENAME).tex
+	$(LATEX) $(FILENAME).tex
 	bibtex $(FILENAME)
-	pydflatex $(FILENAME).tex
-	pydflatex $(FILENAME).tex
-	pydflatex $(FILENAME).tex
+	$(LATEX) $(FILENAME).tex
+	$(LATEX) $(FILENAME).tex
+	$(LATEX) $(FILENAME).tex
 	mv $(FILENAME).pdf $(OUTPUTNAME).pdf
 
 open:

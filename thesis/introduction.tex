@@ -108,22 +108,7 @@ full-blown theorem prover for some kind of logic, and use that on our holes
 instead. In \autoref{ssec:hezarfen}, we describe Hezarfen, a theorem prover for
 intuitionistic propositional logic.
 
-Now that we have an idea about the motivations for such a feature, we should
-describe it can be implemented.
-
-
-The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
-the editor interaction mode is a part of the Idris compiler, and is written in Haskell. When the editor is running,
-it runs the \path{idris} executable with the \path{--ide-mode} flag, which
-allows socket communication with the program through a machine-readable
-syntax.\footnote{The Idris mode of Vim works differently, since Vim did not
-support asynchronous jobs until 8.0. This is expected to change in the near
-future.}
-To be more precise, this program receives S-expressions\cite{mccarthy} as input
-over the socket and sends back S-expressions as output.
-What we want to do is to add another command that would be recognized by our
-compiler, and specify how such a command would run, and what arguments it should
-take to communicate with the editor effectively.
-
 In \autoref{sec:background}, we will go over the basics of the Idris
 programming language and its metaprogramming mechanics.
+
+Now that we have an idea about the motivations for such a feature, we will discuss in \autoref{sec:design} how it can be implemented.

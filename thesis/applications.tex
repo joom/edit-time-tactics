@@ -92,7 +92,7 @@ As we said before, this is not valid Idris. However, this would work:
 \end{figure}
 
 Even though this is a workaround and not really nonlinear patterns, we can
-write an \Elab editor action that runs on a nonlinear pattern, such as
+write an \Elab\ editor action that runs on a nonlinear pattern, such as
 \autoref{code:nonlinear} and converts that into a function that uses Idris
 views, such as \autoref{code:nonlinearWith}.
 
@@ -117,7 +117,7 @@ a list, as presented in \autoref{code:listlast}.
 \end{figure}
 
 Now, suppose we want to write a function to match the last element of a list.
-If we developed such an \Elab editor action, we could write the code in
+If we developed such an \Elab\ editor action, we could write the code in
 \autoref{code:safeLast1} and get the result in \autoref{code:safeLast2}.
 
 \begin{figure}[ht]
@@ -141,7 +141,7 @@ If we developed such an \Elab editor action, we could write the code in
 \end{Verbatim}
 \end{figure}
 
-If we want to run the same tactic on all of these, we have to write an \Elab action
+If we want to run the same tactic on all of these, we have to write an \Elab\ action
 that can
 \begin{enumerate}
 \item Look at a pattern and detect nonlinearities

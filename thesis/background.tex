@@ -1,18 +1,51 @@
-\section{Background} \label{sec:background}
+\section{Background}\label{sec:background}
 
+\newcommand{\zip}{\IdrisFunction{\path{zip}}\ }
 \subsection{Idris}
 
 Idris is a dependently typed functional programming language. In simple terms,
 dependent types allow us to do computation in types, just like we can do
-computation in terms.\cite{davidphd} In \autoref{code:idrisExample}, we define
+computation in terms.\cite{davidphd} Moreover, we can use the computation
+in types to shape our definitions of computations in types.
+
+In \autoref{code:vect}, we define a data type of vectors. It is exactly
+like lists, except now the length is stored within the data type. In other
+words, as we add elements, the length is computed in type level.
+
+After that, we define a function that zips two vectors. Notice that only two
+cases are enough to cover all possible paths of this function. If we were to
+define a \zip function for lists, we would need four cases: both empty, both
+non-empty, one empty and one non-empty, and one non-empty and one empty.
+However, our \zip function takes two argument that are of the same length
+\path{n}.  Therefore, we cannot have a case with one empty and one non-empty,
+because that contradicts with the fact that both vectors are of the same
+length. Notice that the \zip function returns a vector of length \path{n}.
+In other words, the input vectors and the resulting vector are guaranteed to be
+of the same length.
+
+\begin{figure}[ht]
+\caption{Example of a dependently typed Idris code: vectors}
+\label{code:vect}
+\begin{Verbatim}[commandchars=\\\{\}]
+\IdrisKeyword{data} \IdrisType{Vect} : \IdrisType{Nat} -> \IdrisType{Type} -> \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{Nil} : \IdrisType{Vect} \IdrisData{0} \IdrisImplicit{elem}
+  \IdrisData{(::)} : \IdrisImplicit{elem} -> \IdrisType{Vect} \IdrisImplicit{len} \IdrisImplicit{elem} -> \IdrisType{Vect} (\IdrisData{S} \IdrisImplicit{len}) \IdrisImplicit{elem}
+
+\IdrisFunction{zip} : \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{a} -> \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{b} -> \IdrisType{Vect} \IdrisImplicit{n} \IdrisType{(}\IdrisImplicit{a}\IdrisType{,} \IdrisImplicit{b}\IdrisType{)}
+\IdrisFunction{zip} \IdrisData{[]} \IdrisData{[]} = \IdrisData{[]}
+\IdrisFunction{zip} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{(}\IdrisBound{x}\IdrisData{,} \IdrisBound{y}\IdrisData{)} \IdrisData{::} \IdrisFunction{zip} \IdrisBound{xs} \IdrisBound{ys}
+\end{Verbatim}
+\end{figure}
+
+In \autoref{code:evenodd}, we define
 two similar data types that ensure that the given natural number is even or
 odd, and compute the number within the type at every step. Later we give a
 function that takes a natural number and generates either a value of the type
 that ensures evenness or one that ensures oddity. This corresponds to a proof that for all $n \in \mathbb{N}$, $n$ is even or $n$ is odd.
 
 \begin{figure}[ht]
-\caption{Example of a dependently typed Idris code}
-\label{code:idrisExample}
+\caption{Example of a dependently typed Idris code, evenness and oddity}
+\label{code:evenodd}
 \begin{Verbatim}[commandchars=\\\{\}]
 \IdrisKeyword{data} \IdrisType{Even} : \IdrisType{Nat} -> \IdrisType{Type} \IdrisKeyword{where}
   \IdrisData{EvenZ} : \IdrisType{Even} \IdrisData{0}
@@ -35,6 +68,31 @@ that ensures evenness or one that ensures oddity. This corresponds to a proof th
 Unlike other dependently typed languages like Agda and Coq, Idris is not total
 by default. This is because Idris prioritizes general purpose programming
 rather than theorem proving. However, users can opt in to enable totality
-checking either for the entire module or specific functions, which is what we did for \path{evenOrOdd} by using the keyword \path{total}.
+checking either for the entire module or specific functions, which is what we
+did for \path{evenOrOdd} by using the keyword \path{total}. Similarly, we could
+declare the \zip function from the previous example to be total if we wanted to.
 
-\subsection{Elaborator Reflection} \label{ssec:elabref}
+\subsection{Elaborator Reflection}\label{ssec:elabref}
+
+Idris programs elaborated from high-level Idris syntax trees into a core
+language called \path{TT}, and then type checked.\cite{idris} The
+implementation of the elaboration process of Idris is written as a Haskell
+monad that is called \path{Elab}. This monad holds a proof state that hosts
+the context, proof term,
+
+% first, indeptly of the implementation, what does elaborator do in the type theory
+
+% then talk about how it's implemented and how that's exposed
+
+% and tactics, and their connection to the elaborator
+
+Previous versions of Idris had a tactic based prover\footnote{As of Idris
+1.1.1 it is still available, with the warning that it will be deprecated in the
+future versions.}, which embedded the proof tactics in a Haskell monad in the implementation.\cite{elabref}
+
+% what sorts of things stay, what sorts of things go away with elaboration
+% mcbride dependent pattern matching? (Epigram paper?)
+% standard eliminators?
+% (a few constructions on constructors: injectivity and disjointness)
+% icfp 2016 - Jesper Cockx, doing that without axiom K
+% how to get rid of dep pattern matching and turning it into induction principle

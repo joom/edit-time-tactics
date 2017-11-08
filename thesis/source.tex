@@ -21,7 +21,11 @@
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
 \usepackage{setspace, microtype}
 \fvset{commandchars=\\\{\},formatcom=\singlespacing}
-\newcommand{\Elab}{\IdrisType{\path{Elab}}\ }
+\newcommand{\Elab}{\IdrisType{\path{Elab}}}
+\newcommand{\String}{\IdrisType{\path{String}}}
+\newcommand{\TT}{\IdrisType{\path{TT}}}
+\newcommand{\TyDecl}{\IdrisType{\path{TyDecl}}}
+\newcommand{\FunDefn}{\IdrisType{\path{FunDefn}}}
 
 \newcommand{\quadthree}{\qquad\quad}
 \newcommand{\quadfour}{\quadthree\quad}
@@ -75,8 +79,10 @@
 \end{abstract}
 
 \begin{dedication}
-\epigraph{``With metaprogramming, abstraction is no longer a guilty pleasure,
-  it is simply a pleasure.''}{\textit{Jeremy Yallop, ICFP 2017}}
+  \epigraph{``[A]cademia will construct a continuous stream of throw-away
+  languages that amount to nothing more than papers and more advanced ideas,
+  and industry will stick on local maxima of Java for the next few
+  decades.''}{\textit{Stephen Diehl}}
 \end{dedication}
 
 \begin{acknowledgements}

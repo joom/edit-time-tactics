@@ -1,3 +1,5 @@
+Library-defined derived actions / edit-time tactics (from Hazelnut slides)
+
 # To do list
 
 * Finish the red-black tree example
@@ -16,12 +18,10 @@
 
 * Try sneaking in mutual recursion to the elaborator proofs
 
-* You might wanna define a new type for possible outputs from the Elab action
-  * Current `FunDefn` is too messy
-  * Or a library to deal with the messiness
-
 * Line numbers do exist in the whole parsed file, you can look up whatever you
   need from the whole file afterwards, line numbers suffice as an argument.
-   * Use `SourceLocation`
+   * Use `SourceLocation`?
 
 * How do you check preferred names for variables in Elab?
+  * Currently there is no way to do this, but it's trivial to write
+    a primitive tactic to do that.

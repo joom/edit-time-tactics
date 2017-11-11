@@ -179,3 +179,22 @@ converting a list into an S-expression, it is enough to convert everything in
 the list to an S-expression separately, and then collect the separate
 S-expressions inside a list S-expression. Other instances for the \ty{Pair},
 \ty{Maybe}, \ty{Either} types follow the same reasoning.
+
+We now have an interface that limits the types we can use in an editor action.
+However, how do we make sure that the compiler checks this limitation.
+There is no readable way to express this in the type level, therefore we will
+invent a new compiler directive. Now we can declare a function to be an editor
+action with the \texttt{\IdrisKeyword{\%editor}} keyword. Let's go back to the
+case split action.
+
+\begin{Verbatim}
+%editor
+caseSplit : TTName -> FunClause -> TTName -> Elab (List FunClause)
+\end{Verbatim}
+
+Once we complete the definition, this will pass our type checker because
+\ty{TTName}, \ty{FunClause} and \ty{List FunClause} all have implementations of
+the \ty{Editorable} interface.
+
+If we use a type that did not have an \ty{Editorable} implementation, then
+we should get a type error.

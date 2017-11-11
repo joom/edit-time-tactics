@@ -9,13 +9,17 @@
 \usepackage[T1]{tipa}
 \usepackage[backref=page]{hyperref}
 \hypersetup{colorlinks = true, allcolors = {blue}}
+\definecolor{IdrisRed}{RGB}{166, 0, 2}
+\definecolor{IdrisBlue}{RGB}{0, 0, 182}
+\definecolor{IdrisGreen}{RGB}{13, 84, 8}
+\definecolor{IdrisPurple}{RGB}{126, 2, 236}
 
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
-\newcommand{\IdrisData}[1]{\textcolor{Maroon}{#1}}
-\newcommand{\IdrisType}[1]{\textcolor{NavyBlue}{#1}}
-\newcommand{\IdrisBound}[1]{\textcolor{Plum}{#1}}
-\newcommand{\IdrisFunction}[1]{\textcolor{Green}{#1}}
+\newcommand{\IdrisData}[1]{\textcolor{IdrisRed}{#1}}
+\newcommand{\IdrisType}[1]{\textcolor{IdrisBlue}{#1}}
+\newcommand{\IdrisBound}[1]{\textcolor{IdrisPurple}{#1}}
+\newcommand{\IdrisFunction}[1]{\textcolor{IdrisGreen}{#1}}
 \newcommand{\IdrisMetavar}[1]{\textcolor{cyan}{#1}}
 \newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
@@ -69,18 +73,22 @@
 \begin{abstract}
   Metaprogramming is a technique that allows users to write programs that
   writes programs. In dependently-typed languages such as Idris, recent work on
-  the elaborator reflection system paved the way for new applications of
-  metaprogramming, such as tactics. The goal of this work is to use the
-  elaborator reflection system to write editor interaction actions of Idris.
+  elaborator reflection paved the way for new applications of
+  metaprogramming, such as tactics. The goal of this work is to use
+  elaborator reflection to write editor interaction actions of Idris.
   The current implementations of all Idris editor actions are a part of the
   compiler and they are written in Haskell. This work will allow us to rewrite
   them in Idris as metaprograms, and to move the interaction actions into a
-  separate library. Furthermore, it would allow users to write their own
+  separate library.
+  Furthermore, it would allow users to write their own
   tactics through the elaborator reflection, register them to the editor
   through an API and then run them in the editor. This would extend the
-  abilities of the editor interaction mode from the current features of the
-  built-in type checking holes, case splitting etc.\ to anything that a tactic
-  can do.
+  abilities of the editor interaction mode from the current built-in features
+  of the checking types of holes, case splitting, lemma extraction etc.\ to
+  anything that can be done with tactics.
+  In this work, we present the design and implementation of this feature
+  and some examples such as a intuitionistic theorem prover tactic,
+  smart case splitting, and non-linear patterns.
 \end{abstract}
 
 \begin{dedication}
@@ -115,6 +123,7 @@
 \include{introduction}
 \include{background}
 \include{design}
+\include{implementation}
 \include{applications}
 % \include{related}
 % \include{conclusion}

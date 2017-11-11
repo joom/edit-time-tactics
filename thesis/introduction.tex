@@ -2,25 +2,27 @@
 
 The rising popularity of statically typed functional languages led to
 the concept of ``type-driven development'' (hereinafter referred to as TDD).
-When we know the type of an expression we have to write, TDD lets us write this
-expression incrementally and check if the type is correct at every step.  Then
-when we move into the later steps, if we lose track of how we should complete
-an expression, TDD lets us look up what type the next expression should have.
+Typed holes, initially introduced by the ALF proof editor\cite{ALF}, let us
+write a program top-down and leave the parts we do not know how to write
+incomplete. The parts we have already written dictate the types of the
+remaining parts should be, and those types guide us when we try to figure out
+how we should fill the incomplete parts.
+In other words, in TDD we can write our programs incrementally and not only
+this lets us type checks out program at every step, it also gives us clever
+hints about the next steps, based on types and the local context.
 
-The traditional development programming workflow depends on saving the
-file and trying to compile the file in order to check if there are any type
-errors. There are also integrated development environments (IDE), programs that have
-certain functionalities that help us, such as code completion, syntax checking,
-displaying compiler error messages on corresponding lines, displaying
-documentation etc.  These features are convenient, but they are different from
+The traditional development programming workflow depends on saving a
+file and trying to compile in order to check if there are any type
+errors. There are also integrated development environments (IDE),
+programs that have certain functionalities such as code completion, syntax
+checking, displaying compiler error messages on corresponding lines, displaying
+documentation etc. These features are convenient, but they are different from
 TDD. While IDEs can also use types to assist the user, they do not direct the
 entire development process around types per se. TDD is not a program, it is a
 style of programming in which the development process takes the form of a
 conversation between the user's editor and the type-checker/compiler. However,
 this requires certain changes to the compiler, such as being able to type check
 incomplete expressions and definitions.\cite{tdd}
-
-\TODO{mention scriptable editors, and possibly macros in Visual Studio etc.}
 
 The kind of change that is important for this work, however, is the editor
 interaction mode (or IDE mode) that lets the editor

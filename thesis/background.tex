@@ -26,7 +26,7 @@ of the same length.
 \begin{figure}[ht]
 \caption{Example of a dependently typed Idris code: vectors}
 \label{code:vect}
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisKeyword{data} \IdrisType{Vect} : \IdrisType{Nat} -> \IdrisType{Type} -> \IdrisType{Type} \IdrisKeyword{where}
   \IdrisData{Nil} : \IdrisType{Vect} \IdrisData{0} \IdrisImplicit{elem}
   \IdrisData{(::)} : \IdrisImplicit{elem} -> \IdrisType{Vect} \IdrisImplicit{len} \IdrisImplicit{elem} -> \IdrisType{Vect} (\IdrisData{S} \IdrisImplicit{len}) \IdrisImplicit{elem}
@@ -46,7 +46,7 @@ that ensures evenness or one that ensures oddity. This corresponds to a proof th
 \begin{figure}[ht]
 \caption{Example of a dependently typed Idris code, evenness and oddity}
 \label{code:evenodd}
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisKeyword{data} \IdrisType{Even} : \IdrisType{Nat} -> \IdrisType{Type} \IdrisKeyword{where}
   \IdrisData{EvenZ} : \IdrisType{Even} \IdrisData{0}
   \IdrisData{EvenSS} : \IdrisType{Even} \IdrisImplicit{n} -> \IdrisType{Even} (\IdrisData{S} (\IdrisData{S} \IdrisImplicit{n}))
@@ -72,13 +72,23 @@ checking either for the entire module or specific functions, which is what we
 did for \path{evenOrOdd} by using the keyword \path{total}. Similarly, we could
 declare the \zip\ function from the previous example to be total if we wanted to.
 
+Haskell's type classes and type class instances are called interfaces and
+implementations in Idris, respectively. In Haskell there can only be one
+instance for the same type class and the type, but in Idris for the same
+interface and the type, there can be multiple implementations. You can name
+implementations and specify the implementation you want to use by its name,
+when you are writing a function. For our purposes, we will not use multiple
+implementations.
+
 \subsection{Elaborator Reflection}\label{ssec:elabref}
 
-Idris programs elaborated from high-level Idris syntax trees into a core
+Idris programs are elaborated from high-level Idris syntax trees into a core
 language called \path{TT}, and then type checked.\cite{idris} The
 implementation of the elaboration process of Idris is written as a Haskell
-monad that is called \path{Elab}. This monad holds a proof state that hosts
-the context, proof term,
+monad that is called \path{Elab}.
+
+\TODO{Complete the background about elaborator reflection, in comparison to Epigram's elaborator}
+% This monad holds a proof state that hosts the context, proof term,
 
 % first, independently of the implementation, what does elaborator do in the type theory
 
@@ -86,10 +96,10 @@ the context, proof term,
 
 % and tactics, and their connection to the elaborator
 
-Previous versions of Idris had a tactic based prover\footnote{As of Idris
-1.1.1 it is still available, with the warning that it will be deprecated in the
-future versions.}, which embedded the proof tactics in a Haskell monad in the
-implementation.\cite{elabref}
+% Previous versions of Idris had a tactic based prover\footnote{As of Idris
+% 1.1.1 it is still available, with the warning that it will be deprecated in the
+% future versions.}, which embedded the proof tactics in a Haskell monad in the
+% implementation.\cite{elabref}
 
 % what sorts of things stay, what sorts of things go away with elaboration
 % mcbride dependent pattern matching? (Epigram paper?)

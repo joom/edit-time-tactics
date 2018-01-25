@@ -16,7 +16,7 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
   * modules export and import things for syntax
   * macro expansion happens prior to running programs
 
-* Try sneaking in mutual recursion to the elaborator proofs
+* Try sneaking in mutual recursion to the elaborator proofs (done, it works, nothing interesting here)
 
 * Line numbers do exist in the whole parsed file, you can look up whatever you
   need from the whole file afterwards, line numbers suffice as an argument.
@@ -25,3 +25,9 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
 * How do you check preferred names for variables in Elab?
   * Currently there is no way to do this, but it's trivial to write
     a primitive tactic to do that.
+
+* Is ALF really the first with typed holes? Ask Twitter and other people.
+  * "One of the earliest" might be a way to get around that.
+* Look at De Bruijn and Automath in the 60s.
+
+* Explain that one of the challenges of this is to delaborate the code

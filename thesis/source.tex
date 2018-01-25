@@ -1,4 +1,6 @@
 \documentclass[11pt, ma]{westhesis}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph, afterpage}
 \usepackage[square,sort&compress,numbers]{natbib}
@@ -7,7 +9,12 @@
 \usepackage{fancyvrb}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage[T1]{tipa}
-\usepackage[backref=page]{hyperref}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+% \usepackage{tgpagella}
+\usepackage[hang, flushmargin]{footmisc}
+\usepackage[backref=page,hyperfootnotes=false]{hyperref}
+\usepackage{footnotebackref}
 \hypersetup{colorlinks = true, allcolors = {blue}}
 \definecolor{IdrisRed}{RGB}{166, 0, 2}
 \definecolor{IdrisBlue}{RGB}{0, 0, 182}
@@ -24,11 +31,12 @@
 \newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
 \newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
 \usepackage{setspace, microtype}
-\fvset{commandchars=\\\{\},formatcom=\singlespacing}
+\fvset{commandchars=\\\{\},formatcom=\singlespacing, frame=single}
 \newcommand{\ty}[1]{\IdrisType{\path{#1}}}
 \newcommand{\kw}[1]{\IdrisKeyword{\path{#1}}}
 \newcommand{\fn}[1]{\IdrisFunction{\path{#1}}}
 \newcommand{\dt}[1]{\IdrisData{\path{#1}}}
+\newcommand{\bn}[1]{\IdrisBound{\path{#1}}}
 \newcommand{\Elab}{\ty{Elab}}
 \newcommand{\String}{\ty{String}}
 \newcommand{\TT}{\ty{TT}}
@@ -45,6 +53,7 @@
 \newcommand{\quadten}{\quadfive\quadfive}
 \newcommand{\Red}[1]{{\color{red} #1}}
 \newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}
+\newcommand{\FYI}[1]{{\color{green}{[FYI: #1]}}}
 
 
 % \allowdisplaybreaks
@@ -52,7 +61,7 @@
 \department{Mathematics and Computer Science}
 \submitdate{April 2018}
 \advisor{Daniel R. Licata}
-\title{Editor Interaction Through Metaprogramming in Idris}
+\title{Edit-Time Tactics in Idris}
 \author{Joomy Korkut}
 
 \theoremstyle{plain}
@@ -87,15 +96,12 @@
   of the checking types of holes, case splitting, lemma extraction etc.\ to
   anything that can be done with tactics.
   In this work, we present the design and implementation of this feature
-  and some examples such as a intuitionistic theorem prover tactic,
-  smart case splitting, and non-linear patterns.
+  and some examples such as an intuitionistic theorem prover tactic,
+  smart case splitting, and nonlinear patterns.
 \end{abstract}
 
 \begin{dedication}
-  \epigraph{``[A]cademia will construct a continuous stream of throw-away
-  languages that amount to nothing more than papers and more advanced ideas,
-  and industry will stick on local maxima of Java for the next few
-  decades.''}{\textit{Stephen Diehl}}
+  \epigraph{``When mathematics does not suffice, one turns to philosophy, faith, and principles, but when mathematics suffices one who turns to anything else is a bigot.''}{\textit{Ali Nesin}}
 \end{dedication}
 
 \begin{acknowledgements}
@@ -125,8 +131,7 @@
 \include{design}
 \include{implementation}
 \include{applications}
-% \include{related}
-% \include{conclusion}
+\include{conclusion}
 \bibliography{paper}
 \bibliographystyle{plain}
 \end{document}

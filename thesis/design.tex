@@ -1,10 +1,17 @@
 \section{Design}\label{sec:design}
 
+% I haven't yet flowed you into the point
+\TODO{Remember that we are trying to extend Idris's elaborator reflection system to do ...}
+
+
 We described in \autoref{sec:introduction} what a simple editor interaction
 action like case splitting does.  What we want to do is to add another command
 that would be recognized by our compiler, and specify how such a command would
 run, and what arguments it should take to communicate with the editor
 effectively.
+
+\subsection{Communication}\label{ssec:communication}
+\TODO{This section doesn't make such sense, I need at least two examples. I need to address the challenges that make us generalize,  }
 
 The current Idris\footnote{This thesis is using Idris 1.1.1.} implementation of
 the editor interaction mode is a part of the Idris compiler, and is written in
@@ -19,7 +26,7 @@ over the socket and sends back S-expressions as output. Let's see an example of
 this. Suppose we are writing a predecessor function on natural numbers and we
 want to case split on the argument.
 
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{pred} : \IdrisType{Nat} -> \IdrisType{Nat}
 \IdrisFunction{pred} \IdrisBound{x} = \IdrisMetavar{?\IdrisMetavar{p}}
 \end{Verbatim}
@@ -27,12 +34,13 @@ want to case split on the argument.
 When we put the cursor on \path{x} and run case splitting, the following
 communication happens in the background.
 
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
 -> ((:case-split 5 "x") 13)
 <- (:return (:ok "pred Z = ?p_1{\textbackslash}npred (S k) = ?p_2{\textbackslash}n") 13)
 \end{Verbatim}
 
-Case split command requires two arguments, the line number and the variable
+\TODO{Revise the following paragraph: first describe the specific code as if you're reading the code to someone, then generalize it. A complete rewrite of this paragraph would be a good idea.}
+The case split command requires two arguments, the line number and the variable
 name to case split on. The line number is included in most editor actions that
 change the code. The variable name is a string that hold the necessary data.
 The number \path{13} that comes afterwards is how many rounds of communications
@@ -42,42 +50,41 @@ and then a string that contains two lines split by the new line character.
 The editor receives twose two lines and replaces that with the line we ran the
 case split command on.
 
-The most important thing to notice here is that the way the editor and the
-compiler communicate is very ``stringly typed''\footnote{A term coined by Mark
-Simpson, mentioned in a deleted Stack Overflow thread.}.  Since all of these
-editor actions are primitives, this is initially fine. However, we now want to
-create a single command that handles different kinds of actions. These actions
-possibly take multiple arguments that hold different kinds of values, such as
-names, type declarations, function definitions, or expressions.
-The data itself can still be sent as a string by the editor, but having type
-annotations would give a hint to the compiler about how to parse the given
-string into parts of a syntax tree. In other words, the command should take a
-list of strings, each tagged with a type annotation.
+\TODO{The following paragraph is generalizing too early. It'd be nice to have another concrete example, then you can contrast the two examples to show the need for generalization}
+The way the editor and the compiler communicate is
+``stringly typed''\footnote{A term coined by Mark Simpson, mentioned in a
+deleted Stack Overflow thread.\TODO{Explain the meaning}}. We do not have a way
+to check if the arguments
+to \path{:case-split} are of the right type. If that is the case, then we will
+only know when we run that action.
+We now want to create a single command that handles different kinds of
+actions. These actions possibly take multiple arguments that hold different
+kinds of values, such as names, type declarations, function definitions, or
+expressions. The \Elab\ actions we will write are going to require those arguments
+to be of the right ``type", and in the right order. When we are writing front
+end code for your editor interaction mode, we have to take that into account.
+We will not attempt to develop a way to detect errors about this before
+runtime.
 
-Then the question is, how will the editor know what to tag each string with?
-It will not. For each non-trivial editor action, the user will have to extend
-the Idris mode of the editor with a function that tags each string with a type
-annotation. The resulting communication should look like this for case splitting.
+The resulting communication should look like this for case splitting.
 
-\begin{Verbatim}
--> ((:elab-action :case-split 5 '((:name . "x"))) 13)
-<- (:return (:ok '((:fun-defn . "pred Z = ?p_1")
-                   (:fun-defn . "pred (S k) = ?p_2"))) 13)
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
+-> ((:elab-action "caseSplit" '("pred" "pred x = ?p" "x")) 13)
+<- (:return (:ok '("pred Z = ?p_1" "pred (S k) = ?p_2")) 13)
 \end{Verbatim}
-Notice that the call to the editor states that we are calling the \Elab\ action
-that does case splitting, and it takes an argument list, which happens
-to be a singleton list that contains a pair of a tag and a string. The tag
-states that the string should be handled as a variable name by the compiler.
-The result from the editor returns that the action succeeded and then a list of
-results.  In the result list we have two entries, each of which is a pair of a
-tag and a string.  The tags in here state that the string represents a function
-definition.
 
+This does not look that different from the previous version, except now we are
+calling a different command that runs the \Elab\ action \path{"caseSplit"}.
+
+\subsection{Types of Editor Actions}\label{ssec:types}
+
+\TODO{Be more specific, say "the Haskell implementation of the compiler that receives the message from Emacs"}
+\TODO{"Users of our work will be writing a lot of functions like this. the problem with allowing users to do that is the following..."}
 Now let's think of the other end of this editor action. What would the type of
-such an \Elab\ action be?
+such an \Elab\ action be? The communication we mentioned above should give a hint.
 
-\begin{Verbatim}
-caseSplit : TTName -> FunClause -> TTName -> Elab (List FunClause)
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{caseSplit} : \ty{TTName} -> \ty{FunClause} -> \ty{TTName} -> \ty{Elab} (\ty{List} \ty{FunClause})
 \end{Verbatim}
 
 As a first cut, we can imagine an editor action that takes the name of the function
@@ -87,7 +94,10 @@ and will be split by the editor action. As a result, our editor action should re
 a list of function clauses, what the aforementioned function clause turns into
 after the split.
 
-The types in this editor action are reflection types. But what if we wanted to write
+\TODO{Show two examples of what works, show an example of what we want to preclude!}
+
+The types in this editor action are reflection types. \TODO{WHAT ARE REFLECTION
+TYPES, DUH} But what if we wanted to write
 a editor action takes an argument of a non-reflection type, such as \ty{Nat}, then
 how would the compiler know how to pass the editor action the right type of arguments?
 More importantly, can we check in compile time if the editor knows how to pass
@@ -103,17 +113,11 @@ already write type-level functions! However Idris does not allow us to pattern
 match on types, because that breaks parametricity and type erasure.\cite{universePat}
 We could opt for an alternative called the universe pattern, however we should
 save the user the trouble of learning the universe we define. Moreover, any
-universe that we will define cannot be extended by the user. If the user later
+universe that we will defined cannot be extended by the user. If the user later
 wants to define a new type of their own and to use that in the editor action,
 they should be able to do that.
 
-The solution to our problem is to have an interface.\footnote{Haskell's type
-classes and type class instances are called interfaces and implementations,
-respectively. In Haskell there can only be one instance for the same type class
-and the type, but in Idris for the same interface and the type, there can be
-multiple implementation. You can name implementations and state the
-implementation you want to use by name, when you are writing a function. For
-our purposes, they are pretty much the same.}
+The solution to our problem is to have an interface.
 We can define a new interface \ty{Editorable}, which only has implementations
 that we know how to communicate with the editor. For the user defined types,
 the user is free to give an implementation for the \ty{Editorable} interface of
@@ -122,23 +126,25 @@ The way that we communicate with the editor right now is through S-expressions,
 as we described earlier. Therefore we can require our types to have two
 methods, one from the type to an S-expression, and one to go from an
 S-expression to the type. In other words, one to serialize the type, and one
-the deserialize it. Let's call them \fn{toEditor} and \fn{fromEditor}, respectively.
+to the deserialize it. Let's call them \fn{toEditor} and \fn{fromEditor}, respectively.
 
-\begin{Verbatim}
-interface Editorable a where
-  fromEditor : SExp -> Maybe a
-  toEditor : a -> SExp
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{interface} \ty{Editorable} \bn{a} \kw{where}
+  \fn{fromEditor} : \ty{SExp} -> \ty{Maybe} a
+  \fn{toEditor} : \bn{a} -> \ty{SExp}
 \end{Verbatim}
 
 Then we would have implementations of this interface for the reflection types.
 
-\begin{Verbatim}
-err : String
-err = "Primitive instance of the Editorable interface"
+\TODO{the crash thing is confusing, maybe postulate the type class implementation?}
 
-implementation Editorable TTName where
-  fromEditor = idris_crash err
-  toEditor   = idris_crash err
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisFunction{err} : \IdrisType{String}
+\IdrisFunction{err} = \IdrisData{"Primitive instance of the Editorable interface"}
+
+\kw{implementation} \ty{Editorable} \ty{TTName} \kw{where}
+  \fn{fromEditor} = \fn{idris_crash} \fn{err}
+  \fn{toEditor}   = \fn{idris_crash} \fn{err}
 \end{Verbatim}
 
 The implementations for \ty{TT}, \ty{TyDecl}, \ty{DataDefn}, \ty{FunDefn} and
@@ -149,13 +155,13 @@ S-expressions should be handled by the compiler, because we do not have a way
 to parse strings into syntax trees within Idris.
 
 However, we are now free to define other instances of \ty{Editorable} that
-might be useful, such as a \String instance and a \ty{List} instance.
+might be useful, such as a \String\ instance and a \ty{List} instance.
 
-\begin{Verbatim}
-implementation Editorable String where
-  fromEditor (StringAtom s) = Just s
-  fromEditor _ = Nothing
-  toEditor = StringAtom
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{implementation} \ty{Editorable} \ty{String} \kw{where}
+  \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \dt{Just} \bn{s}
+  \fn{fromEditor} _ = \dt{Nothing}
+  \fn{toEditor} = \dt{StringAtom}
 \end{Verbatim}
 
 If we have an S-expression primitive string, then we can convert that into
@@ -164,11 +170,11 @@ Conversely, if we want to convert an Idris \String\ into an S-expression, we
 just make it into a string atom. Other primitive instances like \ty{Integer},
 \ty{Bool} etc.\ follow the same reasoning.
 
-\begin{Verbatim}
-implementation Editorable a => Editorable (List a) where
-  fromEditor (SExpList xs) = sequence (map fromEditor xs)
-  fromEditor _ = Nothing
-  toEditor xs = SExpList (map toEditor xs)
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{implementation} \ty{Editorable} \bn{a} => \ty{Editorable} (\ty{List} \bn{a}) \kw{where}
+  \fn{fromEditor} (SExpList xs) = sequence (map fromEditor xs)
+  \fn{fromEditor} _ = \dt{Nothing}
+  \fn{toEditor} \bn{xs} = \dt{SExpList} (\fn{map} \fn{toEditor} \bn{xs})
 \end{Verbatim}
 
 If we have an S-expression list, then we try to parse everything inside that
@@ -187,9 +193,11 @@ invent a new compiler directive. Now we can declare a function to be an editor
 action with the \texttt{\IdrisKeyword{\%editor}} keyword. Let's go back to the
 case split action.
 
-\begin{Verbatim}
-%editor
-caseSplit : TTName -> FunClause -> TTName -> Elab (List FunClause)
+\TODO{Explain that this is new syntax!}
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{%editor}
+\fn{caseSplit} : \ty{TTName} -> \ty{FunClause} -> \ty{TTName} -> \ty{Elab} (\ty{List} \ty{FunClause})
 \end{Verbatim}
 
 Once we complete the definition, this will pass our type checker because
@@ -198,3 +206,47 @@ the \ty{Editorable} interface.
 
 If we use a type that did not have an \ty{Editorable} implementation, then
 we should get a type error.
+
+\subsection{Connecting Types and Communication}\label{ssec:typesAndCommunication}
+
+We now have defined a way to type check editor actions to see we can call them
+from the editor in a sensible way. Let's juxtapose the type of \fn{caseSplit} and a communication that uses it and see how the arguments should be converted.
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{%editor}
+\fn{caseSplit} : \ty{TTName} -> \ty{FunClause} -> \ty{TTName} -> \ty{Elab} (\ty{List} \ty{FunClause})
+\end{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
+-> ((:elab-action "caseSplit" '("pred" "pred x = ?p" "x")) 13)
+<- (:return (:ok '("pred Z = ?p_1" "pred (S k) = ?p_2")) 13)
+\end{Verbatim}
+
+The first and thirds arguments to \fn{caseSplit} are of type \ty{TTName}. In
+the S-expression, they are merely strings, but when they are passed to the
+compiler we first have to resolve their namespaces and represent them as
+\path{Name}s in the compiler, and then reflect them to
+\path{Term}s\footnote{The type in the Haskell implementation of the compiler
+that represents terms in the core language TT.} in the compiler
+that would be of the type \ty{TTName} if they were reified.
+Only then we can apply them to the \fn{caseSplit} action.
+
+The second argument is of type \ty{FunClause}. Now we have actual code passed
+as a string to the compiler. That string will then be parsed into a
+\path{PClause}\footnote{The type in the Haskell implementation of the compiler
+that represents surface language function clauses.} in the compiler, which will
+then be elaborated into the core language and later represented as a
+\path{RFunClause}\footnote{The type in the Haskell implementation of the
+compiler that represents the reflected core language function clauses.} in the
+compiler. Finally it will be reflected to a \path{Term} in the compiler that
+would be of the type \ty{FunClause}. Then we can apply it to the
+\fn{caseSplit} action.
+
+When we apply the arguments to the \fn{caseSplit} action, we can run the
+elaborator and get the term that it generates. In this case, we will get
+a \path{Term} that will represent a list of \ty{FunClause}s.
+We will first have to reify the \path{Term} that represents the list into an
+actual Haskell list of \path{Term}s. Then we will first have to reify each of
+them into \path{RFunClause}s in the compiler. The next step is to delaborate
+each of them into \path{PClause}s in the compiler. Only then we can use the
+pretty printer to convert them into strings that contain code.
+Now we have a list of strings, which we can represent as an S-expression and
+send back to the editor.

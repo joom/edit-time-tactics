@@ -17,7 +17,7 @@ then write a tactic that takes the goal type, which will of the \path{Raw}, and
 tries to fill the hole with the generated term.  Let's prove a theorem using
 this tactic:
 
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
 \IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfenExpr}
 \end{Verbatim}
@@ -26,15 +26,15 @@ Through the elaborator reflection, that will turn into this\footnote{
   The definition is not changed at all. If it were, it could simply be written
   as
 
-\ttfamily{\IdrisFunction{noContradiction} \IdrisData{(}\IdrisBound{pf}\IdrisData{,} \IdrisBound{contra}\IdrisData{)} = \IdrisBound{contra} \IdrisBound{p}} } when we compile the file:
-\begin{Verbatim}[commandchars=\\\{\}]
+\ttfamily{\fn{noContradiction} \dt{(}\bn{pf}\dt{,} \bn{contra}\dt{)} = \bn{contra} \bn{pf}} } when we compile the file:
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
 \IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
      \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in} \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in} \IdrisFunction{void} (\IdrisBound{j20} \IdrisBound{i20})
 \end{Verbatim}
 
 
-
+\TODO{Explain how the tactic works, especially the nested implication rule which is a bit confusing.}
 
 % explain the nested impl rule in depth
 % and possibly one or two more, to show what they look like in general
@@ -69,7 +69,7 @@ function:
 \begin{figure}[ht]
 \caption{Code with nonlinear patterns, that we are trying to simulate}
 \label{code:nonlinear}
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{elem} : \IdrisType{Eq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
 \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
 \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{True}
@@ -82,7 +82,7 @@ As we said before, this is not valid Idris. However, this would work:
 \begin{figure}[ht]
 \caption{The code with view, that simulates nonlinear patterns}
 \label{code:nonlinearWith}
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{elem} : \IdrisType{DecEq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
 \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
 \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) \IdrisKeyword{with} (\IdrisFunction{decEq} \IdrisBound{x} \IdrisBound{y})
@@ -103,7 +103,7 @@ a list, as presented in \autoref{code:listlast}.
 \begin{figure}[ht]
 \caption{Brady's view to match the last element of a list.\cite{tdd}}
 \label{code:listlast}
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisKeyword{data} \IdrisType{ListLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Type} \IdrisKeyword{where}
   \IdrisData{Empty} : \IdrisType{ListLast} \IdrisData{[]}
   \IdrisData{NonEmpty} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> (\IdrisBound{x} : \IdrisImplicit{a}) -> \IdrisType{ListLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]})
@@ -123,7 +123,7 @@ If we developed such an \Elab\ editor action, we could write the code in
 \begin{figure}[ht]
 \caption{Matching the last element of a list, what we are trying to simulate}
 \label{code:safeLast1}
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
 \IdrisFunction{safeLast} \IdrisData{[]} = \IdrisData{Nothing}
 \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) = \IdrisData{Just} \IdrisBound{x}
@@ -133,7 +133,7 @@ If we developed such an \Elab\ editor action, we could write the code in
 \begin{figure}[ht]
 \caption{The code that matches the last element of a list with a view}
 \label{code:safeLast2}
-\begin{Verbatim}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
 \IdrisFunction{safeLast} \IdrisBound{l} \IdrisKeyword{with} (\IdrisFunction{listLast} \IdrisBound{l})
   \IdrisFunction{safeLast} \IdrisData{[]} | \IdrisData{Empty} = \IdrisData{Nothing}
@@ -150,3 +150,5 @@ that can
 \item Search for a view function that could be used to achieve this pattern
 \item Try to apply possible view functions by unifying the input pattern with the view type constructors
 \end{enumerate}
+
+\TODO{Write the tactic and explain how it works}

@@ -8,6 +8,11 @@ dependent types allow us to do computation in types, just like we can do
 computation in terms.\cite{davidphd} Moreover, we can use the computation
 in types to shape our definitions of computations in types.
 
+A helpful intuition for functional programmers is to think about how the
+concept that functions are values was a initially a novel idea, and now in
+dependently typed programming, types are values as well. Thus a function can take
+types as arguments and/or return a type as a result.\cite{henk}
+
 In \autoref{code:vect}, we define a data type of vectors. It is exactly
 like lists, except now the length is stored within the data type. In other
 words, as we add elements, the length is computed in type level.

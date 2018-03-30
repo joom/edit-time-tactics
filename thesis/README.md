@@ -31,3 +31,45 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
 * Look at De Bruijn and Automath in the 60s.
 
 * Explain that one of the challenges of this is to delaborate the code
+
+* TODO as of early March:
+  - local variables
+  - higher order prims (done)
+  - delaboration of implicits
+  - check for %editor (done)
+
+* using transport(subst) in Agda, it cannot infer F, so write a tactic that does that for you
+  * this is only an issue if you use homogeneous equality, but Idris generally uses heterogeneous
+
+* Add Prim__TryCatch, inspired by tryCatch to Idris. (done)
+
+* TODO as of mid March:
+  * add {from,to}Editor instances for TyDecl, DataDefn, FunDefn, FunClause
+  * figure out implicit arguments in pretty printing. printdef somehow does this properly
+
+* Leif Andersen from Northeastern works on a generalized version of what I'm doing:
+  Her work allows users to define their own editors, with 4 elements: state, serialization/deserialization, elaboration, UI
+  In my work, the UI is Emacs commands, serialization/deserialization is my contribution,
+  and elaboration and (proof)state are provided by elaborator reflection.
+  There's currently no paper but there will be a Github repo and blog post in time for my thesis.
+
+* David: fromEditor and toEditor should be in Elab, because:
+  * they might want to check if there's an implementation for some interface
+  * they might want to limit Editorableness to
+
+* do case splitting as a more compelling example than the theorem prover
+
+* Questions to ask David:
+  * Namespace resolution.
+    If I pass Z it can't resolve, but it can resolve Prelude.Nat.Z
+  * How should I handle local contexts?
+    Elaborating an expression that has some local variables fails because I don't have a way to get them from the context.
+  * How does printdef handle implicit variables?
+
+
+* Add to IState a new field, that is an interval map (implemented with FingerTree ?),
+  where the keys will be an interval of source positions, and values will be
+  a pair of local context and goal type.
+  * This solves the local context problem we have in fromEditor.
+  * We have to record every type to this interval map during elaboration.
+  * We can add a REPL command that gets a sourceposition and returns info.

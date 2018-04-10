@@ -1,3 +1,3 @@
-# masters
+# edit-time-tactics
 
-My master's thesis, slides, poster etc.
+Documents (TeX, slides, poster etc.) for "Edit-Time Tactics in Idris" (work in progress)

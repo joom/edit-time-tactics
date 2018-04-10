@@ -402,7 +402,7 @@
     \bgroup
     \Large
     \begin{center}
-By \\
+by \\
     \check@val\@author \\
 Faculty Advisor: \check@val\@principaladvisor
     \end{center}

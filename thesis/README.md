@@ -60,16 +60,15 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
 * do case splitting as a more compelling example than the theorem prover
 
 * Questions to ask David:
-  * Namespace resolution.
+  * Namespace resolution. (solved)
     If I pass Z it can't resolve, but it can resolve Prelude.Nat.Z
-  * How should I handle local contexts?
+  * How should I handle local contexts? (solved)
     Elaborating an expression that has some local variables fails because I don't have a way to get them from the context.
-  * How does printdef handle implicit variables?
+  * How does printdef handle implicit variables? (solved)
 
-
-* Add to IState a new field, that is an interval map (implemented with FingerTree ?),
+* Add to IState a new field, that is an interval map (implemented with FingerTree),
   where the keys will be an interval of source positions, and values will be
-  a pair of local context and goal type.
-  * This solves the local context problem we have in fromEditor.
-  * We have to record every type to this interval map during elaboration.
-  * We can add a REPL command that gets a sourceposition and returns info.
+  a pair of local context and goal type. (done)
+  * This solves the local context problem we have in fromEditor. (done)
+  * We have to record every type to this interval map during elaboration. (done)
+  * We can add a REPL command that gets a sourceposition and returns info. (trying)

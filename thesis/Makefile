@@ -1,7 +1,7 @@
 FILENAME=thesis
 SOURCENAME=source
 OUTPUTNAME=output
-LATEX=pydflatex
+LATEX=pdflatex
 
 default: preview
 

@@ -6,22 +6,26 @@
 Idris is a dependently typed functional programming language. In simple terms,
 dependent types allow us to do computation in types, just like we can do
 computation in terms.\cite{davidphd} Moreover, we can use the computation
-in types to shape our definitions of computations in types.
+in types to shape our definitions of computations in terms.
 
 A helpful intuition for functional programmers is to think about how the
 concept that functions are values was a initially a novel idea, and now in
-dependently typed programming, types are values as well. Thus a function can take
-types as arguments and/or return a type as a result.\cite{henk}
+dependently typed programming, we promote types to values as well.
+Thus a function can now take a term as an argument and return a type as a
+result.\cite{lambdacube,henk}
+For those familiar with Haskell type families\cite{typefamilies}, this is
+similar to that, but notice that type families are like functions from types to types,
+while we can have functions from terms to types.
 
 In \autoref{code:vect}, we define a data type of vectors. It is exactly
-like lists, except now the length is stored within the data type. In other
+like lists, except now the length is stored within the type. In other
 words, as we add elements, the length is computed in type level.
 
 After that, we define a function that zips two vectors. Notice that only two
 cases are enough to cover all possible paths of this function. If we were to
 define a \zip\ function for lists, we would need four cases: both empty, both
 non-empty, one empty and one non-empty, and one non-empty and one empty.
-However, our \zip\ function takes two argument that are of the same length
+However, our \zip\ function takes two arguments that are of the same length
 \path{n}.  Therefore, we cannot have a case with one empty and one non-empty,
 because that contradicts with the fact that both vectors are of the same
 length. Notice that the \zip\ function returns a vector of length \path{n}.
@@ -73,9 +77,13 @@ that ensures evenness or one that ensures oddity. This corresponds to a proof th
 Unlike other dependently typed languages like Agda and Coq, Idris is not total
 by default. This is because Idris prioritizes general purpose programming
 rather than theorem proving. However, users can opt in to enable totality
-checking either for the entire module or specific functions, which is what we
-did for \path{evenOrOdd} by using the keyword \path{total}. Similarly, we could
-declare the \zip\ function from the previous example to be total if we wanted to.
+checking either for the entire module or for specific functions.
+We did the latter for \path{evenOrOdd} by using the keyword \path{total}.
+Similarly, we could require the \zip\ function from the previous example to be
+total if we wanted to.\footnote{Clearly Idris cannot decide whether a given
+function is total, since that would solve the halting problem. Instead it
+acknowledges the ones that are obviously terminating, and for all the other
+ones, even if they are actually total, it throws a totality check error.}
 
 Haskell's type classes and type class instances are called interfaces and
 implementations in Idris, respectively. In Haskell there can only be one
@@ -92,7 +100,6 @@ language called \path{TT}, and then type checked.\cite{idris} The
 implementation of the elaboration process of Idris is written as a Haskell
 monad that is called \path{Elab}.
 
-\TODO{Complete the background about elaborator reflection, in comparison to Epigram's elaborator}
 % This monad holds a proof state that hosts the context, proof term,
 
 % first, independently of the implementation, what does elaborator do in the type theory

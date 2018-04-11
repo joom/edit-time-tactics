@@ -96,17 +96,270 @@ implementations.
 \subsection{Elaborator Reflection}\label{ssec:elabref}
 
 Idris programs are elaborated from high-level Idris syntax trees into a core
-language called \path{TT}, and then type checked.\cite{idris} The
-implementation of the elaboration process of Idris is written as a Haskell
-monad that is called \path{Elab}.
+language called \path{TT}, and then type checked.\cite{idris}
+The implementation of the Idris elaboration in the compiler is written as a
+Haskell monad called \path{Elab}.
+Recent work on elaborator reflection\cite{elabref} allowed Idris users to
+access this monad from Idris itself, by implementing a primitive monad \Elab\
+in Idris itself, that can only be used for metaprogramming in compile time.
 
-% This monad holds a proof state that hosts the context, proof term,
+\subsubsection{Reflected Core Language Types}
 
-% first, independently of the implementation, what does elaborator do in the type theory
+Since this monad works with core language terms and definitions, the types in
+the compiler representing the syntax trees for the core language are reflected
+in Idris. In other words, there are now types in Idris itself, that match the
+syntax tree types in the compiler. Most important one of all is called \TT,
+which is type of the core language typed terms, and its definition can be seen
+in \autoref{code:ttDef}.
 
-% then talk about how it's implemented and how that's exposed
+\begin{figure}[ht]
+\caption{The reflected type \protect\TT\ in Idris.}
+\label{code:ttDef}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisKeyword{data} \IdrisType{TT} : \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{P} : \IdrisType{NameType} -> \IdrisType{TTName} -> \IdrisType{TT} -> \IdrisType{TT}
+  \IdrisData{V} : \IdrisType{Int} -> \IdrisType{TT}
+  \IdrisData{Bind} : \IdrisType{TTName} -> \IdrisType{Binder} \IdrisType{TT} -> \IdrisType{TT} -> \IdrisType{TT}
+  \IdrisData{App} : \IdrisType{TT} -> \IdrisType{TT} -> \IdrisType{TT}
+  \IdrisData{TConst} : \IdrisType{Const} -> \IdrisType{TT}
+  \IdrisData{Erased} : \IdrisType{TT}
+  \IdrisData{TType} : \IdrisType{TTUExp} -> \IdrisType{TT}
+  \IdrisData{UType} : \IdrisType{Universe} -> \IdrisType{TT}
+\end{Verbatim}
+\end{figure}
 
-% and tactics, and their connection to the elaborator
+As a quick summary:
+\begin{itemize}
+\item\dt{P} creates a variable term from a name and the type of the variable.
+\item\dt{V} creates a de Bruijn variable.
+(given integer $n$ representing the $n$th most recently introduced local variable)
+\item\dt{Bind} creates any kind of binder (lambda, let etc.) with a term it binds on.
+\item\dt{App} creates a function application.
+\item\dt{TConst} creates a constant such as an integer, a character, a string etc.
+\item\dt{Erased} creates a term that is not known. This is used for erasing the types we do not need later in the compilation.
+\item\dt{TType} creates a type of types for a given universe.
+\item\dt{UType} creates a uniqueness type for a given uniqueness universe.
+\end{itemize}
+
+This summary is meant to be an overview, so refer to \cite{idris} and
+\cite{elabref} if this is not perfectly clear. For our purposes, we will mostly
+be concerned with \dt{P}, \dt{Bind} and \dt{App}.
+
+The other important type that is used in elaborator reflection is \ty{Raw},
+which is the type of untyped core language terms, and its definition can be
+seen in \autoref{code:rawDef}.
+
+\begin{figure}[ht]
+\caption{The reflected type \protect\ty{Raw} in Idris.}
+\label{code:rawDef}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisKeyword{data} \IdrisType{Raw} : \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{Var} : \IdrisType{TTName} -> \IdrisType{Raw}
+  \IdrisData{RBind} : \IdrisType{TTName} -> \IdrisType{Binder} \IdrisType{Raw} -> \IdrisType{Raw} -> \IdrisType{Raw}
+  \IdrisData{RApp} : \IdrisType{Raw} -> \IdrisType{Raw} -> \IdrisType{Raw}
+  \IdrisData{RType} : \IdrisType{Raw}
+  \IdrisData{RUType} : \IdrisType{Universe} -> \IdrisType{Raw}
+  \IdrisData{RConstant} : \IdrisType{Const} -> \IdrisType{Raw}
+\end{Verbatim}
+\end{figure}
+
+The constructors of \ty{Raw} are almost the same ones as \TT,
+except a few of them are missing and variables do not have to be annotated with
+their types.
+
+
+The \ty{TTName} type is the type of names in the core language, its full definition can be seen in \autoref{code:ttnameDef}.
+
+\begin{figure}[ht]
+\caption{The reflected type \protect\ty{TTName} in Idris.}
+\label{code:ttnameDef}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisKeyword{data} \IdrisType{TTName} : \IdrisType{Type} \IdrisKeyword{where}
+  \IdrisData{UN} : \IdrisType{String} -> \IdrisType{TTName}
+  \IdrisData{NS} : \IdrisType{TTName} -> \IdrisType{List} \IdrisType{String} -> \IdrisType{TTName}
+  \IdrisData{MN} : \IdrisType{Int} -> \IdrisType{String} -> \IdrisType{TTName}
+  \IdrisData{SN} : \IdrisType{SpecialName} -> \IdrisType{TTName}
+\end{Verbatim}
+\end{figure}
+
+As a quick summary:
+\begin{itemize}
+\item\dt{UN} represents the variable names without any namespace.
+\item\dt{NS} represents the variable names with a given namespace. For example, the name \path{Prelude.Bool.True} is represented as
+  \dt{NS} \path{(}\dt{UN} \dt{"True"}\path{)} \dt{["Bool",} \dt{"Prelude"]}.
+\item\dt{MN} represents machine generated names with a hint string and a fresh integer for that hint.
+\item\dt{SN} represents special names, which are used for metavariables, implementations etc. We will not deal with them in this thesis.
+\end{itemize}
+
+As a quick way to refer to names in Idris, there is a syntactic sugar \verb|`{{x}}|
+that would give you the term \dt{UN} \dt{"x"}.
+Similarly, there is another syntactic sugar that lets you refer to an existing
+name without having to specify its full namespace, and it also checks whether
+this name exists: \verb|`{False}| would give you
+\dt{NS} \path{(}\dt{UN} \dt{"False"}\path{)} \dt{["Bool",} \dt{"Prelude"]}.
+
+\medskip
+
+There are many other types used in the reflection of the core language, but we
+will not give their definitions here since they are not as common as \TT,
+\ty{Raw}, and \ty{TTName}. However, it would be useful to at least list the
+important ones and describe what they represent.
+
+\begin{itemize}
+\item\ty{TyDecl} represents type declarations.
+\item\ty{FunDefn} represents function definitions.
+\item\ty{FunClause} represents a single clause in a function definition.
+\item\ty{DataDefn} represents data type definitions.
+\end{itemize}
+
+\subsubsection{Quasiquotation}
+
+Writing \TT\ and \ty{Raw} terms by hand can get tedious, hence there is a
+quasiquotation syntax that elaborates a given expression into its corresponding
+\TT\ or \ty{Raw} term.\cite{idrisQuotation}
+The syntax \verb|`(|\fn{e}\verb|)|, where \fn{e} is an Idris expression, gives
+us the typed or untyped core language syntax tree for \fn{e}. For example,
+\verb|`(|\fn{not}\ \dt{True}\verb|)| gives us the following \TT\ term:
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisData{App} (\IdrisData{P} \IdrisData{Ref}
+       (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})
+       (\IdrisData{Bind} (\IdrisData{UN} \IdrisData{"__pi_arg"})
+             (\IdrisData{Pi} (\IdrisData{P} (\IdrisData{TCon} \IdrisData{8} \IdrisData{0}) (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"Bool"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}) \IdrisData{Erased})
+                 (\IdrisData{TType} (\IdrisData{UVar} \IdrisData{"./Prelude/Bool.idr"} \IdrisData{71})))
+             (\IdrisData{P} (\IdrisData{TCon} \IdrisData{8} \IdrisData{0}) (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"Bool"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}) \IdrisData{Erased})))
+    (\IdrisData{P} (\IdrisData{DCon} \IdrisData{1} \IdrisData{0})
+       (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"True"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})
+       (\IdrisData{P} (\IdrisData{TCon} \IdrisData{0} \IdrisData{0}) (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"Bool"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}) \IdrisData{Erased}))
+\end{Verbatim}
+
+The \ty{Raw} term for the same expression is a bit more reasonable:
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+(\IdrisData{RApp} (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}))
+      (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"True"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})))
+\end{Verbatim}
+
+Obviously, we would not want to terms like these every time we want to return
+the syntax tree for a simple function application. At times like this,
+quasiquotation saves us.
+Quasiquotation can be used for constructing both expressions and patterns.
+
+We can also give the type of the expression we want to elaborate, which is
+necessary when Idris cannot infer the type. For \dt{True}, it is trivial to
+infer that type is \ty{Bool}, but for \dt{5}, the type can be \ty{Int},
+\ty{Integer}, \ty{Nat}, or anything that satisfies the \ty{Num} interface.
+Therefore, we have to specify the type when we are quasiquoting. The
+syntax for that is \verb|`(|\fn{e}\ \verb|:|\ \ty{t}\verb|)|,
+e.g. \verb|`(|\dt{5}\ \verb|:|\ \ty{Int}\verb|)|.
+
+We also can do antiquotation. If we have some variable expression \fn{x} that has the
+type \TT\ or \ty{Raw}, then we can construct a syntax tree using it within the
+quasiquotation, with the syntax \verb|`(|\fn{not}\ ~\fn{x}\verb|)|.
+Note that antiquotation works for expressions, not just variables. The type of
+expression or variable we have in the antiquotation has to match the type of
+the quasiquotation. In other words, only \TT\ expressions can be used in an
+antiquotation in a \TT\ quasiquotation, and mutatis mutandis for \ty{Raw}.
+
+\subsubsection{\protect\Elab\ monad}
+
+The elaborator reflection\cite{elabref} feature that has been added to the
+Idris compiler recently provides a tool for metaprogramming with a monad called
+\Elab.  This monad is implemented as a primitive and it can only be run during
+compile time.
+
+Elaborator reflection adds a new declaration
+\texttt{\IdrisKeyword{\%runElab}}\ \fn{e} to Idris,
+where \fn{e} has the type \ty{Elab}\ \ty{()}.
+This declaration runs the \Elab\ action and adds new type declarations,
+function and data type definitions generated by the \Elab\ action generated by
+\fn{e} to the context.
+
+Elaborator reflection also adds a new expression
+\texttt{\IdrisKeyword{\%runElab}}\ \fn{e} to Idris,
+where \fn{e} has the type \ty{Elab}\ \ty{()}.
+The type \ty{t} of the entire expression is started as the goal of the
+\Elab\ action, and the tactics in \fn{e} must solve the goal
+that has the type \ty{t}.
+Like the declaration above, this expression also adds the newly generated
+declarations and definitions to the context.
+
+\Elab\ monad holds a proof state inside, which has a goal type, a proof term that is incrementally built up, a hole queue, a collection of open unification problems, and a supply of fresh names.\cite{elabref}
+Tactics can change the proof state. Here are some examples that do that:
+\begin{itemize}
+\item\fn{claim}\ \verb|: (|\bn{n}\ \verb|:|\ \ty{TTName}\verb|) -> (|\bn{t} \verb|:| \ty{Raw}\verb|) -> |\Elab\ \ty{()}\\
+Creates a new hole named \bn{n} with the type \bn{t}.
+\item\fn{fill}\ \verb|: (|\bn{e} \verb|:| \ty{Raw}\verb|) -> |\Elab\ \ty{()}\\
+  Create a guess to fill the current hole with the term \bn{e}. Fail if the types do not unify.
+\item\fn{solve}\ \verb|:|\ \Elab\ \ty{()}\\
+  Try to finalize the guess in the hole. Fail if there is no guess.
+\end{itemize}
+
+There are a lot more tactics, which we will not list here. A more thorough list
+can be found in \cite{elabref} and Idris documentation.
+
+We also have access to \Elab\ actions that do not change the proof state, but give us access to the context or other compiler primitives:
+\begin{itemize}
+  \item\fn{check}\ \verb|: (|\bn{env}\ \verb|:|\ \ty{List}\ \ty{(TTName,}\ \ty{Binder}\ \ty{TT)}\verb|) -> (|\bn{tm} \verb| : | \ty{Raw}\verb|) -> |\Elab\ \ty{(TT, TT)}\\
+Type-checks a term under a given environment and gives the typed core term version of \bn{tm} and the type of \bn{tm} as a typed core term.
+\item\fn{normalise}\ \verb|: (|\bn{env}\ \verb|:|\ \ty{List}\ \ty{(TTName,}\ \ty{Binder}\ \ty{TT)}\verb|) -> (|\bn{term} \verb|:| \ty{TT}\verb|) -> |\Elab\ \ty{TT}\\
+Normalizes\footnote{\fn{normalise} is spelled the British way, since most Idris development happens in the UK.} a typed term under a given environment.
+\item\fn{lookupTy} \verb|:| \ty{TTName} \verb|->| \Elab\ \verb|(|\ty{List}\ \ty{(TTName,}\ \ty{NameType,}\ \ty{TT)}\verb|)|\\
+Looks up the type of the given name and returns the ones it finds in a list, in case the name is ambiguous.
+\end{itemize}
+
+Observe that in most of these functions, for inputs we use \ty{Raw}, the
+untyped core language terms, and results are in \ty{TT}, the typed core
+language terms.  This is because untyped core language terms are easier to
+write for the tactic users, and type-checking them in the elaborator is easy.
+
+Now let's define a function using elaborator reflection.
+Let's define a polymorphic identity function.
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{id} : (\bn{a} : \ty{Type}) -> \bn{a} -> \bn{a}
+\fn{id} = \kw{%runElab} (\kw{do} \fn{intro} `\{\{ty\}\}
+                  \fn{intro} `\{\{a\}\}
+                  \fn{fill} (\dt{Var} `\{\{a\}\})
+                  \fn{solve})
+\end{Verbatim}
+
+For anyone familiar with Coq, this will look very similar to a normal Coq
+proof. First we take the type as an argument, and then a value of that type,
+and we return the same value. Elaborator reflection proofs are a bit more
+unpolished compared to Coq proofs because of the core language terms,
+quasiquotation and special name syntax, but it is essentially very similar,
+hence the name ``tactics'' we use to refer to monadic \Elab\ actions.
+
+Let's prove something not as trivial this time. This time we want to prove that
+$(\forall n \in \mathbb{N})\ n = n + 0$, for our definition of addition. Since that requires more complex tactics like induction, we will import the Pruviloj library.\cite{davidphd}
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{nPlusZero} : (\bn{n} : \ty{Nat}) -> \bn{n} = \fn{plus} \bn{n} \dt{0}
+\fn{nPlusZero} = \kw{%runElab} (\kw{do} \fn{intro} `{{n}}
+                         \fn{induction} (\dt{Var} `{{n}})
+                         \fn{compute}
+                         \fn{reflexivity}
+                         \fn{compute}
+                         \fn{attack}
+                         \fn{intro} `{{n1}}
+                         \fn{intro} `{{indHyp}}
+                         \fn{rewriteWith} (\dt{Var} `{{indHyp}})
+                         \fn{reflexivity}
+                         \fn{solve})
+\end{Verbatim}
+
+The proof proceeds as such: we first take in the argument \bn{n}, and then do
+an induction on \bn{n}. Because of the way induction works in Pruviloj, we have
+to simplify the goal using \fn{compute}\footnote{Its Coq equivalent would be
+\path{simpl}.}.
+And for the base case the goal is just proving \dt{0} \dt{=} \dt{0}.
+For the inductive step, we have to restructure the goal with \fn{attack} and
+then reintroduce the input and then introduce the induction hypothesis. Then we
+rewrite the goal with the induction hypothesis and then the goal becomes
+trivial. Understanding this proof completely is not crucial for this thesis,
+but if you want to fully comprehend \fn{attack} and {solve}, you can read
+\cite{elabref}.
+
+
 
 % Previous versions of Idris had a tactic based prover\footnote{As of Idris
 % 1.1.1 it is still available, with the warning that it will be deprecated in the

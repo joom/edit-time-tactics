@@ -1,48 +1,54 @@
 \section{Introduction} \label{sec:introduction}
 
 The rising popularity of statically typed functional languages led to
-the concept of ``type-driven development'' (hereinafter referred to as TDD).
-Typed holes let us write a program top-down and leave the parts we do not know
-how to write incomplete. The parts we have already written dictate what the
-types of remaining parts should be, and those types guide us when we try to
-figure out how we should fill the incomplete parts.
-In other words, in TDD we can write our programs incrementally. This not only
-lets us type check our program at every step, it also gives us clever
-hints about the future steps, based on the types and the local context.
-Especially as dependent types gradually sneak in to mainstream languages, like
-they already have to Haskell\cite{eisenberg} and Scala\cite{scalaDep} now, we
-predict that TDD will only get more popular.
-
+the concept of ``type-driven development'' (hereinafter referred to as TDD),
+which is a style of development that revolves around the types of missing parts in
+programs. The expressions we have not written yet, or ones we do not know
+how to write, can be left as holes in our program, and the program still
+A hole is kind of expression, and since these languages are
+statically typed, those holes have types; the parts
+we have already written dictate what the types of the remaining parts should
+be. These types can guide us when we try to fill the holes to complete the program.
+In other words, TDD lets us write our programs incrementally and top-down. This
+not only lets us type-check our program at every step, it also gives us clever
+hints about the following steps, based on the types and the local contexts.
+% Especially as dependent types gradually sneak into mainstream languages, like
+% they already have to Haskell\cite{eisenberg} and Scala\cite{scalaDep} now, we
+% predict that TDD will only get more popular.
+This idea was originally born in the proof assistants world and then it was
+borrowed by more practical functional languages.
 Interactive editing based on types has been used in proof assistants for a long
 time; the LCF system\cite{lcf} and its successors HOL and
-Isabelle\cite{isabelle} allow users to prove theorems
-incrementally. Users type in commands that update the proof state by
-changing the goal, or by creating subgoals. These commands are called
-tactics and even though they also generate a proof term in the style
-of Curry-Howard isomorphism at the end, they only allow the user to change the
-proof term indirectly.
-Inspired by these systems, there were also proof assistants that let users
-change the proof term directly by incrementally building it
+Isabelle\cite{isabelle} have allowed users to prove theorems
+incrementally. Users type in commands called ``tactics'' that update the proof state by
+changing the goal, or by creating subgoals.
+Even though tactics generate a Curry-Howard style proof term at the end, these
+proof assistants focused on changing the proof term indirectly.
+Inspired by these systems, came new ones
+that provide an new interface and type theory that focus on
+changing the proof terms directly by incrementally building them
 up\footnote{Changing the proof term indirectly with tactics is also called
 backward reasoning, and incrementally building up the proof term is called
 forward reasoning.}. One of the earliest such proof assistants was the ALF proof
 editor\cite{ALF}, and the idea was developed further by Epigram\cite{epigram}
-and Agda\cite{agda}.  The recent popularity of TDD in more mainstream
-functional programming is built upon the legacy of these interactive proof
-assistants.
+and Agda\cite{agda}.
+The ideas that are brewed in these proof assistants continue to inspire more
+mainstream functional languages.
 
-On the practical programming side, the traditional programming
+On the general programming side, the traditional programming
 workflow that depends on saving a file and trying to compile (or run) with
 every edit has changed with the advancement of integrated development environments (IDEs),
 programs that have certain functionalities such as code completion, syntax
-checking, displaying compiler error messages on corresponding lines, displaying
-documentation etc. These features are convenient, but they are different from
-TDD. While IDEs can also use types to assist the user, they do not direct the
-entire development process around types per se. TDD is not a program, it is
-merely a style of programming in which the development process takes the form
-of a conversation between the type-checker/compiler and the user's editor/IDE.
-However, this requires certain changes to the compiler, such as being able to
-type-check incomplete expressions and definitions.\cite{tdd}
+checking, displaying compiler error messages on their corresponding lines,
+searching in documentation etc.
+These features are convenient, but they are different from TDD.
+While IDEs can also use types to assist the user, they do not direct the
+entire development process around types per se.
+And besides, TDD is not a program, it is merely a style of programming in which
+the development process takes the form of a conversation between the
+type-checker/compiler and the user's editor/IDE.  However, this requires
+certain changes to the compiler, such as being able to type-check incomplete
+expressions and definitions.\cite{tdd}
 
 The kind of change that is important for this work is the editor
 interaction mode (or the IDE mode, as it is called in Idris\cite{idris}) that
@@ -51,8 +57,8 @@ we should mention that there are two different parts of an editor interaction
 mode. The first is a plugin to the editor, often written in the script language
 of the editor, such as Emacs Lisp or VimL. The second part is a separate
 program that does the heavy lifting of the editing features that work with the
-language itself.  \path{ghc-mod} in Haskell and \path{agda-mode} in Agda would
-be perfect examples for the second part. We will call these parts the frontend
+language itself.  \texttt{ghc-mod} in Haskell and \texttt{agda-mode} in Agda would
+be perfect examples for the second part. We can call these parts the frontend
 and backend of the editor interaction mode, respectively.  When we talk about
 the language the editor interaction mode is implemented, we mean the language
 used in the backend, because the language used in the frontend depends on the
@@ -63,12 +69,21 @@ Proof General\cite{pg} and CoqIDE for Coq\cite{coq},
 the Emacs mode\cite{agdamode} for Agda,
 the Emacs mode\cite{idrismode} for Idris,
 jEdit\cite{isabellejedit} for Isabelle,
-and recently the editor mode of Lean\cite{lean}.
-Among these examples, Idris is the only language that prioritizes general
-purpose programming rather than theorem proving\cite{idrisfaq}, but that does
-not mean TDD is of less importance for Idris. On the contrary, this should
-be the first step of convincing programmers to adopt TDD, since
-editor interaction provides decent tools to help them write programs faster.
+and the editor mode of Lean\cite{lean}.\footnote{Haskell's typed holes in GHC
+is exciting, but it does not have seamless editor interaction yet, at least not
+in the style of Agda and Idris.}
+Among these languages, Idris has a special place since it is the only language
+that prioritizes general purpose programming. Among the mainstream languages
+that have mature IDEs, Idris still has an unusual standing since it also is a
+proof assistant.\cite{idrisfaq}
+The unique position of Idris provides motivation for editor features on par
+with mature IDEs for other languages, and also the TDD-style development
+workflow via editor actions.
+This work strives to bring the long-standing traditions of proof assistants and
+IDEs closer together, by introducing a feature called ``edit-time tactics''.
+The word ``edit-time'' is a wordplay on the terms ``compile time'' and ``run
+time'', and it means that we run the tactics when were are still in the editor,
+in order to use them to help us define new editor actions.
 
 Before we proceed to describe this work,
 it is imperative to understand what an editor action exactly is.
@@ -91,7 +106,7 @@ type declaration.
 \includegraphics[scale=0.6]{edit2}
 
 Now we have a definition for \fn{height} that takes one argument \bn{t1}, and
-returns \hole{height_rhs}. This is clearly incomplete; we want to change
+returns \hole{height\_rhs}. This is clearly incomplete; we want to change
 the return value based on what \bn{t1} is. So the next step would be to inspect
 what values \bn{t1} can take. We can put the cursor on \bn{t1} and then run the
 editor action ``Case split pattern variable''.
@@ -99,8 +114,8 @@ editor action ``Case split pattern variable''.
 \vspace{1em}
 \includegraphics[scale=0.6]{edit3}
 
-Now we have two holes that we have to complete, namely \hole{height_rhs1} and
-\hole{height_rhs2}. When the cursor is on one of the holes, we can run the
+Now we have two holes that we have to complete, namely \hole{height\_rhs1} and
+\hole{height\_rhs2}. When the cursor is on one of the holes, we can run the
 editor action ``Display type'' and see what type of expression should replace
 the hole, and what names are in the local context, i.e. are available to use
 when writing that expression.
@@ -109,8 +124,8 @@ when writing that expression.
 \includegraphics[scale=0.6]{edit4}
 
 Finishing this function from here is trivial, so we will not proceed further.
-However, this example shows how much editor actions can shape your
-overall programming experience.
+However, this example should show how much editor actions can shape your
+programming experience.
 
 Now that we are familiar with what an editor action is, we can describe what
 this project is about. The editor actions we reviewed above are features embedded
@@ -122,7 +137,7 @@ just to add a custom editor action. Maintaining a compiler fork and
 navigating through the compiler source code are usually not in the skill sets
 of most users.
 
-Therefore we want to provide users a way to write custom editor actions. Our
+Therefore we want to give users a way to write custom editor actions. Our
 solution for this is to make use of elaborator reflection\cite{elabref} in
 Idris, which is a metaprogramming machinery that allows users to automate the
 construction of proofs and programs, by reflecting the elaborator
@@ -163,7 +178,7 @@ This means Idris programs will be compiled more often than Agda or Coq in the lo
 since not much code is added to proofs after its completion, but practical programs tend to change in time. Therefore, minimizing compile time is more of a priority for Idris.
 Idris tactics generate proof terms in compile time, but the
 compilation can take a long time for complex tactics\footnote{Similar problems
-are observed in Coq. For example, theorems that use the famous \path{omega}
+are observed in Coq. For example, theorems that use the famous \texttt{omega}
 tactic that decides Presburger arithmetic take a long time to compile, and it
 usually generates a huge proof term.},
 not to mention that the implementation of elaborator
@@ -191,7 +206,7 @@ this still could be a last resort solution to repeated long compile times for
 tactics.
 
 To achieve the advantages listed above, we make the following specific contributions:
-\vspace{-1em}
+% \vspace{-1em}
 \begin{itemize}
 \item We extend the primitive \Elab\ monad with the necessary primitive monadic
 actions that make writing an editor action with elaborator reflection possible.
@@ -200,12 +215,12 @@ called \ty{Editorable} for serializing and deserializing Idris expressions.
 For the reflected type that represents the core language terms of Idris,
 implementations of this interface are primitives.
 \item We add an interval map in which keys are intervals of source code
-  positions (pair of line and column numbers) and values are local contexts at
-    those positions. This allows us to inspect what variables are available to
-    use even when we are not on a hole.
+positions (pair of line and column numbers) and values are local contexts at
+those positions. This allows us to inspect what local variables are available to
+use anywhere in the source code.
 \item The current proof search mechanism in Idris is not particularly advanced.
 We write an alternative proof search tactic called Hezarfen, a full-blown
-theorem prover for intuitionistic propositional logic, and then we show how
+    theorem prover for intuitionistic propositional logic, and then we show how
 to use this on holes when we are in the editor.
 % Details can be found in \autoref{ssec:hezarfen}.
 \item We define a case-split tactic that can be run from the editor, which can
@@ -213,11 +228,11 @@ replace the hard-coded case-split editor action.
 \end{itemize}
 
 In \autoref{sec:background}, we will go over the basics of the Idris
-programming language and its metaprogramming mechanics.
+programming language and its metaprogramming machinery.
 
-Now that we have an idea about the motivations for such a feature, we will
-discuss its design in \autoref{sec:design} and its implementation in
-\autoref{sec:implementation}.
+Now that we have an idea about the motivations for edit-time tactics,
+we will discuss their design in \autoref{sec:design} and their implementation
+in \autoref{sec:implementation}.
 
 
 % One way to do this would be to have compiler plugins, like
@@ -226,7 +241,6 @@ discuss its design in \autoref{sec:design} and its implementation in
 % and Coq\footnote{Users can write compiler Coq plugins in OCaml.}
 % However, the Idris compiler does not have a plugin system, and writing one for
 % this purpose would be an overkill.
-
 
 
 % Let's imagine a use case for such a feature.

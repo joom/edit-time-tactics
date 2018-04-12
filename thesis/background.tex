@@ -26,9 +26,9 @@ cases are enough to cover all possible paths of this function. If we were to
 define a \zip\ function for lists, we would need four cases: both empty, both
 non-empty, one empty and one non-empty, and one non-empty and one empty.
 However, our \zip\ function takes two arguments that are of the same length
-\path{n}.  Therefore, we cannot have a case with one empty and one non-empty,
+\bn{n}.  Therefore, we cannot have a case with one empty and one non-empty,
 because that contradicts with the fact that both vectors are of the same
-length. Notice that the \zip\ function returns a vector of length \path{n}.
+length. Notice that the \zip\ function returns a vector of length \bn{n}.
 In other words, the input vectors and the resulting vector are guaranteed to be
 of the same length.
 
@@ -96,9 +96,9 @@ implementations.
 \subsection{Elaborator Reflection}\label{ssec:elabref}
 
 Idris programs are elaborated from high-level Idris syntax trees into a core
-language called \path{TT}, and then type checked.\cite{idris}
+language called \texttt{TT}, and then type checked.\cite{idris}
 The implementation of the Idris elaboration in the compiler is written as a
-Haskell monad called \path{Elab}.
+Haskell monad called \texttt{Elab}.
 Recent work on elaborator reflection\cite{elabref} allowed Idris users to
 access this monad from Idris itself, by implementing a primitive monad \Elab\
 in Idris itself, that can only be used for metaprogramming in compile time.
@@ -185,8 +185,8 @@ The \ty{TTName} type is the type of names in the core language, its full definit
 As a quick summary:
 \begin{itemize}
 \item\dt{UN} represents the variable names without any namespace.
-\item\dt{NS} represents the variable names with a given namespace. For example, the name \path{Prelude.Bool.True} is represented as
-  \dt{NS} \path{(}\dt{UN} \dt{"True"}\path{)} \dt{["Bool",} \dt{"Prelude"]}.
+\item\dt{NS} represents the variable names with a given namespace. For example, the name \texttt{Prelude.Bool.True} is represented as
+  \texttt{\dt{NS} (\dt{UN} \dt{"True"}) \dt{["Bool", "Prelude"]}}.
 \item\dt{MN} represents machine generated names with a hint string and a fresh integer for that hint.
 \item\dt{SN} represents special names, which are used for metavariables, implementations etc. We will not deal with them in this thesis.
 \end{itemize}
@@ -197,7 +197,7 @@ that would give you the term \dt{UN} \dt{"x"}.
 Similarly, there is another syntax that checks whether a given name exists and
 lets you refer to an existing name without having to specify its full
 namespace: \texttt{\IdrisKeyword{\`{}\{}False\IdrisKeyword{\}}} would give you
-\dt{NS} \path{(}\dt{UN} \dt{"False"}\path{)} \dt{["Bool",} \dt{"Prelude"]}.
+\texttt{\dt{NS} (\dt{UN} \dt{"False"}) \dt{["Bool", "Prelude"]}}.
 
 \medskip
 
@@ -218,9 +218,9 @@ important ones and describe what they represent.
 Writing \TT\ and \ty{Raw} terms by hand can get tedious, hence there is a
 quasiquotation syntax that elaborates a given expression into its corresponding
 \TT\ or \ty{Raw} term.\cite{idrisQuotation}
-The syntax \verb|`(|\fn{e}\verb|)|, where \fn{e} is an Idris expression, gives
+The syntax \texttt{\`{}(\fn{e})}, where \fn{e} is an Idris expression, gives
 us the typed or untyped core language syntax tree for \fn{e}. For example,
-\verb|`(|\fn{not}\ \dt{True}\verb|)| gives us the following \TT\ term:
+\texttt{\`{}(\fn{not} \dt{True})} gives us the following \TT\ term:
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisData{App} (\IdrisData{P} \IdrisData{Ref}
        (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})
@@ -239,22 +239,21 @@ The \ty{Raw} term for the same expression is a bit more reasonable:
       (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"True"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})))
 \end{Verbatim}
 
-Obviously, we would not want to terms like these every time we want to return
-the syntax tree for a simple function application. At times like this,
-quasiquotation saves us.
-Quasiquotation can be used for constructing both expressions and patterns.
+Obviously, we would not want to write terms like these manually every time we want to return
+the syntax tree for a simple function application.
+At times like this, quasiquotation saves us, for both expressions and patterns.
 
-We can also give the type of the expression we want to elaborate, which is
+We can also give the type of the expression we want to elaborate, which becomes
 necessary when Idris cannot infer the type. For \dt{True}, it is trivial to
 infer that type is \ty{Bool}, but for \dt{5}, the type can be \ty{Int},
 \ty{Integer}, \ty{Nat}, or anything that satisfies the \ty{Num} interface.
 Therefore, we have to specify the type when we are quasiquoting. The
-syntax for that is \verb|`(|\fn{e}\ \verb|:|\ \ty{t}\verb|)|,
-e.g. \verb|`(|\dt{5}\ \verb|:|\ \ty{Int}\verb|)|.
+syntax for that is \texttt{\`{}(\fn{e} : \ty{t})},
+e.g. \texttt{\`{}(\dt{5} : \ty{Nat})}.
 
 We also can do antiquotation. If we have some variable expression \fn{x} that has the
 type \TT\ or \ty{Raw}, then we can construct a syntax tree using it within the
-quasiquotation, with the syntax \verb|`(|\fn{not}\ ~\fn{x}\verb|)|.
+quasiquotation, with the syntax \texttt{\`{}(\fn{not} ~\fn{x})}.
 Note that antiquotation works for expressions, not just variables. The type of
 expression or variable we have in the antiquotation has to match the type of
 the quasiquotation. In other words, only \TT\ expressions can be used in an
@@ -317,9 +316,9 @@ Let's define a polymorphic identity function.
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{id} : (\bn{a} : \ty{Type}) -> \bn{a} -> \bn{a}
-\fn{id} = \kw{%runElab} (\kw{do} \fn{intro} `\{\{ty\}\}
-                  \fn{intro} `\{\{a\}\}
-                  \fn{fill} (\dt{Var} `\{\{a\}\})
+\fn{id} = \kw{%runElab} (\kw{do} \fn{intro} \kw{`\{\{}ty\kw{\}\}}
+                  \fn{intro} \kw{`\{\{}a\kw{\}\}}
+                  \fn{fill} (\dt{Var} \kw{`\{\{}a\kw{\}\}})
                   \fn{solve})
 \end{Verbatim}
 
@@ -335,15 +334,15 @@ $(\forall n \in \mathbb{N})\ n = n + 0$, for our definition of addition. Since t
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{nPlusZero} : (\bn{n} : \ty{Nat}) -> \bn{n} = \fn{plus} \bn{n} \dt{0}
-\fn{nPlusZero} = \kw{%runElab} (\kw{do} \fn{intro} `{{n}}
-                         \fn{induction} (\dt{Var} `{{n}})
+\fn{nPlusZero} = \kw{%runElab} (\kw{do} \fn{intro} \kw{`\{\{}n\kw{\}\}}
+                         \fn{induction} (\dt{Var} \kw{`\{\{}n\kw{\}\}})
                          \fn{compute}
                          \fn{reflexivity}
                          \fn{compute}
                          \fn{attack}
-                         \fn{intro} `{{n1}}
-                         \fn{intro} `{{indHyp}}
-                         \fn{rewriteWith} (\dt{Var} `{{indHyp}})
+                         \fn{intro} \kw{`\{\{}n1\kw{\}\}}
+                         \fn{intro} \kw{`\{\{}indHyp\kw{\}\}}
+                         \fn{rewriteWith} (\dt{Var} \kw{`\{\{}indHyp\kw{\}\}})
                          \fn{reflexivity}
                          \fn{solve})
 \end{Verbatim}
@@ -351,7 +350,7 @@ $(\forall n \in \mathbb{N})\ n = n + 0$, for our definition of addition. Since t
 The proof proceeds as such: we first take in the argument \bn{n}, and then do
 an induction on \bn{n}. Because of the way induction works in Pruviloj, we have
 to simplify the goal using \fn{compute}\footnote{Its Coq equivalent would be
-\path{simpl}.}.
+\texttt{simpl}.}.
 And for the base case the goal is just proving \dt{0} \dt{=} \dt{0}.
 For the inductive step, we have to restructure the goal with \fn{attack} and
 then reintroduce the input and then introduce the induction hypothesis. Then we

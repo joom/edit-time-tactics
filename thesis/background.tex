@@ -78,7 +78,7 @@ Unlike other dependently typed languages like Agda and Coq, Idris is not total
 by default. This is because Idris prioritizes general purpose programming
 rather than theorem proving. However, users can opt in to enable totality
 checking either for the entire module or for specific functions.
-We did the latter for \path{evenOrOdd} by using the keyword \path{total}.
+We did the latter for \fn{evenOrOdd} by using the keyword \kw{total}.
 Similarly, we could require the \zip\ function from the previous example to be
 total if we wanted to.\footnote{Clearly Idris cannot decide whether a given
 function is total, since that would solve the halting problem. Instead it
@@ -191,11 +191,12 @@ As a quick summary:
 \item\dt{SN} represents special names, which are used for metavariables, implementations etc. We will not deal with them in this thesis.
 \end{itemize}
 
-As a quick way to refer to names in Idris, there is a syntactic sugar \verb|`{{x}}|
+As a quick way to refer to Idris names, there is a syntax
+\texttt{\IdrisKeyword{\`{}\{\{}x\IdrisKeyword{\}\}}}
 that would give you the term \dt{UN} \dt{"x"}.
-Similarly, there is another syntactic sugar that lets you refer to an existing
-name without having to specify its full namespace, and it also checks whether
-this name exists: \verb|`{False}| would give you
+Similarly, there is another syntax that checks whether a given name exists and
+lets you refer to an existing name without having to specify its full
+namespace: \texttt{\IdrisKeyword{\`{}\{}False\IdrisKeyword{\}}} would give you
 \dt{NS} \path{(}\dt{UN} \dt{"False"}\path{)} \dt{["Bool",} \dt{"Prelude"]}.
 
 \medskip
@@ -285,12 +286,12 @@ declarations and definitions to the context.
 \Elab\ monad holds a proof state inside, which has a goal type, a proof term that is incrementally built up, a hole queue, a collection of open unification problems, and a supply of fresh names.\cite{elabref}
 Tactics can change the proof state. Here are some examples that do that:
 \begin{itemize}
-\item\fn{claim}\ \verb|: (|\bn{n}\ \verb|:|\ \ty{TTName}\verb|) -> (|\bn{t} \verb|:| \ty{Raw}\verb|) -> |\Elab\ \ty{()}\\
-Creates a new hole named \bn{n} with the type \bn{t}.
-\item\fn{fill}\ \verb|: (|\bn{e} \verb|:| \ty{Raw}\verb|) -> |\Elab\ \ty{()}\\
-  Create a guess to fill the current hole with the term \bn{e}. Fail if the types do not unify.
-\item\fn{solve}\ \verb|:|\ \Elab\ \ty{()}\\
-  Try to finalize the guess in the hole. Fail if there is no guess.
+\item\texttt{\IdrisFunction{claim} : \IdrisType{TTName} -> \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
+Creates a new hole with a given name and a type.
+\item\texttt{\IdrisFunction{fill} : \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
+Create a guess to fill the current hole with a term. Fail if the types do not unify.
+\item\texttt{\IdrisFunction{solve} : \IdrisType{Elab} \IdrisType{()}}\\
+Try to finalize the guess in the hole. Fail if there is no guess.
 \end{itemize}
 
 There are a lot more tactics, which we will not list here. A more thorough list
@@ -298,11 +299,11 @@ can be found in \cite{elabref} and Idris documentation.
 
 We also have access to \Elab\ actions that do not change the proof state, but give us access to the context or other compiler primitives:
 \begin{itemize}
-  \item\fn{check}\ \verb|: (|\bn{env}\ \verb|:|\ \ty{List}\ \ty{(TTName,}\ \ty{Binder}\ \ty{TT)}\verb|) -> (|\bn{tm} \verb| : | \ty{Raw}\verb|) -> |\Elab\ \ty{(TT, TT)}\\
-Type-checks a term under a given environment and gives the typed core term version of \bn{tm} and the type of \bn{tm} as a typed core term.
-\item\fn{normalise}\ \verb|: (|\bn{env}\ \verb|:|\ \ty{List}\ \ty{(TTName,}\ \ty{Binder}\ \ty{TT)}\verb|) -> (|\bn{term} \verb|:| \ty{TT}\verb|) -> |\Elab\ \ty{TT}\\
+\item\texttt{\IdrisFunction{check} : \IdrisType{List} \IdrisType{(}\IdrisType{TTName}\IdrisType{,} \IdrisType{Binder} \IdrisType{TT}\IdrisType{)} -> \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{(}\IdrisType{TT}\IdrisType{,} \IdrisType{TT}\IdrisType{)}}\\
+Type-checks a term under a given environment and gives the typed core term version of the \ty{Raw} term and the type of it as a typed core term.
+\item\texttt{\IdrisFunction{normalise} : \IdrisType{List} \IdrisType{(}\IdrisType{TTName}\IdrisType{,} \IdrisType{Binder} \IdrisType{TT}\IdrisType{)} -> \IdrisType{TT} -> \IdrisType{Elab} \IdrisType{TT}}\\
 Normalizes\footnote{\fn{normalise} is spelled the British way, since most Idris development happens in the UK.} a typed term under a given environment.
-\item\fn{lookupTy} \verb|:| \ty{TTName} \verb|->| \Elab\ \verb|(|\ty{List}\ \ty{(TTName,}\ \ty{NameType,}\ \ty{TT)}\verb|)|\\
+\item\texttt{\IdrisFunction{lookupTy} : \IdrisType{TTName} -> \IdrisType{Elab} (\IdrisType{List} \IdrisType{(}\IdrisType{TTName}\IdrisType{,} \IdrisType{NameType}\IdrisType{,} \IdrisType{TT}\IdrisType{)})}\\
 Looks up the type of the given name and returns the ones it finds in a list, in case the name is ambiguous.
 \end{itemize}
 
@@ -356,9 +357,22 @@ For the inductive step, we have to restructure the goal with \fn{attack} and
 then reintroduce the input and then introduce the induction hypothesis. Then we
 rewrite the goal with the induction hypothesis and then the goal becomes
 trivial. Understanding this proof completely is not crucial for this thesis,
-but if you want to fully comprehend \fn{attack} and {solve}, you can read
+but if you want to fully comprehend \fn{attack} and {solve}, you can refer to
 \cite{elabref}.
 
+Finally let's do an example for a declaration with elaborator reflection:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\IdrisKeyword{%runElab} (\IdrisKeyword{do} \IdrisFunction{\IdrisFunction{declareType}} (\IdrisData{\IdrisData{Declare}} \IdrisKeyword{`\{\{}n\IdrisKeyword{\}\}} \IdrisData{\IdrisData{[]}} \IdrisKeyword{`(\IdrisType{\IdrisType{Nat\IdrisKeyword{)}}}})
+             \IdrisFunction{\IdrisFunction{defineFunction}} (\IdrisData{\IdrisData{DefineFun}} \IdrisKeyword{`\{\{}n\IdrisKeyword{\}\}}
+                               \IdrisData{\IdrisData{[\IdrisData{\IdrisData{MkFunClause}}}} (\IdrisData{\IdrisData{Var}} \IdrisKeyword{`\{\{}n\IdrisKeyword{\}\}}) \IdrisKeyword{`(\IdrisData{\IdrisData{Z\IdrisKeyword{)\IdrisData{\IdrisData{]}}}}}}))
+\end{Verbatim}
+
+The example above first declares that \fn{n} will have the type \ty{Nat}.
+Then it defines it as \texttt{\IdrisFunction{n} = \IdrisData{Z}}.
+
+Now that we have seen different use cases for elaborator reflection, we can move on to the
+design of the edit-time tactics feature.
 
 
 % Previous versions of Idris had a tactic based prover\footnote{As of Idris

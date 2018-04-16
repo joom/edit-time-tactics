@@ -11,7 +11,8 @@
 \usepackage[T1]{tipa}
 \usepackage{graphicx}
 \graphicspath{ {images/} }
-% \usepackage{tgpagella}
+\usepackage{tgpagella}
+\usepackage{ragged2e}
 \usepackage[hang, flushmargin]{footmisc}
 \usepackage[backref=page,hyperfootnotes=false]{hyperref}
 \usepackage{footnotebackref}
@@ -55,6 +56,7 @@
 \newcommand{\Red}[1]{{\color{red} #1}}
 \newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}
 \newcommand{\FYI}[1]{{\color{green}{[FYI: #1]}}}
+\sloppy
 
 
 % \allowdisplaybreaks
@@ -86,19 +88,22 @@
   elaborator reflection paved the way for new applications of metaprogramming
   by showing that it can be a substitute for tactic-based proof languages.
   The goal of this work is to use elaborator reflection to write editor
-  interaction actions of Idris.
+  interaction actions in Idris.
+
   Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case splitting, and lemma extraction.
   Implementations of all of these Idris editor actions are hard-coded in the
   compiler and they are written in Haskell. This work will allow us to rewrite
   them in Idris as metaprograms, and to move them into an Idris library instead
   of having them embedded into the compiler.
+
   Furthermore, we can write our own tactics through elaborator
   reflection, and run them from the editor, i.e. in edit-time.
   This would extend the abilities of the editor interaction mode from the
   current built-in features to anything that can be done with tactics.
   In this work, we present the design and implementation of this feature in the
   Idris compiler.
+
   We also implement an intuitionistic theorem prover tactic that is meant to be an
   better alternative to the built-in proof search editor action, and a case
   splitting tactic that exemplifies how we can move some of the hard-coded
@@ -164,7 +169,7 @@ but I made it through with their help and friendship. Thank you.
 
 \include{introduction}
 \include{background}
-% \include{design}
+\include{design}
 % \include{implementation}
 % \include{applications}
 % \include{conclusion}

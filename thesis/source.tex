@@ -42,6 +42,8 @@
 \newcommand{\Elab}{\ty{Elab}}
 \newcommand{\String}{\ty{String}}
 \newcommand{\TT}{\ty{TT}}
+\newcommand{\Raw}{\ty{Raw}}
+\newcommand{\Editorable}{\ty{Editorable}}
 \newcommand{\TyDecl}{\ty{TyDecl}}
 \newcommand{\FunDefn}{\ty{FunDefn}}
 \newcommand{\FunClause}{\ty{FunClause}}
@@ -111,8 +113,10 @@
 \end{abstract}
 
 \begin{dedication}
-  \epigraph{``Soon enough, [mathematicians] are going to find themselves doing mathematics at the computer, with the aid of computer proof assistants. Soon, they won’t consider a theorem proven until a computer has verified it.''}{\textit{Vladimir Voevodsky}\cite{voevodskyQuote}}
-  % https://blogs.scientificamerican.com/guest-blog/voevodskye28099s-mathematical-revolution/
+  \epigraph{``What do compilers do? They manipulate programs! Making it easy
+  for users to manipulate their own programs, and also easy to interlace their
+  manipulations with the compiler’s manipulations, creates a powerful new
+  tool.''}{\textit{Tim Sheard and Simon Peyton Jones}\cite{th}}
 \end{dedication}
 
 \begin{acknowledgements}
@@ -121,8 +125,8 @@ Even though I picked a topic that he was not particularly interested in, he
 gladly played along and gave very helpful advice whenever I got
 stuck. Since this project also had a user interfacing aspect, his insights as a
 long-time proof assistant user shaped my choices.
-He had more impact on my research taste than anyone, and there is no doubt I
-will miss his astute advice when I leave Wesleyan.
+He has had more impact on my research taste than anyone, and there is no doubt
+I will miss his astute advice when I leave Wesleyan.
 
 I am incredibly fortunate to have met David Christiansen last summer and talked
 to him about his work on metaprogramming for dependent types.
@@ -130,8 +134,7 @@ He laid the foundation that makes this project possible in his
 dissertation\cite{davidphd}, and pitched me the idea of using elaborator
 reflection for interactive editing.
 I could not have finished this work without him putting up with my incessant
-stream of questions.  (My words, not his. He would have strongly disagreed
-with my word choices.)
+stream of questions. (My words, not his.)
 
 I would like to express my gratitude to James Lipton and Edward Morehouse for
 reading and evaluating my thesis. I would also like to thank Cyrus Omar and
@@ -141,19 +144,18 @@ context\cite{hazelnut}, I cannot think of a better way to describe this
 project.
 
 I want to thank Joseph Cutler and Mitchell Riley for the programming languages
-discussions we had over the entire year; I am grateful for our little PL
-community.
+discussions we had over the year; I am grateful for our little PL community.
 
-Finally, I am thankful to Yulia, Mehmet, Recep, Kivanc, Damlasu, Isin Ekin and
+Finally, I am thankful to Yulia, Mehmet, Recep, Kivanc, Isin Ekin and
 my family for their emotional support. This has not been an easy year for me,
 but I made it through with their help and friendship. Thank you.
 \end{acknowledgements}
 
 \frontmatter
 \maketitle
-% \makededication
-% \makeack
 \makeabstract
+\makededication
+\makeack
 
 \tableofcontents
 
@@ -170,7 +172,7 @@ but I made it through with their help and friendship. Thank you.
 \include{introduction}
 \include{background}
 \include{design}
-% \include{implementation}
+\include{implementation}
 % \include{applications}
 % \include{conclusion}
 \bibliography{paper}

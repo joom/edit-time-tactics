@@ -100,10 +100,11 @@ language called \texttt{TT}, and then type checked.\cite{idris}
 The implementation of the Idris elaboration in the compiler is written as a
 Haskell monad called \texttt{Elab}.
 Recent work on elaborator reflection\cite{elabref} allowed Idris users to
-access this monad from Idris itself, by implementing a primitive monad \Elab\
-in Idris itself, that can only be used for metaprogramming in compile time.
+access this monad from Idris itself, by implementing a primitive monad
+\Elab\ in Idris itself, that can only be used for metaprogramming in compile
+time.
 
-\subsubsection{Reflected core language types}
+\subsubsection{Reflected core language types}\label{sssec:reflectedTypes}
 
 Since this monad works with core language terms and definitions, the types in
 the compiler representing the syntax trees for the core language are reflected
@@ -208,9 +209,9 @@ important ones and describe what they represent.
 
 \begin{itemize}
 \item\ty{TyDecl} represents type declarations.
+\item\ty{DataDefn} represents data type definitions.
 \item\ty{FunDefn} represents function definitions.
 \item\ty{FunClause} represents a single clause in a function definition.
-\item\ty{DataDefn} represents data type definitions.
 \end{itemize}
 
 \subsubsection{Quotations}
@@ -264,7 +265,7 @@ antiquotation in a \TT\ quotation, and mutatis mutandis for \ty{Raw}.
 The elaborator reflection\cite{elabref} feature that has been added to the
 Idris compiler recently provides a tool for metaprogramming with a monad called
 \Elab.  This monad is implemented as a primitive and it can only be run during
-compile time.
+compile time, or in the interactive proof shell.
 
 Elaborator reflection adds a new declaration
 \texttt{\IdrisKeyword{\%runElab}}\ \fn{e} to Idris,

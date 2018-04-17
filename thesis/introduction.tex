@@ -5,6 +5,7 @@ the concept of ``type-driven development'' (hereinafter referred to as TDD),
 which is a style of development that revolves around the types of missing parts in
 programs. The expressions we have not written yet, or ones we do not know
 how to write, can be left as holes in our program, and the program still
+compiles, with a warning that there are incomplete parts.
 A hole is kind of expression, and since these languages are
 statically typed, those holes have types; the parts
 we have already written dictate what the types of the remaining parts should
@@ -15,7 +16,7 @@ hints about the following steps, based on the types and the local contexts.
 % Especially as dependent types gradually sneak into mainstream languages, like
 % they already have to Haskell\cite{eisenberg} and Scala\cite{scalaDep} now, we
 % predict that TDD will only get more popular.
-This idea was originally born in the proof assistants world and then it was
+This idea was originally born in the world of proof assistants and then it was
 borrowed by more practical functional languages.
 Interactive editing based on types has been used in proof assistants for a long
 time; the LCF system\cite{lcf} and its successors HOL and
@@ -23,9 +24,9 @@ Isabelle\cite{isabelle} have allowed users to prove theorems
 incrementally. Users type in commands called ``tactics'' that update the proof state by
 changing the goal, or by creating subgoals.
 Even though tactics generate a Curry-Howard style proof term at the end, these
-proof assistants focused on changing the proof term indirectly.
-Inspired by these systems, came new ones
-that provide an new interface and type theory that focus on
+proof assistants have focused on changing the proof term indirectly.
+Inspired by these systems, others arose which
+provide a new interface and type theory that focuses on
 changing the proof terms directly by incrementally building them
 up\footnote{Changing the proof term indirectly with tactics is also called
 backward reasoning, and incrementally building up the proof term is called
@@ -35,16 +36,15 @@ and Agda\cite{agda}.
 The ideas that are brewed in these proof assistants continue to inspire more
 mainstream functional languages.
 
-On the general programming side, the traditional programming
-workflow that depends on saving a file and trying to compile (or run) with
-every edit has changed with the advancement of integrated development environments (IDEs),
-programs that have certain functionalities such as code completion, syntax
-checking, displaying compiler error messages on their corresponding lines,
-searching in documentation etc.
+The traditional programming depended on saving a file and trying to compile (or
+run) with every edit. This has changed with the advancement of integrated
+development environments (IDEs), programs that have certain functionalities
+such as code completion, syntax checking, displaying compiler error messages on
+their corresponding lines, searching in documentation etc.
 These features are convenient, but they are different from TDD.
 While IDEs can also use types to assist the user, they do not direct the
 entire development process around types per se.
-And besides, TDD is not a program, it is merely a style of programming in which
+TDD is not a program, it is merely a style of programming in which
 the development process takes the form of a conversation between the
 type-checker/compiler and the user's editor/IDE.  However, this requires
 certain changes to the compiler, such as being able to type-check incomplete
@@ -70,14 +70,14 @@ the Emacs mode\cite{agdamode} for Agda,
 the Emacs mode\cite{idrismode} for Idris,
 jEdit\cite{isabellejedit} for Isabelle,
 and the editor mode of Lean\cite{lean}.\footnote{Haskell's typed holes in GHC
-is exciting, but it does not have seamless editor interaction yet, at least not
-in the style of Agda and Idris.}
-Among these languages, Idris has a special place since it is the only language
-that prioritizes general purpose programming. Among the mainstream languages
+are exciting, but they do not enjoy the seamless editor interaction yet that
+Agda and Idris do.}
+Idris has a special place among these proving languages since it tries to
+prioritize general purpose programming. Among the mainstream languages
 that have mature IDEs, Idris still has an unusual standing since it also is a
 proof assistant.\cite{idrisfaq}
-The unique position of Idris provides motivation for editor features on par
-with mature IDEs for other languages, and also the TDD-style development
+This unique position of Idris provides motivation for editor features on par
+with mature IDEs for other languages, as well as the TDD-style development
 workflow via editor actions.
 This work strives to bring the long-standing traditions of proof assistants and
 IDEs closer together, by introducing a feature called ``edit-time tactics''.
@@ -86,7 +86,7 @@ time'', and it means that we run the tactics when were are still in the editor,
 in order to use them to help us define new editor actions.
 
 Before we proceed to describe this work,
-it is imperative to understand what an editor action exactly is.
+it is imperative to understand what exactly an editor action is.
 Editor actions are commands in the editor that make a meaningful
 change in your code, or one that gives you some information about your
 code. For example, if you are trying to define a function to compute the height
@@ -242,22 +242,6 @@ in \autoref{sec:implementation}.
 % However, the Idris compiler does not have a plugin system, and writing one for
 % this purpose would be an overkill.
 
-
-% Let's imagine a use case for such a feature.
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \fn{swap3} : \ty{(}\IdrisImplicit{a}\ty{,} \IdrisImplicit{b}\ty{,} \IdrisImplicit{c}\IdrisType{)} -> \ty{(}\IdrisImplicit{c}\ty{,} \IdrisImplicit{b}\IdrisType{,} \IdrisImplicit{a}\ty{)}
-% \fn{swap3} \bn{x} = \IdrisMetavar{?\IdrisMetavar{p}}
-% \end{Verbatim}
-% We have a 3-tuple\footnote{n-tuples are nested right-associative pairs in
-% Idris.} as an argument, and we need to access every element in that tuple.
-% If we case split on the argument \path{x}, that pattern will turn into
-% a pair. However we need the full \path{(a, b, c)} pattern in this
-% case. We can case split again on the second component of the pair and get the
-% 3-tuple pattern.
-% For one function this repetition might not seem like a big deal, but if we need
-% to do this numerously, we might want a way to automate that with a
-% tactic.\footnote{Similar to the \path{unproduct} tactic in the Pruviloj library
-% for Idris, but for case splitting.}
 
 % Case splitting on a nested tuple might seem like a mindless task. What if we
 % had a data type that required us to be clever when we are case splitting,

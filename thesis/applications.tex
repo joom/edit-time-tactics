@@ -6,32 +6,47 @@ In this section, we describe the tactic Hezarfen\footnote{ The name is
   pronounced {[\textipa{hezaRf\ae n}]}, like ``has are fan'', and it means
     polymath in Turkish.  Tactic source code is available at
     \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
-propositional logic theorems. This is based on LJT\cite{ljt} and its Haskell
-implementation called Djinn\cite{djinn}, which generates Haskell expressions
-for a given type. However, Djinn is a standalone program that takes commands
+propositional logic theorems.
+
+This tactic will be based on LJT\cite{ljt} and its Haskell
+implementation Djinn\cite{djinn}, which generates Haskell expressions
+for a given type.
+
+However, Djinn is a standalone program that takes commands
 interactively, and when it generates an expression it prints it on the screen.
-We can improve this by having our
-theorem prover generate Idris expressions of the type \path{Raw}, one of the
-types used for the inner representation of the core language of Idris.  We can
-then write a tactic that takes the goal type, which will of the \path{Raw}, and
-tries to fill the hole with the generated term.  Let's prove a theorem using
-this tactic:
+Instead we want to design Hezarfen as a library that provides an \Elab\ action
+that can be used as a tactic in proofs, and also as a custom editor action that
+helps us when the built-in proof search mechanism does not suffice.
 
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-\IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfenExpr}
-\end{Verbatim}
 
-Through the elaborator reflection, that will turn into this\footnote{
-  The definition is not changed at all. If it were, it could simply be written
-  as
+% We can improve this by having our
+% theorem prover generate Idris expressions of the type \Raw, one of the
+% types used for the inner representation of the core language of Idris.  We can
+% then write a tactic that takes the goal type, which will of the \Raw, and
+% tries to fill the hole with the generated term.  Let's prove a theorem using
+% this tactic:
 
-\ttfamily{\fn{noContradiction} \dt{(}\bn{pf}\dt{,} \bn{contra}\dt{)} = \bn{contra} \bn{pf}} } when we compile the file:
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-\IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
-     \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in} \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in} \IdrisFunction{void} (\IdrisBound{j20} \IdrisBound{i20})
-\end{Verbatim}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
+% \IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfenExpr}
+% \end{Verbatim}
+
+% Through the elaborator reflection, that will turn into this\footnote{
+%   The definition is not changed at all. If it were, it could simply be written
+%   as
+
+% \texttt{\fn{noContradiction} \dt{(}\bn{pf}\dt{,} \bn{contra}\dt{)} = \bn{contra} \bn{pf}} } when we compile the file:
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
+% \IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
+%      \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in} \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in} \IdrisFunction{void} (\IdrisBound{j20} \IdrisBound{i20})
+% \end{Verbatim}
+
+
+
+
+
+
 
 
 \TODO{Explain how the tactic works, especially the nested implication rule which is a bit confusing.}
@@ -40,7 +55,7 @@ Through the elaborator reflection, that will turn into this\footnote{
 % and possibly one or two more, to show what they look like in general
 
 
-\subsection{Red-Black Trees}\label{ssec:rbt}
+% \subsection{Red-Black Trees}\label{ssec:rbt}
 
 % let's translate the same problem to Idris.
 
@@ -50,105 +65,105 @@ Through the elaborator reflection, that will turn into this\footnote{
 % \path{AlmostWellRedTree}. We also have a key and value that should be stored in
 % the root. Our task is to form a well-formed red-black tree with these.
 
-\subsection{Nonlinear Patterns}
+% \subsection{Nonlinear Patterns}
 
-In Idris, there is no way to include the equality of two variables as a condition to match the pattern in the first place.
-In Haskell, you can add a guard after the pattern that checks if those two
-given variables are equal, assuming that their type has an \path{Eq} instance.
-In OCaml, you can do the same with the \path{when} keyword.
-However, these are not ideal. Prolog users will wonder whether we can just name
-those variables the same thing, in order to check if they are equal. The answer
-is no, yet in Idris, if we have an equality proof about two things, we can use
-the same name for both since they are already the same.\footnote{In Agda the first one will have a normal name, but the other one will have the same name prepended with a dot. This is called a ``dot pattern''.} That means we would
-first have to generate an equality proof for two things, which is something we
-can do with views in Idris.
+% In Idris, there is no way to include the equality of two variables as a condition to match the pattern in the first place.
+% In Haskell, you can add a guard after the pattern that checks if those two
+% given variables are equal, assuming that their type has an \path{Eq} instance.
+% In OCaml, you can do the same with the \path{when} keyword.
+% However, these are not ideal. Prolog users will wonder whether we can just name
+% those variables the same thing, in order to check if they are equal. The answer
+% is no, yet in Idris, if we have an equality proof about two things, we can use
+% the same name for both since they are already the same.\footnote{In Agda the first one will have a normal name, but the other one will have the same name prepended with a dot. This is called a ``dot pattern''.} That means we would
+% first have to generate an equality proof for two things, which is something we
+% can do with views in Idris.
 
-Using nonlinear patterns, this is how we would write a list membership check
-function:
+% Using nonlinear patterns, this is how we would write a list membership check
+% function:
 
-\begin{figure}[ht]
-\caption{Code with nonlinear patterns, that we are trying to simulate}
-\label{code:nonlinear}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{elem} : \IdrisType{Eq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
-\IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
-\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{True}
-\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{False}
-\end{Verbatim}
-\end{figure}
+% \begin{figure}[ht]
+% \caption{Code with nonlinear patterns, that we are trying to simulate}
+% \label{code:nonlinear}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{elem} : \IdrisType{Eq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
+% \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
+% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{True}
+% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{False}
+% \end{Verbatim}
+% \end{figure}
 
-As we said before, this is not valid Idris. However, this would work:
+% As we said before, this is not valid Idris. However, this would work:
 
-\begin{figure}[ht]
-\caption{The code with view, that simulates nonlinear patterns}
-\label{code:nonlinearWith}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{elem} : \IdrisType{DecEq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
-\IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
-\IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) \IdrisKeyword{with} (\IdrisFunction{decEq} \IdrisBound{x} \IdrisBound{y})
-  \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{Yes} \IdrisBound{Refl} = \IdrisData{True}
-  \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{No} \IdrisBound{contra} = \IdrisData{False}
-\end{Verbatim}
-\end{figure}
+% \begin{figure}[ht]
+% \caption{The code with view, that simulates nonlinear patterns}
+% \label{code:nonlinearWith}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{elem} : \IdrisType{DecEq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
+% \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
+% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) \IdrisKeyword{with} (\IdrisFunction{decEq} \IdrisBound{x} \IdrisBound{y})
+%   \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{Yes} \IdrisBound{Refl} = \IdrisData{True}
+%   \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{No} \IdrisBound{contra} = \IdrisData{False}
+% \end{Verbatim}
+% \end{figure}
 
-Even though this is a workaround and not really nonlinear patterns, we can
-write an \Elab\ editor action that runs on a nonlinear pattern, such as
-\autoref{code:nonlinear} and converts that into a function that uses Idris
-views, such as \autoref{code:nonlinearWith}.
+% Even though this is a workaround and not really nonlinear patterns, we can
+% write an \Elab\ editor action that runs on a nonlinear pattern, such as
+% \autoref{code:nonlinear} and converts that into a function that uses Idris
+% views, such as \autoref{code:nonlinearWith}.
 
-This can be generalized to things that are not like Prolog-style patterns.
-Brady describes a view that matches on the last element of
-a list, as presented in \autoref{code:listlast}.
+% This can be generalized to things that are not like Prolog-style patterns.
+% Brady describes a view that matches on the last element of
+% a list, as presented in \autoref{code:listlast}.
 
-\begin{figure}[ht]
-\caption{Brady's view to match the last element of a list.\cite{tdd}}
-\label{code:listlast}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisKeyword{data} \IdrisType{ListLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Type} \IdrisKeyword{where}
-  \IdrisData{Empty} : \IdrisType{ListLast} \IdrisData{[]}
-  \IdrisData{NonEmpty} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> (\IdrisBound{x} : \IdrisImplicit{a}) -> \IdrisType{ListLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]})
+% \begin{figure}[ht]
+% \caption{Brady's view to match the last element of a list.\cite{tdd}}
+% \label{code:listlast}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisKeyword{data} \IdrisType{ListLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Type} \IdrisKeyword{where}
+%   \IdrisData{Empty} : \IdrisType{ListLast} \IdrisData{[]}
+%   \IdrisData{NonEmpty} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> (\IdrisBound{x} : \IdrisImplicit{a}) -> \IdrisType{ListLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]})
 
-\IdrisFunction{listLast} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> \IdrisType{ListLast} \IdrisBound{xs}
-\IdrisFunction{listLast} \IdrisData{[]} = \IdrisData{Empty}
-\IdrisFunction{listLast} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) = \IdrisKeyword{case} \IdrisFunction{listLast} \IdrisBound{xs} \IdrisKeyword{of}
-                       \IdrisData{Empty} => \IdrisData{NonEmpty} \IdrisData{[]} \IdrisBound{x}
-                       \IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{y} => \IdrisData{NonEmpty} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) \IdrisBound{y}
-\end{Verbatim}
-\end{figure}
+% \IdrisFunction{listLast} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> \IdrisType{ListLast} \IdrisBound{xs}
+% \IdrisFunction{listLast} \IdrisData{[]} = \IdrisData{Empty}
+% \IdrisFunction{listLast} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) = \IdrisKeyword{case} \IdrisFunction{listLast} \IdrisBound{xs} \IdrisKeyword{of}
+%                        \IdrisData{Empty} => \IdrisData{NonEmpty} \IdrisData{[]} \IdrisBound{x}
+%                        \IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{y} => \IdrisData{NonEmpty} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) \IdrisBound{y}
+% \end{Verbatim}
+% \end{figure}
 
-Now, suppose we want to write a function to match the last element of a list.
-If we developed such an \Elab\ editor action, we could write the code in
-\autoref{code:safeLast1} and get the result in \autoref{code:safeLast2}.
+% Now, suppose we want to write a function to match the last element of a list.
+% If we developed such an \Elab\ editor action, we could write the code in
+% \autoref{code:safeLast1} and get the result in \autoref{code:safeLast2}.
 
-\begin{figure}[ht]
-\caption{Matching the last element of a list, what we are trying to simulate}
-\label{code:safeLast1}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
-\IdrisFunction{safeLast} \IdrisData{[]} = \IdrisData{Nothing}
-\IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) = \IdrisData{Just} \IdrisBound{x}
-\end{Verbatim}
-\end{figure}
+% \begin{figure}[ht]
+% \caption{Matching the last element of a list, what we are trying to simulate}
+% \label{code:safeLast1}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
+% \IdrisFunction{safeLast} \IdrisData{[]} = \IdrisData{Nothing}
+% \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) = \IdrisData{Just} \IdrisBound{x}
+% \end{Verbatim}
+% \end{figure}
 
-\begin{figure}[ht]
-\caption{The code that matches the last element of a list with a view}
-\label{code:safeLast2}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
-\IdrisFunction{safeLast} \IdrisBound{l} \IdrisKeyword{with} (\IdrisFunction{listLast} \IdrisBound{l})
-  \IdrisFunction{safeLast} \IdrisData{[]} | \IdrisData{Empty} = \IdrisData{Nothing}
-  \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) | (\IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{x}) = \IdrisData{Just} \IdrisBound{x}
-\end{Verbatim}
-\end{figure}
+% \begin{figure}[ht]
+% \caption{The code that matches the last element of a list with a view}
+% \label{code:safeLast2}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+% \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
+% \IdrisFunction{safeLast} \IdrisBound{l} \IdrisKeyword{with} (\IdrisFunction{listLast} \IdrisBound{l})
+%   \IdrisFunction{safeLast} \IdrisData{[]} | \IdrisData{Empty} = \IdrisData{Nothing}
+%   \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) | (\IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{x}) = \IdrisData{Just} \IdrisBound{x}
+% \end{Verbatim}
+% \end{figure}
 
-If we want to run the same tactic on all of these, we have to write an \Elab\ action
-that can
-\begin{enumerate}
-\item Look at a pattern and detect nonlinearities
-\item Look at a pattern and detect we used functions instead of constructors inside
-\item Look up the type of the interesting patterns
-\item Search for a view function that could be used to achieve this pattern
-\item Try to apply possible view functions by unifying the input pattern with the view type constructors
-\end{enumerate}
+% If we want to run the same tactic on all of these, we have to write an \Elab\ action
+% that can
+% \begin{enumerate}
+% \item Look at a pattern and detect nonlinearities
+% \item Look at a pattern and detect we used functions instead of constructors inside
+% \item Look up the type of the interesting patterns
+% \item Search for a view function that could be used to achieve this pattern
+% \item Try to apply possible view functions by unifying the input pattern with the view type constructors
+% \end{enumerate}
 
-\TODO{Write the tactic and explain how it works}
+% \TODO{Write the tactic and explain how it works}

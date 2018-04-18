@@ -8,6 +8,7 @@
 \usepackage{inconsolata}
 \usepackage{fancyvrb}
 \usepackage[usenames,dvipsnames]{xcolor}
+% \usepackage[usenames,dvipsnames,monochrome]{xcolor} %black and white
 \usepackage[T1]{tipa}
 \usepackage{graphicx}
 \graphicspath{ {images/} }
@@ -82,6 +83,7 @@
 
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
+
 \begin{document}
 
 \begin{abstract}
@@ -121,12 +123,12 @@
 
 \begin{acknowledgements}
 First and foremost, I would like to thank Dan Licata, my research advisor.
-Even though I picked a topic that he was not particularly interested in, he
-gladly played along and gave very helpful advice whenever I got
-stuck. Since this project also had a user interfacing aspect, his insights as a
-long-time proof assistant user shaped my choices.
-He has had more impact on my research taste than anyone, and there is no doubt
-I will miss his astute advice when I leave Wesleyan.
+Even though the topic I picked was not very close to the work he does, he
+played along and gave me very helpful advice whenever I got stuck.
+Since this project also had a user interface aspect, his insight as a
+long-time user of proof assistants shaped my decisions.
+He has had more impact on my research taste than anyone, and I am indebted to
+him for his kindness and patience.
 
 I am incredibly fortunate to have met David Christiansen last summer and talked
 to him about his work on metaprogramming for dependent types.
@@ -148,7 +150,7 @@ discussions we had over the year; I am grateful for our little PL community.
 
 Finally, I am thankful to Yulia, Mehmet, Recep, Kivanc, Isin Ekin and
 my family for their emotional support. This has not been an easy year for me,
-but I made it through with their help and friendship. Thank you.
+but I made it through thanks to all of you.
 \end{acknowledgements}
 
 \frontmatter
@@ -173,8 +175,9 @@ but I made it through with their help and friendship. Thank you.
 \include{background}
 \include{design}
 \include{implementation}
-% \include{applications}
-% \include{conclusion}
+\include{applications}
+\include{relatedwork}
+\include{conclusion}
 \bibliography{paper}
 \bibliographystyle{plain}
 \end{document}

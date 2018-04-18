@@ -108,7 +108,7 @@ type declaration.
 Now we have a definition for \fn{height} that takes one argument \bn{t1}, and
 returns \hole{height\_rhs}. This is clearly incomplete; we want to change
 the return value based on what \bn{t1} is. So the next step would be to inspect
-what values \bn{t1} can take. We can put the cursor on \bn{t1} and then run the
+what values \bn{t1} can take. We can place the cursor on \bn{t1} and then run the
 editor action ``Case split pattern variable''.
 
 \vspace{1em}
@@ -127,8 +127,8 @@ Finishing this function from here is trivial, so we will not proceed further.
 However, this example should show how much editor actions can shape your
 programming experience.
 
-Now that we are familiar with what an editor action is, we can describe what
-this project is about. The editor actions we reviewed above are features embedded
+Now that we are familiar with what an editor action is, we can describe problem
+this project solves. The editor actions we reviewed above are features embedded
 in the compiler. If you want to define a new action, the only way possible is
 to change the compiler source code and build your own version of the compiler,
 and then edit the source code of your editor mode to use that feature you
@@ -136,6 +136,8 @@ added. This is clearly far from ideal; no one should have to fork a compiler
 just to add a custom editor action. Maintaining a compiler fork and
 navigating through the compiler source code are usually not in the skill sets
 of most users.
+Another drawback is that users would have to learn Haskell, and recompile the
+entire Idris system every time they want to define a custom editor action.
 
 Therefore we want to give users a way to write custom editor actions. Our
 solution for this is to make use of elaborator reflection\cite{elabref} in

@@ -29,7 +29,7 @@ on binary trees at the end. The next step is to add a the initial function claus
 \IdrisFunction{height} : \IdrisType{Tree} \bn{a} -> \IdrisType{Nat}
 \end{Verbatim}
 
-When we put the cursor on \fn{height} and run the action to add the initial
+When we place the cursor on \fn{height} and run the action to add the initial
 function clause, the editor sends the message on the first line to the
 compiler, after doing the necessary computation, the compiler responds with the
 message on the second line:
@@ -63,7 +63,7 @@ have before that action:
 \IdrisFunction{height} \IdrisBound{t1} = \hole{height_rhs}
 \end{Verbatim}
 
-When we put the cursor on \bn{t1} and run the case splitting action, this is
+When we place the cursor on \bn{t1} and run the case splitting action, this is
 the communication that happens between the editor and the compiler.
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
@@ -97,7 +97,7 @@ Let's try to prove a trivial lemma with this tactic.
 \fn{f} = \hole{q}
 \end{Verbatim}
 
-When we put the cursor on \hole{q} and tell the editor to run the \fn{prover}
+When we place the cursor on \hole{q} and tell the editor to run the \fn{prover}
 tactic, we have to convey a couple things to the compiler: We have to tell that
 we want to run an \Elab\ action named \fn{prover}, and we are running this on
 the hole \hole{q}, and where exactly the cursor is (in line and column numbers)
@@ -234,7 +234,7 @@ deserialize one of the types that we expect to use the most in our editor
 actions, the type of names, \ty{TTName}.
 
 \begin{figure}[ht]
-\caption{The \ty{Editorable} implementation for the type \ty{TTName}.}
+\caption{\ty{Editorable} implementation for the type \ty{TTName}.}
 \label{code:ttnameEditorable}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{implementation} \ty{Editorable} \ty{TTName} \kw{where}
@@ -416,7 +416,7 @@ then the compiler must check if \ty{TTName}, \TT\ (from the second argument)
 and \TT\ (from the return type) are all \Editorable. If any of the argument of
 return types do not have an \Editorable\ implementation, then we should not be
 able to run the given action from the editor. In fact, to make the distinction
-clearer, we add a new function modifier \kw{\%editor} to Idris.
+clearer, we add a new function modifier syntax \kw{\%editor} to Idris.
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%editor}
@@ -424,8 +424,8 @@ clearer, we add a new function modifier \kw{\%editor} to Idris.
 \end{Verbatim}
 
 When used before the type declaration of a function, Idris makes sure during
-type-checking that that function's argument and return types all have an
-\Editorable\ implementation. If they do not, then the users gets a type-error
+type-checking that this function's argument and return types all have an
+\Editorable\ implementation. If they do not, then the user gets a type-error
 that tells them that since they declared that \Elab\ action an editor action,
 they must provide an \Editorable\ implementation for all argument and return
 types, and the error tells them which one is missing.
@@ -467,10 +467,13 @@ the following steps should happen:
   \item We can now send that S-expression back to the editor.
 \end{itemize}
 
-\subsection{Example in action}\label{ssec:designExample}
+\subsection{Examples in action}\label{ssec:designExample}
 
-To see how the \ty{Editorable} interface achieves both of these goals, let's
-write a simple toy editor action.
+\subsubsection{Successful example}
+
+We now know how the compiler should work with the \Editorable\ interface.
+To illustrate how it works in reality, let's finish the \fn{toy} editor action
+we started above.
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%editor}
@@ -485,6 +488,9 @@ Here is what we expect from this \Elab\ action: we will pass it two arguments,
 the first one is a name of a hole, and the second one is a core language term.
 If the type of the hole is \ty{Nat}, then we will return the term that we are
 given, otherwise we will fail.
+
+To be able to call this editor action from Emacs, we will have to write a bit
+of Emacs Lisp:
 
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Emacs Lisp}}, labelposition=topline]
 (\kw{defun} \fn{idris-elab-hole-arg} (\bn{action} \bn{args})
@@ -504,3 +510,109 @@ given, otherwise we will fail.
   (\kw{let} ((\bn{term} (\fn{read-string} \dt{"Enter a term:"})))
     (\fn{idris-elab-hole-arg} \dt{"toy"} `(,(\fn{idris-name-at-point}) ,\bn{term}))))
 \end{Verbatim}
+
+The first function \fn{idris-elab-hole-arg} is a general function that can be
+reused by other hole-based editor actions. It takes a name of an action and a
+list, and sends them to the Idris executable, also adding the line and column
+numbers. When it gets a response, it deletes the hole that the cursor is on,
+and replaces it with the string/code that was just received from the compiler.
+
+The second function \fn{idris-toy} is the little piece of code that runs the
+\fn{toy} editor action we defined above. It asks the user to enter some code,
+and when they do, it uses \fn{idris-elab-hole-arg} to send to Idris a message
+that consists of the name under the cursor and that term the user just typed
+in. Notice that the name under the cursor will be parsed as a \ty{TTName}, type
+of the first argument of \fn{toy}, and the term we typed in will correspond to
+\TT, type of the second argument of \fn{toy}.
+
+Suppose we want to use this new editor action now.
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{n} : \ty{Nat}
+\fn{n} = \hole{q}
+\end{Verbatim}
+
+We can place the cursor on \hole{q} and then run the \fn{idris-toy} function in
+Emacs, possibly through a keyboard shortcut we assign to it.
+By definition of \fn{idris-toy}, Emacs asks us to enter a term, suppose we
+write \texttt{S Z} and press enter.
+The following communication happens in the background with the compiler:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
+-> ((:elab-edit "toy" ("q" "S Z") 35 5)
+<- (:return (:ok "1" nil) 20)
+\end{Verbatim}
+
+We send the \Elab\ action name \fn{toy} and the list of arguments as an
+S-expression. Idris sends back the result of the \Elab\ action when run with
+the arguments \hole{q} as the name, and the core language term for \dt{S Z}.
+Since the type of our hole is \ty{Nat} here, \fn{toy} just returns the same
+term we give it, but it pretty prints it is as \dt{1}.
+
+By definition of \fn{idris-elab-hole-arg}, the result \dt{1} replaces the hole
+\hole{q} in the file. The resulting code is this:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{n} : \ty{Nat}
+\fn{n} = \dt{1}
+\end{Verbatim}
+
+\subsubsection{What \Editorable\ precludes}
+
+Suppose we wanted to write a polymorphic editor action, that merely returned its argument back.
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{%editor}
+\fn{poly} : \bn{a} -> \ty{Elab} \bn{a}
+\fn{poly} \bn{x} = \fn{pure} \bn{x}
+\end{Verbatim}
+
+First of all, observe that the type declaration above is actually
+\texttt{\{\bn{a} : \ty{Type}\} -> \bn{a} -> \ty{Elab} \bn{a}}, which means
+there is an implicit argument in the beginning that has the type
+\ty{Type}.\footnote{\ty{Type} is the type of types in Idris, similar to
+\texttt{*} in Haskell and \texttt{Set} in Agda, but with a caveat:
+Haskell's \texttt{*} has the type \texttt{*}\cite{eisenberg}, while Agda has universe
+polymorphism and Idris has cumulativity. This means Agda and Idris manage to
+avoid Girard's paradox, but Haskell does not even attempt that, ... not that
+there's anything wrong with that.}
+
+The problem with this is that, the editor has to tell the compiler what type of
+result we want to get at the end. We do not yet have a way to communicate a
+value of the type \ty{Type} between the editor and the compiler, i.e. we cannot
+define an \Editorable\ implementation for \ty{Type} in Idris itself, because
+Idris does not allow us to pattern match on types, since that breaks
+parametricity and creates problems with type erasure.\cite{universePat}
+We will not explore adding such an \Editorable\ implementation as a primitive.
+We will instead disallow polymorphic editor actions.
+When we try to compile \fn{poly}, we get the following error:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris error message}}, labelposition=topline]
+You declared \fn{poly} to be an editor action, but there's no
+\ty{Language.Reflection.Editor.Editorable} implementation for \ty{Type}
+\end{Verbatim}
+
+Here is another custom editor action we want to preclude:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{%editor}
+\fn{funAction} : (\ty{Nat} -> \ty{Nat}) -> \ty{Elab} \dt{()}
+\fn{funAction} \bn{x} = \fn{pure} \dt{()}
+\end{Verbatim}
+
+We do not have a way to serialize and deserialize functions of the type
+\texttt{\ty{Nat} -> \ty{Nat}}, so therefore we should not allow \fn{funAction}
+to be declared an editor action.
+When we try to compile \fn{funAction}, we get the following error:
+
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris error message}}, labelposition=topline]
+You declared \fn{funAction} to be an editor action, but there's no
+\ty{Language.Reflection.Editor.Editorable} implementation for \ty{Nat} -> \ty{Nat}
+\end{Verbatim}
+
+We have now seen the motivations behind the \Editorable\ interface and
+why we defined it this way. We have also demonstrated that this definition
+is useful for serialization and deserialization of the data used in editor
+actions, and that for the unserializable kinds of data, such as functions,
+\Editorable\ acts as a gatekeeper. In the next section, we will look at how
+this design is implemented in the Idris compiler in Haskell.

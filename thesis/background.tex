@@ -1,7 +1,7 @@
-\section{Background}\label{sec:background}
+\chapter{Background}\label{chap:background}
 
 \newcommand{\zip}{\fn{zip}}
-\subsection{Idris}
+\section{Idris}
 
 Idris is a dependently typed functional programming language. In simple terms,
 dependent types allow us to do computation in types, just like we can do
@@ -93,7 +93,7 @@ implementations and specify the implementation you want to use by its name,
 when you are writing a function. For our purposes, we will not use multiple
 implementations.
 
-\subsection{Elaborator reflection}\label{ssec:elabref}
+\section{Elaborator reflection}\label{ssec:elabref}
 
 Idris programs are elaborated from high-level Idris syntax trees into a core
 language called \texttt{TT}, and then type checked.\cite{idris}
@@ -104,7 +104,7 @@ access this monad from Idris itself, by implementing a primitive monad
 \Elab\ in Idris itself, that can only be used for metaprogramming in compile
 time.
 
-\subsubsection{Reflected core language types}\label{sssec:reflectedTypes}
+\subsection{Reflected core language types}\label{sssec:reflectedTypes}
 
 Since this monad works with core language terms and definitions, the types in
 the compiler representing the syntax trees for the core language are reflected
@@ -214,7 +214,7 @@ important ones and describe what they represent.
 \item\ty{FunClause} represents a single clause in a function definition.
 \end{itemize}
 
-\subsubsection{Quotations}
+\subsection{Quotations}
 
 Writing \TT\ and \ty{Raw} terms by hand can get tedious, hence there is a
 quotation syntax that elaborates a given expression into its corresponding
@@ -222,6 +222,9 @@ quotation syntax that elaborates a given expression into its corresponding
 The syntax \texttt{\`{}(\fn{e})}, where \fn{e} is an Idris expression, gives
 us the typed or untyped core language syntax tree for \fn{e}. For example,
 \texttt{\`{}(\fn{not} \dt{True})} gives us the following \TT\ term:
+
+\begin{figure}[ht]
+  \caption{The \TT\ term we get when we quote \texttt{\fn{not} \dt{True}}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisData{App} (\IdrisData{P} \IdrisData{Ref}
        (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})
@@ -233,12 +236,16 @@ us the typed or untyped core language syntax tree for \fn{e}. For example,
        (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"True"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})
        (\IdrisData{P} (\IdrisData{TCon} \IdrisData{0} \IdrisData{0}) (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"Bool"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}) \IdrisData{Erased}))
 \end{Verbatim}
+\end{figure}
 
 The \ty{Raw} term for the same expression is a bit more reasonable:
+\begin{figure}[ht]
+  \caption{The \Raw\ term we get when we quote \texttt{\fn{not} \dt{True}}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 (\IdrisData{RApp} (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}))
       (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"True"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]})))
 \end{Verbatim}
+\end{figure}
 
 Obviously, we would not want to write terms like these manually every time we want to return
 the syntax tree for a simple function application.
@@ -260,7 +267,7 @@ expression or variable we have in the antiquotation has to match the type of
 the quotation. In other words, only \TT\ expressions can be used in an
 antiquotation in a \TT\ quotation, and mutatis mutandis for \ty{Raw}.
 
-\subsubsection{\protect\Elab\ monad}
+\subsection{\protect\Elab\ monad}
 
 The elaborator reflection\cite{elabref} feature that has been added to the
 Idris compiler recently provides a tool for metaprogramming with a monad called
@@ -315,6 +322,9 @@ write for the tactic users, and type-checking them in the elaborator is easy.
 Now let's define a function using elaborator reflection.
 Let's define a polymorphic identity function.
 
+
+\begin{figure}[ht]
+  \caption{A proof of the identity function using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{id} : (\bn{a} : \ty{Type}) -> \bn{a} -> \bn{a}
 \fn{id} = \kw{%runElab} (\kw{do} \fn{intro} \kw{`\{\{}ty\kw{\}\}}
@@ -322,6 +332,7 @@ Let's define a polymorphic identity function.
                   \fn{fill} (\dt{Var} \kw{`\{\{}a\kw{\}\}})
                   \fn{solve})
 \end{Verbatim}
+\end{figure}
 
 For anyone familiar with Coq, this will look very similar to a normal Coq
 proof. First we take the type as an argument, and then a value of that type,
@@ -333,6 +344,8 @@ hence the name ``tactics'' we use to refer to monadic \Elab\ actions.
 Let's prove something not as trivial. This time we want to prove that
 $(\forall n \in \mathbb{N})\ n = n + 0$, for the standard definition of addition. Since that requires more complex tactics like induction, we will import the Pruviloj library.\cite{davidphd}
 
+\begin{figure}[ht]
+  \caption{A proof that $(\forall n \in \mathbb{N})\ n = n + 0$ using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{nPlusZero} : (\bn{n} : \ty{Nat}) -> \bn{n} = \fn{plus} \bn{n} \dt{0}
 \fn{nPlusZero} = \kw{%runElab} (\kw{do} \fn{intro} \kw{`\{\{}n\kw{\}\}}
@@ -347,6 +360,7 @@ $(\forall n \in \mathbb{N})\ n = n + 0$, for the standard definition of addition
                          \fn{reflexivity}
                          \fn{solve})
 \end{Verbatim}
+\end{figure}
 
 The proof proceeds as such: we first take in the argument \bn{n}, and then do
 an induction on \bn{n}. Because of the way induction works in Pruviloj, we have
@@ -362,11 +376,14 @@ but if you want to fully comprehend \fn{attack} and {solve}, you can refer to
 
 Finally let's do an example for a declaration with elaborator reflection:
 
+\begin{figure}[ht]
+  \caption{A type declaration and new definition for \fn{n}, using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%runElab} (\kw{do} \fn{declareType} (\dt{Declare} \kw{\`{}\{\{}n\kw{\}\}} \dt{[]} \kw{`{}(}\ty{Nat}\kw{)})
              \fn{defineFunction} (\dt{DefineFun} \kw{\`{}\{\{}n\kw{\}\}}
                               \dt{[}\dt{MkFunClause} (\dt{Var} \kw{\`{}\{\{}n\kw{\}\}}) \kw{\`{}(}\dt{Z}\kw{)}\dt{]}))
 \end{Verbatim}
+\end{figure}
 
 The example above first declares that \fn{n} will have the type \ty{Nat}.
 Then it defines it as \texttt{\IdrisFunction{n} = \IdrisData{Z}}.

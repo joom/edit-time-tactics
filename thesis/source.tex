@@ -83,6 +83,8 @@
 
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
+\numberwithin{section}{chapter}
+\numberwithin{figure}{chapter}
 
 \begin{document}
 
@@ -160,6 +162,12 @@ but I made it through thanks to all of you.
 \makeack
 
 \tableofcontents
+
+\newcommand{\nocontentsline}[3]{}
+\bgroup\let\addcontentsline=\nocontentsline
+\renewcommand\numberline[1]{#1.\ }
+\listoffigures
+\egroup
 
 \mainmatter
 

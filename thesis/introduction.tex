@@ -1,4 +1,4 @@
-\section{Introduction} \label{sec:introduction}
+\chapter{Introduction} \label{chap:introduction}
 
 The rising popularity of statically typed functional languages led to
 the concept of ``type-driven development'' (hereinafter referred to as TDD),
@@ -224,17 +224,17 @@ use anywhere in the source code.
 We write an alternative proof search tactic called Hezarfen, a full-blown
     theorem prover for intuitionistic propositional logic, and then we show how
 to use this on holes when we are in the editor.
-% Details can be found in \autoref{ssec:hezarfen}.
+% Details can be found in \autoref{sec:hezarfen}.
 \item We define a case-split tactic that can be run from the editor, which can
 replace the hard-coded case-split editor action.
 \end{itemize}
 
-In \autoref{sec:background}, we will go over the basics of the Idris
+In \autoref{chap:background}, we will go over the basics of the Idris
 programming language and its metaprogramming machinery.
 
 Now that we have an idea about the motivations for edit-time tactics,
-we will discuss their design in \autoref{sec:design} and their implementation
-in \autoref{sec:implementation}.
+we will discuss their design in \autoref{chap:design} and their implementation
+in \autoref{chap:implementation}.
 
 
 % One way to do this would be to have compiler plugins, like
@@ -257,6 +257,6 @@ in \autoref{sec:implementation}.
 % write a tactic that does that for us. Moreover, the interesting cases are when
 % we have two consecutive red nodes, so we might want to list them first in our
 % patterns.  An Agda formalization of the tree rotation was previously given by
-% Licata\cite{licataOPLSS}. In \autoref{ssec:rbt}, we first describe an Idris
+% Licata\cite{licataOPLSS}. In \autoref{sec:rbt}, we first describe an Idris
 % equivalent of that code, and then define a tactic to generate cases for
 % rotation.

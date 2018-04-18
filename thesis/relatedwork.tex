@@ -1,6 +1,6 @@
-\section{Related work} \label{sec:relatedwork}
+\chapter{Related work} \label{chap:relatedwork}
 
-\subsection{In Haskell}
+\section{In Haskell}
 
 Template Haskell \cite{th} is the main metaprogramming mechanism in Haskell.
 It is similar to elaborator reflection in the sense that metaprograms are
@@ -42,7 +42,7 @@ editor modes.\footnote{The project can be found here:
 at the Haskell Implementors' Workshop 2017 can be found here:
 \url{http://youtu.be/-pjQcG94CxM}}
 
-\subsection{In Agda}
+\section{In Agda}
 
 There is a line of work on bringing more automated theorem proving,
 proof automation and tactics, or metaprogramming to Agda.
@@ -50,21 +50,17 @@ Lindblad and Benke (2006) introduced a term search algorithm called
 Agsy, a proof search mechanism that aims to save users' time by automating
 parts of the proof that are straightforward but tedious to write.\cite{agsy}
 Agda has a derivative of this mechanism implemented as a part of its compiler.
-After the addition of the old reflection system to Agda, van der Walt and
-Swierstra showed compelling examples of reflection in Agda, such as a proof
-mechanism for boolean tautologies.\cite{pfByReflAgda}
-
 Kokke and Swierstra (2015) used the old reflection system of Agda to define a
 new proof search mechanism in Agda itself.\cite{autoinagda}
-The Hezarfen tactic we discussed in \autoref{ssec:hezarfen} is not as advanced
-as their \texttt{auto} function, yet in their paper, they discussed a feature
+The Hezarfen tactic we discussed in \autoref{sec:hezarfen} is not as advanced
+as their \fn{auto} function, yet in their paper, they discussed a feature
 similar to edit-time tactics as future work:
 
 \begin{quote}
   ``In the future, it may be interesting to explore how to integrate proof
   automation using the reflection mechanism better with Agda's IDE. For
   instance, we could create an IDE feature which replaces a call to
-  \texttt{auto} with the proof terms that it generates. As a result, reloading
+  \fn{auto} with the proof terms that it generates. As a result, reloading
   the file would no longer need to recompute the proof terms.''\cite{autoinagda}
 \end{quote}
 
@@ -72,7 +68,24 @@ In this thesis, we generalized their suggestion to all tactics, and specified
 how the editor/IDE and the compiler should communicate with each other
 in order to successfully call a tactic with inputs of the correct types.
 
-\subsection{In Coq}
+There is also work on ``proof by reflection'' in Agda, which is different from our
+usage of the word ``reflection'' so far.
+
+\begin{quote}\label{quote:reflection}
+``Reflection is an overloaded word in this context, since in programming language
+  technology reflection is the capability of converting some piece of concrete
+  code into an abstract syntax tree object that can be manipulated in the same
+  system. Reflection in the proof technical sense is the method of mechanically
+  constructing a proof of a theorem by inspecting its shape.''\cite{reflInAgda}
+\end{quote}
+
+We have been concerned with the first meaning of ``reflection'' in this thesis,
+however the work on the second meaning of this word is still relevant to proof
+automation, and their ideas can be reused in our edit-time tactics. Work by van
+der Walt and Swierstra showed compelling examples of proof by reflection in
+Agda, such as a proof mechanism for boolean tautologies.\cite{pfByReflAgda}
+
+\section{In Coq}
 
 Coq has a metaprogramming mechanism called
 \texttt{template-coq}\footnote{It can be found here:
@@ -81,3 +94,18 @@ Malecha's term reification. \cite{malecha-phd}. Recently a typed
 version of this system is also introduced. \cite{typed-template-coq}
 However, we are not aware of any work on using template metaprograms in Coq to
 write new features for the editor.
+
+Aside from this, there is a large body of work on proof automation, proof
+engineering and tactic languages in Coq.  Coq's original tactic language is
+Ltac\cite{ltac}, which is separate from its Coq's term language Gallina.
+However, alternatives to Ltac have been developed, such as Mtac\cite{mtac} and
+MetaCoq\cite{metacoq}.  Especially Mtac\cite{mtac}, which is a tactic language
+for Coq that facilitates custom proof search by providing a monadic interface,
+has inspired further research in the area, including Idris' elaborator
+reflection.\cite{elabref}
+
+Chlipala's \emph{Certified Programming with Dependent Types}\cite{cpdt} has
+emerged as the canonical introductory textbook for proof engineering; it
+explains the basics of tactic programming and even delves into proof search and
+proof by reflection. Note that we use the word reflection in the proof
+technical sense, \hyperref[quote:reflection]{as mentioned in the quote above}.

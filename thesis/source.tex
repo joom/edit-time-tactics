@@ -5,7 +5,6 @@
 \usepackage{amsmath, amsfonts, amssymb, bussproofs, listings, float, upgreek, stmaryrd, epigraph, afterpage}
 \usepackage[square,sort&compress,numbers]{natbib}
 \usepackage[font=small]{caption}
-\usepackage{inconsolata}
 \usepackage{fancyvrb}
 \usepackage[usenames,dvipsnames]{xcolor}
 % \usepackage[usenames,dvipsnames,monochrome]{xcolor} %black and white
@@ -13,15 +12,22 @@
 \usepackage{graphicx}
 \graphicspath{ {images/} }
 \usepackage{tgpagella}
+\usepackage{inconsolata}
 \usepackage{ragged2e}
 \usepackage[hang, flushmargin]{footmisc}
 \usepackage[backref=page,hyperfootnotes=false]{hyperref}
 \usepackage{footnotebackref}
-\hypersetup{colorlinks = true, allcolors = {blue}}
 \definecolor{IdrisRed}{RGB}{166, 0, 2}
 \definecolor{IdrisBlue}{RGB}{0, 0, 182}
 \definecolor{IdrisGreen}{RGB}{13, 84, 8}
 \definecolor{IdrisPurple}{RGB}{126, 2, 236}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = {blue},
+  citecolor = {blue},
+  urlcolor = {blue},
+  anchorcolor = {blue}
+}
 
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
@@ -97,7 +103,7 @@
   interaction actions in Idris.
 
   Currently in Idris modes of editors such as Emacs, users can perform actions
-  like type-checking holes, case splitting, and lemma extraction.
+  like type-checking holes, case-splitting, and lemma extraction.
   Implementations of all of these Idris editor actions are hard-coded in the
   compiler and they are written in Haskell. This work will allow us to rewrite
   them in Idris as metaprograms, and to move them into an Idris library instead

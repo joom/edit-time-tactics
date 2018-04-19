@@ -57,7 +57,7 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
   * they might want to check if there's an implementation for some interface
   * they might want to limit Editorableness to
 
-* do case splitting as a more compelling example than the theorem prover
+* do case-splitting as a more compelling example than the theorem prover
 
 * Questions to ask David:
   * Namespace resolution. (solved)

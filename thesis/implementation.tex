@@ -1,6 +1,132 @@
-\chapter{Implementation}\label{sec:implementation}
+\chapter{Implementation}\label{chap:implementation}
+
+\section{Additions to the Idris standard library}\label{sec:stdlib}
+
+\newcommand{\LR}{\texttt{Language.Reflection}}
+\newcommand{\LRE}{\texttt{Language.Reflection.Elab}}
+\newcommand{\LREd}{\texttt{Language.Reflection.Editor}}
+
+Out of the types we skimmed through in \autoref{ssec:reflectedTypes}, \TT,
+\Raw, and \ty{TTName} live in the \texttt{Language.Reflection} module, and
+\ty{TyDecl}, \ty{DataDefn}, and \ty{FunDefn} live in \LRE. This is because
+Idris only has quotation of terms, as we reviewed in \autoref{ssec:quotation},
+so the definitions we will need in quotations are in \LR. The ones that are not
+needed by quotation but are needed for elaborator reflection are in \LRE.
+
+Out of the types we defined in \autoref{sec:types}, \ty{SExp} should live in
+\LRE\ since \Elab\ will depend on it. However, the new interface
+\Editorable\ should live in \LREd.
+
+Remember from \autoref{code:newElabPrims} that we added two new
+\Elab\ primitives to our language, namely \fn{prim\_\_fromEditor} and
+\fn{prim\_\_toEditor}.
+The way \Elab\ primitives work in Idris is that there is a constructor in the
+\Elab\ data type for each of them. Therefore we need to add those constructors
+and then define \fn{prim\_\_fromEditor} and \fn{prim\_\_toEditor} in terms of
+them.
+
+\begin{figure}[ht]
+\caption{New constructors for the new \Elab\ primitives, and function definitions based on them.}
+  \label{code:newElabConstructors}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{export}
+\kw{data} \ty{Elab} : \ty{Type} -> \ty{Type} \kw{where}
+  -- the constructors we had before
+  \dt{Prim__FromEditor} : \{\bn{a} : \ty{Type}\} -> \ty{HasEditorPrim} \bn{a} -> \ty{SExp} -> \ty{Elab} \bn{a}
+  \dt{Prim__ToEditor} : \{\bn{a} : \ty{Type}\} -> \ty{HasEditorPrim} \bn{a} -> \bn{a} -> \ty{Elab} \ty{SExp}
+
+\kw{export}
+\fn{prim__fromEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\} -> \ty{SExp} -> \ty{Elab} \bn{a}
+\fn{prim__fromEditor} \{\bn{has} = \bn{x}\} \bn{sexp} = \dt{Prim__FromEditor} \bn{x} \bn{sexp}
+
+\kw{export}
+\fn{prim__toEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\} -> \bn{a} -> \ty{Elab} \ty{SExp}
+\fn{prim__toEditor} \{\bn{has} = \bn{x}\} \bn{y} = \dt{Prim__ToEditor} \bn{x} \bn{y}
+\end{Verbatim}
+\end{figure}
+
+We make the additions in \autoref{code:newElabConstructors} in \LRE.  Notice
+that \kw{export} for \Elab\ does not export the constructors for the module,
+and we do not want to export all the primitive actions without any limits. For
+that purpose, we define \fn{prim\_\_fromEditor} and \fn{prim\_\_toEditor} that
+we actually can export. Compared to the types of the constructors we defined,
+types of the functions we defined are tweaked by making the \ty{HasEditorPrim}
+argument automatically inferrable by proof search, which is
+an accomodating feature of Idris usable via the \kw{auto} keyword.
+
+We will inspect in \label{sec:primitiveEditorableImpl} how these new
+constructors will be used in the compiler.
 
 \section{Primitive \ty{Editorable} implementations}\label{sec:primitiveEditorableImpl}
 
+In \autoref{ssec:primitiveEditorableDesign} we discussed why core language
+types like \ty{TT}, \ty{TyDecl}, \ty{DataDefn}, \ty{FunDefn}, and
+\ty{FunClause} must have primitive implementations of the
+\Editorable\ interface. Recall that for each of these types, the editor can
+only send a piece of code to the compiler, as a string which contains code in
+the surface language, however these types are in the core language. There are
+many steps in between that we are missing, such as parsing, elaboration,
+delaboration and pretty printing.
 
+Now let's see how we implemented this in the Idris compiler. Tactic evaluation
+in the compiler happens in the \fn{runElabAction} defined in the compiler
+source code. Inside that, there is a helper function \fn{runTacTm} that takes a
+typed term corresponding to a value in the \Elab\ monad of Idris, which should
+correspond to a \Elab\ primitive constructor applied to arguments, i.e. when
+the \Elab\ action term is in a weak head normal form\footnote{Hereinafter referred
+to as WHNF.}. Then we can check what primitive constructor we are dealing with
+and behave accordingly.
 
+\begin{figure}[ht]
+\caption{The \fn{runElabAction} function in the compiler, how \Elab\ action terms are run under the hood.}
+\label{code:runElabAction}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\fn{runElabAction} :: \ty{ElabInfo} -> \ty{IState} -> \ty{FC} -> \ty{Env}
+              -> \ty{Term} -> [\ty{String}] -> \ty{ElabD} \ty{Term}
+\fn{runElabAction} \bn{info} \bn{ist} \bn{fc} \bn{env} \bn{tm} \bn{ns} = \kw{do} \bn{tm}' <- \fn{eval} \bn{tm}
+                                         \fn{runTacTm} \bn{tm}'
+
+  -- some helper functions ...
+
+  \fn{runTacTm} :: \ty{Term} -> \ty{ElabD} \ty{Term}
+  \fn{runTacTm} \bn{tac}@(\fn{unApply} -> (\dt{P} _ \bn{n} _, \bn{args}))
+    | \bn{n} \fn{==} \fn{tacN} \dt{"Prim__Solve"}
+    = \kw{do} ~[] <- \fn{tacTmArgs} \dt{0} \bn{tac} \bn{args}
+          \fn{solve}
+          \fn{returnUnit}
+    -- other cases for other constructors
+\end{Verbatim}
+\end{figure}
+
+In \autoref{code:runElabAction} we can observe how \fn{runElabAction} is
+defined in the compiler.
+It takes many arguments, such as informaion for the elaborator, the internal
+state of the compiler at that point, the source location of the action, the
+environment under which the \Elab\ term should be evaluated to a WHNF, the
+term that represents the \Elab\ action term, and a namespace.  For our purposes,
+we do not have to worry about all of these.
+
+In the definition of \fn{runElabAction} we evaluate \bn{tm} to a WHNF
+of the \Elab\ action, and then we check in \fn{runTacTm} which form we want run.
+
+If we have a WHNF of the \Elab\ action, that means when we decide
+that what we have is a variable term, which is a constructor, represented by
+\dt{P}, or it is a series of applications to a variable term that is a
+constructor. We can handle both situations with the
+\texttt{\fn{unApply} :: \ty{Term} -> (\ty{Term}, [\ty{Term}])} function,
+which takes a dissects multiple curried function applications into the the term
+that should be a function, and the list of argument terms passed to
+it.\footnote{A term that is not a function application will be treated as a
+function application with no arguments passed.}
+
+We included in \autoref{code:runElabAction} how an example \Elab\ action
+term is treated by \fn{runTacTm}. For the primitive version of the \fn{solve}
+action, which is represented by the \dt{Prim\_\_Solve} constructor in \Elab,
+we first make sure that there are no given arguments, and then run
+\texttt{\fn{solve} :: \ty{Elab'} \bn{aux} \ty{()}} in the internal elaborator
+monad. If these all succeed, we return the reflected unit term back.
+
+Now, in order to add more \Elab\ primitives, we have to do similar cases for
+  \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}.
+
+\section{Extensions to the Idris IDE mode}\label{sec:idemode}

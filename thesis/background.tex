@@ -93,7 +93,7 @@ implementations and specify the implementation you want to use by its name,
 when you are writing a function. For our purposes, we will not use multiple
 implementations.
 
-\section{Elaborator reflection}\label{ssec:elabref}
+\section{Elaborator reflection}\label{sec:elabref}
 
 Idris programs are elaborated from high-level Idris syntax trees into a core
 language called \texttt{TT}, and then type checked.\cite{idris}
@@ -104,12 +104,24 @@ access this monad from Idris itself, by implementing a primitive monad
 \Elab\ in Idris itself, that can only be used for metaprogramming in compile
 time.
 
-\subsection{Reflected core language types}\label{sssec:reflectedTypes}
+\subsection{Reflected core language types}\label{ssec:reflectedTypes}
 
-Since this monad works with core language terms and definitions, the types in
-the compiler representing the syntax trees for the core language are reflected
-in Idris. In other words, there are now types in Idris itself, that match the
-syntax tree types in the compiler. Most important one of all is called \TT,
+Since the \Elab\ monad in Idris needs to work with core language terms and
+definitions, we have to use data types in Idris representing them.
+We want to have a correspondence between the internal data type that represents
+the core language syntax in the compiler, and the ones defined in Idris.
+
+The process of converting the syntax tree representation in the compiler, into
+a term in Idris representing the same syntax tree, is called reflection.
+The other direction, converting an Idris term that represents a syntax tree,
+into the syntax tree representation of the compiler is called reification.
+This allows us to manipulate Idris syntax trees in Idris itself.
+
+In other words, there are types in Idris itself, that match the syntax
+tree types in the compiler; we will call the ones we defined ``reflected
+types''.
+
+The most important one these types is called \TT,
 which is type of the core language typed terms, and its definition can be seen
 in \autoref{code:ttDef}.
 
@@ -214,7 +226,7 @@ important ones and describe what they represent.
 \item\ty{FunClause} represents a single clause in a function definition.
 \end{itemize}
 
-\subsection{Quotations}
+\subsection{Quotations}\label{ssec:quotation}
 
 Writing \TT\ and \ty{Raw} terms by hand can get tedious, hence there is a
 quotation syntax that elaborates a given expression into its corresponding
@@ -342,7 +354,11 @@ quotation and special name syntax, but it is essentially very similar,
 hence the name ``tactics'' we use to refer to monadic \Elab\ actions.
 
 Let's prove something not as trivial. This time we want to prove that
-$(\forall n \in \mathbb{N})\ n = n + 0$, for the standard definition of addition. Since that requires more complex tactics like induction, we will import the Pruviloj library.\cite{davidphd}
+$(\forall n \in \mathbb{N})\ n = n + 0$, for the standard definition of
+addition. Since that requires more complex tactics like induction, we will
+import the Pruviloj\footnote{Pruviloj is the Idris library included in
+the Idris distribution. It contains complex tactics written with elaborator
+reflection.} library.\cite{davidphd}
 
 \begin{figure}[ht]
   \caption{A proof that $(\forall n \in \mathbb{N})\ n = n + 0$ using elaborator reflection in Idris.}

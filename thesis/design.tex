@@ -2,7 +2,7 @@
 The goal of this project is to allow users to write custom editor actions using
 elaborator reflection.
 The editor and the compiler have to communicate to do that; the editor must
-send the name of the action and the necessary information for that, and the
+send the name of the action and the necessary information, and the
 compiler should then send the result back.
 In this chapter, we will look at how the built-in editor actions work, and then
 see what kind of restrictions this brings, and how this shapes the design of
@@ -21,9 +21,9 @@ support asynchronous jobs until version 8.0. This should change in the near futu
 To be more precise, the compiler receives S-expressions\cite{mccarthy} as input
 over the socket and sends back S-expressions as output.
 
-Let's the editor actions we looked at in \autoref{chap:introduction}.
-We have the following piece of code, which is meant to be the height function
-on binary trees at the end. The next step is to add a the initial function clause.
+Let's revise the editor actions we looked at in \autoref{chap:introduction}.
+We have the following piece of code, which will complete to the height function
+on binary trees. The next step is to add a the initial function clause.
 
 \begin{figure}[ht]
 \caption{Initial \fn{height} function.}
@@ -33,12 +33,13 @@ on binary trees at the end. The next step is to add a the initial function claus
 \end{figure}
 
 When we place the cursor on \fn{height} and run the action to add the initial
-function clause, the editor sends the message on the first line to the
-compiler, after doing the necessary computation, the compiler responds with the
-message on the second line:
+function clause, the editor sends the message on the first line in
+\autoref{code:commAddClause} to the compiler, after doing the necessary
+computation, the compiler responds with the message on the second line.
 
 \begin{figure}[ht]
   \caption{The communication for add clause editor action on \fn{height}.}
+  \label{code:commAddClause}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
 -> ((:add-clause 4 "height") 8)
 <- (:return (:ok "height t1 = ?height_rhs") 8)
@@ -61,7 +62,7 @@ line. Note that that last step is done by the front-end of the editor
 interaction mode, i.e. in Emacs Lisp if we are in Emacs.
 
 The next step in writing the function \fn{height} is to look at the possible
-cases of the tree, i.e. a case splitting action. This is the piece of code we
+cases of the tree, i.e. a case-splitting action. This is the piece of code we
 have before that action:
 
 \begin{figure}[ht]
@@ -72,11 +73,13 @@ have before that action:
 \end{Verbatim}
 \end{figure}
 
-When we place the cursor on \bn{t1} and run the case splitting action, this is
-the communication that happens between the editor and the compiler.
+When we place the cursor on \bn{t1} and run the case-splitting action, the
+communication in \autoref{code:commCaseSplit} happens between the editor and
+the compiler.
 
 \begin{figure}[ht]
-\caption{The communication for case split editor action on \fn{height}.}
+\caption{The communication for case-split editor action on \fn{height}.}
+\label{code:commCaseSplit}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
 -> ((:case-split 5 "t1") 11)
 <- (:return (:ok
@@ -85,10 +88,10 @@ the communication that happens between the editor and the compiler.
 \end{Verbatim}
 \end{figure}
 
-The built-in case split command needs to know the line number on which we are
-case splitting, which is \texttt{5}, and the name of the argument we are
+The built-in case-split command needs to know the line number on which we are
+case-splitting, which is \texttt{5}, and the name of the argument we are
 splitting, which is \bn{t1}.  The response contains \texttt{:ok}, which means
-the case splitting succeeded, and then a string that contains two lines split
+the case-splitting succeeded, and then a string that contains two lines split
 by the new line character. When the editor receives this information, it
 replaces the line the cursor was on before with the new code it received.
 
@@ -321,7 +324,7 @@ Alternatively, since editor actions are run interactively, we do have access to
 the source code of functions, so one could explore serialization of functions
 more seriously, but we will not entertain this thought in this thesis.
 
-\subsection{Primitive \ty{Editorable} implementations}\label{ssec:primitiveEditorable}
+\subsection{Primitive \ty{Editorable} implementations}\label{ssec:primitiveEditorableDesign}
 
 The existing elaborator reflection system are enough to define \ty{Editorable}
 implementations for some of the most common types in Idris.
@@ -411,6 +414,7 @@ Now we can use the predicate \ty{HasEditorPrim} to define our two new
 
 \begin{figure}[ht]
 \caption{New \Elab\ primitives for serialization and deserialization that depend on \ty{HasEditorPrim}.}
+\label{code:newElabPrims}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{prim__fromEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\} -> \ty{SExp} -> \ty{Elab} \bn{a}
 \fn{prim__toEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\} -> \bn{a} -> \ty{Elab} \ty{SExp}
@@ -627,7 +631,7 @@ Suppose we wanted to write a polymorphic editor action, that merely returned its
 \end{Verbatim}
 \end{figure}
 
-First of all, observe that the type declaration above is actually
+First of all, observe that the type declaration above actually is
 \texttt{\{\bn{a} : \ty{Type}\} -> \bn{a} -> \ty{Elab} \bn{a}}, which means
 there is an implicit argument in the beginning that has the type
 \ty{Type}.\footnote{\ty{Type} is the type of types in Idris, similar to

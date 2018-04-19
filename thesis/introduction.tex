@@ -63,8 +63,8 @@ and backend of the editor interaction mode, respectively.  When we talk about
 the language the editor interaction mode is implemented, we mean the language
 used in the backend, because the language used in the frontend depends on the
 editor.}.
-There are various existing examples of compilers and editors
-that do this sort of interaction:
+There are various existing examples of compilers and editors that do this sort
+of interaction:
 Proof General\cite{pg} and CoqIDE for Coq\cite{coq},
 the Emacs mode\cite{agdamode} for Agda,
 the Emacs mode\cite{idrismode} for Idris,
@@ -84,6 +84,11 @@ IDEs closer together, by introducing a feature called ``edit-time tactics''.
 The word ``edit-time'' is a wordplay on the terms ``compile time'' and ``run
 time'', and it means that we run the tactics when were are still in the editor,
 in order to use them to help us define new editor actions.
+The area of bringing IDE features to proof assistants is not new\cite{ctcoq,
+developingReuse, realTheoremProvers, toolSupport}, but it has been focusing
+on their usefulness as proof tools, not necessarily how they can help
+mainstream programmers. In contrast, we take tactics from proof assistants
+and see how they can help type-driven developers.
 
 Before we proceed to describe this work,
 it is imperative to understand what exactly an editor action is.
@@ -127,6 +132,8 @@ Finishing this function from here is trivial, so we will not proceed further.
 However, this example should show how much editor actions can shape your
 programming experience.
 
+\section{Motivation}
+
 Now that we are familiar with what an editor action is, we can describe problem
 this project solves. The editor actions we reviewed above are features embedded
 in the compiler. If you want to define a new action, the only way possible is
@@ -166,8 +173,8 @@ parts from the compiler and move them into an Idris library.
 \item Abilities of the editor interaction mode is extended from the
 current built-in features to anything that can be done with tactics.
 \item Defining editor actions with a monadic interface allows us to
-compose them easily. For instance, if we had case splitting as an \Elab\
-action, we could define a tactic to case split on many arguments at the same time.
+compose them easily. For instance, if we had case-splitting as an \Elab\
+action, we could define a tactic to case-split on many arguments at the same time.
 \end{itemize}
 
 The ability to run tactics as editor actions has a consequence
@@ -207,7 +214,10 @@ We leave that for future work.  However, even without proof simplification,
 this still could be a last resort solution to repeated long compile times for
 tactics.
 
-To achieve the advantages listed above, we make the following specific contributions:
+\section{Contributions}
+
+To achieve the advantages listed above, we make the following specific
+contributions in this thesis:
 % \vspace{-1em}
 \begin{itemize}
 \item We extend the primitive \Elab\ monad with the necessary primitive monadic
@@ -222,19 +232,34 @@ those positions. This allows us to inspect what local variables are available to
 use anywhere in the source code.
 \item The current proof search mechanism in Idris is not particularly advanced.
 We write an alternative proof search tactic called Hezarfen, a full-blown
-    theorem prover for intuitionistic propositional logic, and then we show how
+theorem prover for intuitionistic propositional logic, and then we show how
 to use this on holes when we are in the editor.
-% Details can be found in \autoref{sec:hezarfen}.
+Details can be found in \autoref{sec:hezarfen}.
 \item We define a case-split tactic that can be run from the editor, which can
 replace the hard-coded case-split editor action.
 \end{itemize}
 
+Some of the features we implemented in this thesis have already made their way to
+the Idris compiler, and the rest also will once they are reviewed by the
+other Idris contributors.
+
 In \autoref{chap:background}, we will go over the basics of the Idris
 programming language and its metaprogramming machinery.
-
 Now that we have an idea about the motivations for edit-time tactics,
 we will discuss their design in \autoref{chap:design} and their implementation
 in \autoref{chap:implementation}.
+
+Before we move on the other chapters, it might be helpful to take a brief look
+at the typographic conventions we use in this thesis: When we have code
+excerpts, we will use a monospace font.  Keywords will be written in \kw{black
+boldface}, types will be \ty{blue}, constant and function names will be
+\fn{green}, bound variables will be \bn{purple}, and metavariables and holes
+will be \texttt{\IdrisMetavar{cyan}}.\footnote{We are following the color
+conventions in Conor McBride's Epigram paper\cite{epigram} and David
+Christiansen's dissertation\cite{davidphd}.} We will have code excerpts in
+different programming languages such as Idris, Haskell, and Emacs Lisp in this
+thesis, hence we will always explicitly state what language the code is in, but
+we will use the same syntax highlighting for all of them.
 
 
 % One way to do this would be to have compiler plugins, like
@@ -245,8 +270,8 @@ in \autoref{chap:implementation}.
 % this purpose would be an overkill.
 
 
-% Case splitting on a nested tuple might seem like a mindless task. What if we
-% had a data type that required us to be clever when we are case splitting,
+% Case-splitting on a nested tuple might seem like a mindless task. What if we
+% had a data type that required us to be clever when we are case-splitting,
 % then doing that for every function would get exhausting.
 % Red-black trees\cite{okasakiRedBlack} are a good example of that.
 % Suppose we want to balance a red-black tree, and we want to rotate the tree in

@@ -79,7 +79,7 @@ proof assistant.\cite{idrisfaq}
 This unique position of Idris provides motivation for editor features on par
 with mature IDEs for other languages, as well as the TDD-style development
 workflow via editor actions.
-This work strives to bring the long-standing traditions of proof assistants and
+Our work strives to bring the long-standing traditions of proof assistants and
 IDEs closer together, by introducing a feature called ``edit-time tactics''.
 The word ``edit-time'' is a wordplay on the terms ``compile time'' and ``run
 time'', and it means that we run the tactics when were are still in the editor,
@@ -90,7 +90,7 @@ on their usefulness as proof tools, not necessarily how they can help
 mainstream programmers. In contrast, we take tactics from proof assistants
 and see how they can help type-driven developers.
 
-Before we proceed to describe this work,
+Before we proceed to describe our work,
 it is imperative to understand what exactly an editor action is.
 Editor actions are commands in the editor that make a meaningful
 change in your code, or one that gives you some information about your
@@ -167,7 +167,7 @@ can define their custom editor actions. This has the following advantages:
 
 \begin{itemize}
 \item Implementations of the Idris editor actions mentioned above are
-built-into the compiler and they are written in Haskell. This work will allow
+built-into the compiler and they are written in Haskell. Our work will allow
 us to rewrite them in Idris as \Elab\ actions. This way we can remove these
 parts from the compiler and move them into an Idris library.
 \item Abilities of the editor interaction mode is extended from the
@@ -261,6 +261,12 @@ different programming languages such as Idris, Haskell, and Emacs Lisp in this
 thesis, hence we will always explicitly state what language the code is in, but
 we will use the same syntax highlighting for all of them.
 
+\TODO{Hopefully edit-time tactics will look just the same to the "end user". to
+the tactic writer, it looks like the "examples in action" section for tactic
+writers. We have three different users: editor action users, simple action
+writers, and ones that want to define their own editorable instances. It would
+be ideal to have one working example in the introduction section to give a
+taste of what we actually did!}
 
 % One way to do this would be to have compiler plugins, like
 % GHC\footnote{Users can write compiler GHC plugins in Haskell starting from GHC 7.2.1.

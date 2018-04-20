@@ -1,5 +1,79 @@
 \chapter{Implementation}\label{chap:implementation}
 
+Before we delve into the details of implementation, we should clarify an
+important distinction in regard to the terminology we will use in this chapter.
+
+\begin{figure}[ht]
+\caption{The relationship between reflection, reification, quotation,
+  unquotation, elaboration and delaboration.}
+\label{reflectionGraph}
+\newcommand\mlnode[1]{
+  \begin{minipage}{3.3cm}
+    \linespread{1}\selectfont \begin{center}\small #1 \end{center}
+  \end{minipage}}
+\begin{tikzcd}
+  \mlnode{
+    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term
+
+    \dt{()}
+  }
+  \arrow[rrr, "\text{\small reflection}" description, bend right=20]
+  &  &  &
+  \mlnode{
+    Haskell representation of Idris core language terms\\ \medskip \scriptsize
+    such as the \ty{Term}\footnotemark term
+
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[lll, "\text{\small reification}" description, bend right=20] \\
+  &  &  &\\
+  \mlnode{
+    Idris terms\\ \medskip \footnotesize such as the \ty{()} term
+
+    \dt{()}
+  }
+  \arrow[r, "\text{\small elaboration}" description, bend right=50]
+  &
+  \mlnode{
+    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term
+
+    \dt{MkUnit}
+  }
+  \arrow[l, "\text{\small delaboration}" description, bend right=50]
+  \arrow[rr, "\text{\small quotation}" description, bend right=35]
+  & &
+  \mlnode{
+    Idris representation of the Haskell representation of Idris core language terms\\
+    \medskip \scriptsize such as the \TT\ term
+
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
+    (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
+  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
+\end{tikzcd}
+\end{figure}
+\footnotetext{In the compiler source code in Haskell, both \ty{Term} and
+  \ty{Type} are aliases for \ty{TT Name}. This should not be confused with the
+  type of reflected names, \ty{TTName}, defined in Idris. In the compiler, the
+  type of typed core language terms, \TT, is indexed by the type of names in
+  that term. The type of names in the compiler is called \ty{Name}, therefore
+  \texttt{TT Name} in the compiler is the type of core language terms with the
+  usual names. We will stick with \ty{Term} and \ty{Type} in this thesis to
+  avoid this confusion.}
+
+In the previous sections, we have informally used the word ``reflection'' to
+refer to the act of providing an Idris representation for a Haskell type we use
+in the compiler.  That was not an incorrect usage, since moving from a Haskell
+term to the Haskell representation of an Idris term is reflection as we define
+above. Since this holds for any Haskell term, take a Haskell term that is
+itself an internal Haskell representation of some Idris syntax.
+% If we reflect that
+% we can start from a Haskell term that is itself an internal Haskell
+% representation of some Idris syntax.  The reflected term then is the Haskell
+% representation of
+
+Since Idris types and terms must have a Haskell representation in the compiler so that the compiler can manipulate them.
 \section{Additions to the Idris standard library}\label{sec:stdlib}
 
 \newcommand{\LR}{\texttt{Language.Reflection}}
@@ -127,6 +201,63 @@ we first make sure that there are no given arguments, and then run
 monad. If these all succeed, we return the reflected unit term back.
 
 Now, in order to add more \Elab\ primitives, we have to do similar cases for
-  \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}.
+\dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}, which we
+started to do in \autoref{code:runElabAction}.
+
+\begin{figure}[ht]
+\caption{Adding cases for \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm} in the compiler.}
+\label{code:runElabAction}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\fn{runTacTm} :: \ty{Term} -> \ty{ElabD} \ty{Term}
+\fn{runTacTm} \bn{tac}@(\fn{unApply} -> (\dt{P} _ \bn{n} _, \bn{args}))
+  -- other cases for other Elab primitives
+  | \bn{n} \fn{==} \bn{tacN} \dt{"Prim__FromEditor"}
+  = \kw{do} ~[\bn{ty}, \bn{hasEditorPrim}, \bn{arg}] <- \fn{tacTmArgs} \dt{3} \bn{tac} \bn{args}
+        \bn{ty'} <- \fn{eval} \bn{ty}
+        \bn{arg'} <- \fn{eval} \bn{arg}
+        \kw{case} \bn{ty'} \kw{of}
+          \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
+            -- now we want to convert an S-expression to TT
+          \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{tacN} \dt{"TyDecl"} ->
+            -- now we want to convert an S-expression to TyDecl
+          -- other cases for other core language types
+  | \bn{n} \fn{==} \bn{tacN} \dt{"Prim__ToEditor"}
+  = \kw{do} ~[\bn{ty}, \bn{hasEditorPrim}, \bn{arg}] <- \fn{tacTmArgs} \dt{3} \bn{tac} \bn{args}
+        \bn{ty'} <- \fn{eval} \bn{ty}
+        \bn{arg'} <- \fn{eval} \bn{arg}
+        \kw{case} \bn{ty'} \kw{of}
+          \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
+            -- now we want to convert a TT into an S-expression
+          \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{tacN} \dt{"TyDecl"} ->
+            -- now we want to convert a TyDecl into an S-expression
+          -- other cases for other core language types
+\end{Verbatim}
+\end{figure}
+
+Observe that we left most parts in here blank, let's zoom in to the \TT\ cases
+  of \dt{Prim\_\_FromEditor} and \dt{Prim\_\_toEditor}.
+
+For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
+\begin{enumerate}
+  \item We have an Idris term \bn{arg'} representing the S-expression passed to
+    the \dt{Prim\_\_FromEditor}, we have to reify this and get a Haskell term
+    that is the S-expression.
+  \item Parse the surface syntax.
+  \item Elaborate that into the core language
+  \item Reflect that to Raw in the core language
+  \item Typecheck the reflected term from Raw to TT
+  \item Evaluate and return the TT
+\end{enumerate}
+
+Let's see in \autoref{code:ttFromEditor} how this can be implemented in the compiler.
+
+\begin{figure}[ht]
+\caption{The \TT\ case of \dt{Prim\_\_FromEditor}.}
+\label{code:ttFromEditor}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
+\end{Verbatim}
+\end{figure}
+
 
 \section{Extensions to the Idris IDE mode}\label{sec:idemode}

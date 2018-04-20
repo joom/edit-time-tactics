@@ -1,79 +1,5 @@
 \chapter{Implementation}\label{chap:implementation}
 
-Before we delve into the details of implementation, we should clarify an
-important distinction in regard to the terminology we will use in this chapter.
-
-\begin{figure}[ht]
-\caption{The relationship between reflection, reification, quotation,
-  unquotation, elaboration and delaboration.}
-\label{reflectionGraph}
-\newcommand\mlnode[1]{
-  \begin{minipage}{3.3cm}
-    \linespread{1}\selectfont \begin{center}\small #1 \end{center}
-  \end{minipage}}
-\begin{tikzcd}
-  \mlnode{
-    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term
-
-    \dt{()}
-  }
-  \arrow[rrr, "\text{\small reflection}" description, bend right=20]
-  &  &  &
-  \mlnode{
-    Haskell representation of Idris core language terms\\ \medskip \scriptsize
-    such as the \ty{Term}\footnotemark term
-
-    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
-  }
-  \arrow[lll, "\text{\small reification}" description, bend right=20] \\
-  &  &  &\\
-  \mlnode{
-    Idris terms\\ \medskip \footnotesize such as the \ty{()} term
-
-    \dt{()}
-  }
-  \arrow[r, "\text{\small elaboration}" description, bend right=50]
-  &
-  \mlnode{
-    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term
-
-    \dt{MkUnit}
-  }
-  \arrow[l, "\text{\small delaboration}" description, bend right=50]
-  \arrow[rr, "\text{\small quotation}" description, bend right=35]
-  & &
-  \mlnode{
-    Idris representation of the Haskell representation of Idris core language terms\\
-    \medskip \scriptsize such as the \TT\ term
-
-    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
-    (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
-  }
-  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
-  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
-\end{tikzcd}
-\end{figure}
-\footnotetext{In the compiler source code in Haskell, both \ty{Term} and
-  \ty{Type} are aliases for \ty{TT Name}. This should not be confused with the
-  type of reflected names, \ty{TTName}, defined in Idris. In the compiler, the
-  type of typed core language terms, \TT, is indexed by the type of names in
-  that term. The type of names in the compiler is called \ty{Name}, therefore
-  \texttt{TT Name} in the compiler is the type of core language terms with the
-  usual names. We will stick with \ty{Term} and \ty{Type} in this thesis to
-  avoid this confusion.}
-
-In the previous sections, we have informally used the word ``reflection'' to
-refer to the act of providing an Idris representation for a Haskell type we use
-in the compiler.  That was not an incorrect usage, since moving from a Haskell
-term to the Haskell representation of an Idris term is reflection as we define
-above. Since this holds for any Haskell term, take a Haskell term that is
-itself an internal Haskell representation of some Idris syntax.
-% If we reflect that
-% we can start from a Haskell term that is itself an internal Haskell
-% representation of some Idris syntax.  The reflected term then is the Haskell
-% representation of
-
-Since Idris types and terms must have a Haskell representation in the compiler so that the compiler can manipulate them.
 \section{Additions to the Idris standard library}\label{sec:stdlib}
 
 \newcommand{\LR}{\texttt{Language.Reflection}}
@@ -129,7 +55,153 @@ argument automatically inferrable by proof search, which is
 an accomodating feature of Idris usable via the \kw{auto} keyword.
 
 We will inspect in \label{sec:primitiveEditorableImpl} how these new
-constructors will be used in the compiler.
+constructors will be used in the compiler, but first we have to clarify some
+terminology.
+
+\newpage
+\section{Reflection and reification in the compiler}
+
+Before we delve into further details of the implementation, we should compare
+and contrast certain terminology we will use in this chapter. The graph in
+\autoref{reflectionGraph} describes the relationship between the different
+kinds of languages and representations and the spells out the specific names
+for moving from one to another.
+
+\begin{figure}[ht]
+\caption{The relationship between reflection, reification, quotation,
+  unquotation, elaboration and delaboration.}
+\label{reflectionGraph}
+\newcommand\mlnode[1]{
+  \begin{minipage}{3.3cm}
+    \linespread{1}\selectfont \begin{center}\small #1 \end{center}
+  \end{minipage}}
+\begin{tikzcd}
+  \mlnode{
+    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term
+
+    \dt{()}
+  }
+  \arrow[rrr, "\text{\small reflection}" description, bend right=10]
+  &  &  &
+  \mlnode{
+    Haskell representation of Idris core language terms\\ \medskip \scriptsize
+    such as the \ty{Term}\footnotemark term
+
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[lll, "\text{\small reification}" description, bend right=10] \\
+  &  &  &\\
+  \mlnode{
+    Idris terms\\ \medskip \footnotesize such as the \ty{()} term
+
+    \dt{()}
+  }
+  \arrow[r, "\text{\small elaboration}" description, bend right=50]
+  &
+  \mlnode{
+    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term
+
+    \dt{MkUnit}
+  }
+  \arrow[l, "\text{\small delaboration}" description, bend right=50]
+  \arrow[rr, "\text{\small quotation}" description, bend right=35]
+  \arrow[uurr, "\text{\small \emph{internally represented as}}" description, dashed, bend left=25]
+  & &
+  \mlnode{
+    Idris representation of the Haskell representation of Idris core language terms\\
+    \medskip \scriptsize such as the \TT\ term
+
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
+    (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
+  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
+\end{tikzcd}
+\end{figure}
+\footnotetext{In the compiler source code in Haskell, both \ty{Term} and
+  \ty{Type} are aliases for \ty{TT Name}. This should not be confused with the
+  type of reflected names, \ty{TTName}, defined in Idris. In the compiler, the
+  type of typed core language terms, \TT, is indexed by the type of names in
+  that term. The type of names in the compiler is called \ty{Name}, therefore
+  \texttt{TT Name} in the compiler is the type of core language terms with the
+  usual names. We will stick with \ty{Term} and \ty{Type} in this thesis to
+  avoid this confusion.}
+In the previous sections, we have informally used the word ``reflection'' to
+refer to the act of providing an Idris representation for a Haskell type we use
+in the compiler.  That was handwavy but still accurate: In the graph we defined
+reflection as moving from a Haskell term to the Haskell representation of an
+Idris term. Since this holds for any Haskell term, you can also take a Haskell
+term that is itself an internal Haskell representation of some Idris syntax.
+When you reflect that, you get the internal representation of an Idris
+representation of the Haskell representation of an Idris term.  Our previous
+usage of ``reflection'' was only a special case of the word, but in this
+section, we will use the generalized definition.
+
+Let's give an example and see what we mean by this.
+We defined the Idris type \ty{SExp} in \autoref{code:definitionSExp}.
+When we will define \fn{fromEditor} and \fn{toEditor} in \label{sec:primitiveEditorableImpl},
+we will need to convert Haskell terms of the Haskell type \ty{SExp} into the
+internal representation of an Idris term of the Idris type \ty{SExp}, and vice
+versa.
+
+The conversion from the former to the latter is reflection. We write the
+function \fn{reflectSExp} in \autoref{code:reflectSExp}.
+
+\begin{figure}[ht]
+\caption{The function to reflect Haskell terms of the type \ty{SExp} to the
+internal representations of Idris terms of the Idris type \ty{SExp}.}
+\label{code:reflectSExp}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\fn{reflectSExp} :: \ty{SExp} -> \ty{Raw}
+\fn{reflectSExp} (\dt{StringAtom} \bn{s}) =
+  \dt{RApp} (\dt{Var} (\fn{tacN} \dt{"StringAtom"})) (\dt{RConstant} (\dt{Str} \bn{s}))
+\fn{reflectSExp} (\dt{SymbolAtom} \bn{s}) =
+  \dt{RApp} (\dt{Var} (\fn{tacN} \dt{"SymbolAtom"})) (\dt{RConstant} (\dt{Str} \bn{s}))
+\fn{reflectSExp} (\dt{BoolAtom} \bn{b}) =
+  \dt{RApp} (\dt{Var} (\fn{tacN} \dt{"BoolAtom"})) (\fn{reflectBool} \bn{b})
+\fn{reflectSExp} (\dt{IntegerAtom} \bn{i}) =
+  \dt{RApp} (\dt{Var} (\fn{tacN} \dt{"IntegerAtom"})) (\dt{RConstant} (\dt{BI} \bn{i}))
+\fn{reflectSExp} (\dt{SexpList} \bn{l}) =
+  \dt{RApp} (\dt{Var} (\fn{tacN} \dt{"SExpList"}))
+       (\fn{reflectList} (\dt{Var} (\bn{tacN} \dt{"SExp"})) (\fn{map} \fn{reflectSExp} \bn{l}))
+\end{Verbatim}
+\end{figure}
+
+Observe that in the \fn{reflectSExp}, we are returning a \Raw\ term, a core
+language term that is untyped. This mainly for convenience, it is easier to
+write the syntax trees for untyped terms. We can always type-check them later.
+
+To get a Haskell term of the type \ty{SExp} from an internal representation of
+an Idris term that has the Idris type \ty{SExp}, we have to write a function
+\fn{reifySExp} that reifies a given \ty{Term}, which you can see in
+\autoref{code:reifySExp}
+
+\begin{figure}[ht]
+\caption{The function to reify the internal representations of Idris terms
+  of the Idris type \ty{SExp} to Haskell terms of the type \ty{SExp}.}
+\label{code:reifySExp}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\fn{reifySExp} :: \ty{Term} -> \ty{ElabD} \ty{SExp}
+\fn{reifySExp} (\dt{App} _ (\dt{P} _ \bn{n} _) \bn{x})
+  | \bn{n} \fn{==} \fn{tacN} \dt{"StringAtom"}  = \dt{StringAtom}  \fn{<$>} \fn{reifyString} \bn{x}
+  | \bn{n} \fn{==} \fn{tacN} \dt{"SymbolAtom"}  = \dt{SymbolAtom}  \fn{<$>} \fn{reifyString} \bn{x}
+  | \bn{n} \fn{==} \fn{tacN} \dt{"BoolAtom"}    = \dt{BoolAtom}    \fn{<$>} \fn{reifyBool} \bn{x}
+  | \bn{n} \fn{==} \fn{tacN} \dt{"IntegerAtom"} = \dt{IntegerAtom} \fn{<$>} \fn{reifyInteger} \bn{x}
+  | \bn{n} \fn{==} \fn{tacN} \dt{"SExpList"}    = \dt{SexpList}    \fn{<$>} \fn{reifyList} \fn{reifySExp} \bn{x}
+\fn{reifySExp} \bn{tm} = \fn{fail} (\dt{"Not an SExp: "} \fn{++} \fn{show} \bn{tm})
+\end{Verbatim}
+\end{figure}
+
+Observe in \fn{reifySExp} that we are returning
+\ty{ElabD SExp}.\footnote{\ty{ElabD} is an alias for the \ty{Elab'} monad
+combined with some special state, this does not concern us in this thesis.}
+This is because reification, unlike reflection, can fail. This function is
+designed to reify the internal representation of S-expressions, and if the
+\ty{Term} it receives does not correspond to one, reification should fail.
+
+Now that we know how reflection and reification mean in the context of compiler
+implementation, we can move on to how they are used in implementing primitive
+instances for \ty{Editorable}.
 
 \section{Primitive \ty{Editorable} implementations}\label{sec:primitiveEditorableImpl}
 
@@ -147,9 +219,8 @@ in the compiler happens in the \fn{runElabAction} defined in the compiler
 source code. Inside that, there is a helper function \fn{runTacTm} that takes a
 typed term corresponding to a value in the \Elab\ monad of Idris, which should
 correspond to a \Elab\ primitive constructor applied to arguments, i.e. when
-the \Elab\ action term is in a weak head normal form\footnote{Hereinafter referred
-to as WHNF.}. Then we can check what primitive constructor we are dealing with
-and behave accordingly.
+the \Elab\ action term is in a normal form. Then we can check what primitive
+constructor we are dealing with and behave accordingly.
 
 \begin{figure}[ht]
 \caption{The \fn{runElabAction} function in the compiler, how \Elab\ action terms are run under the hood.}
@@ -176,14 +247,14 @@ In \autoref{code:runElabAction} we can observe how \fn{runElabAction} is
 defined in the compiler.
 It takes many arguments, such as informaion for the elaborator, the internal
 state of the compiler at that point, the source location of the action, the
-environment under which the \Elab\ term should be evaluated to a WHNF, the
+environment under which the \Elab\ term should be evaluated to a normal form, the
 term that represents the \Elab\ action term, and a namespace.  For our purposes,
 we do not have to worry about all of these.
 
-In the definition of \fn{runElabAction} we evaluate \bn{tm} to a WHNF
+In the definition of \fn{runElabAction} we evaluate \bn{tm} to a normal form
 of the \Elab\ action, and then we check in \fn{runTacTm} which form we want run.
 
-If we have a WHNF of the \Elab\ action, that means when we decide
+If we have a normal form of the \Elab\ action, that means when we decide
 that what we have is a variable term, which is a constructor, represented by
 \dt{P}, or it is a series of applications to a variable term that is a
 constructor. We can handle both situations with the
@@ -235,29 +306,84 @@ started to do in \autoref{code:runElabAction}.
 \end{figure}
 
 Observe that we left most parts in here blank, let's zoom in to the \TT\ cases
-  of \dt{Prim\_\_FromEditor} and \dt{Prim\_\_toEditor}.
+  of \dt{Prim\_\_FromEditor} and \dt{Prim\_\_toEditor}. The actual code blocks
+  for them refer to many helper functions that are difficult to follow; we will
+  instead explain what they do in detailed prose.
 
 For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
 \begin{enumerate}
   \item We have an Idris term \bn{arg'} representing the S-expression passed to
-    the \dt{Prim\_\_FromEditor}, we have to reify this and get a Haskell term
-    that is the S-expression.
-  \item Parse the surface syntax.
-  \item Elaborate that into the core language
-  \item Reflect that to Raw in the core language
-  \item Typecheck the reflected term from Raw to TT
-  \item Evaluate and return the TT
+    the \dt{Prim\_\_FromEditor}, we have to reify this using \fn{reifySExp} and
+    get a Haskell term with the Haskell type \ty{SExp}.
+  \item Remember from \autoref{ssec:primitiveEditorableDesign} that we should
+    receive a string atom S-expression. We fail is the \ty{SExp} we get in the
+    previous step is not a string atom. Otherwise we have access to the string
+    \bn{s}.
+  \item Parse the string \bn{s} into a abstract syntax tree term \bn{pterm} of
+    the surface syntax, which is represented by the type \ty{PTerm} in the
+    compiler. We therefore obtain the variable \bn{pterm}.
+  \item Elaboration cannot resolve namespaces in the parsed surface syntax
+    terms.  Using the current context, we write a function
+    \texttt{\fn{resolveNames} :: \ty{Context} -> \ty{PTerm} -> \ty{Either} \ty{Err} \ty{PTerm}}
+    that traverses the the surface language abstract syntax tree using
+    Uniplate\cite{uniplate}, and then at the \dt{PRef} terms, i.e. variable
+    references, we search the context to find the matching fully namespaced
+    name. If there is a unique find, we change the name. If there are multiple
+    finds, we return an error that there is ambiguity in the name. If there are
+    no finds, we leave it as is and let elaboration handle the rest.
+    We apply the current context and \bn{pterm} to this function and obtain
+    \bn{pterm'}, the surface syntax term with resolved names.
+  \item Elaborate \bn{pterm'} into the core language and get \bn{t}.
+  \item Now, remember that our function \fn{fromEditor} must return
+    \ty{Elab TT} in this context. Therefore in the Haskell implementation, we
+    want to return the Haskell representation of the Idris representation of
+    the Haskell representation of the given code. In other words, we have to
+    reflect \bn{t}, which is of the type \ty{Term}, and get a \Raw term, which
+    is a Haskell representation of the Idris representation of \bn{t}.
+    We can call the reflected term \bn{reflected}.
+  \item \fn{runTacTm} requires us to return a \ty{Term}, therefore we
+    type-check \bn{reflected} and get a Haskell term of the type \ty{Term},
+    which we can call \bn{tmReflected}.
+  \item When we return a core syntax tree, we want to return it in normal form,
+    therefore we normalise \bn{tmReflected} and return it.
 \end{enumerate}
 
-Let's see in \autoref{code:ttFromEditor} how this can be implemented in the compiler.
+% Let's see in \autoref{code:ttFromEditor} how this can be implemented in the compiler.
 
-\begin{figure}[ht]
-\caption{The \TT\ case of \dt{Prim\_\_FromEditor}.}
-\label{code:ttFromEditor}
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
-\dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
-\end{Verbatim}
-\end{figure}
+% \begin{figure}[ht]
+% \caption{The \TT\ case of \dt{Prim\_\_FromEditor}.}
+% \label{code:ttFromEditor}
+% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+% \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
+% \end{Verbatim}
+% \end{figure}
+
+For the \TT\ case of \dt{Prim\_\_ToEditor}, we have to do the following steps:
+\begin{enumerate}
+  \item We have an Idris term \bn{arg'} representing the \TT\ term passed to
+    the \dt{Prim\_\_ToEditor}, we have to reify this using \fn{reifyTT} and
+    get a Haskell term with the Haskell type \ty{Term}.
+    In other words, we are given the Haskell representation of the Idris
+    representation of the Haskell representation of a term.
+    We want to get the Haskell representation of that term, using reification.
+  \item We now have a \ty{Term} term named \bn{v}. We delaborate and resugar
+    \bn{v} and get the surface syntax version of it. We name the delaborated
+    version \bn{pterm}, which has the type \ty{PTerm}.
+  \item We pretty print \bn{pterm} and get a string \bn{s}.
+  \item With \bn{s}, we can create \texttt{\dt{StringAtom} \bn{s}}, which is a
+    Haskell term with the Haskell type \ty{SExp}. Using \fn{reflectSExp}, we
+    can get the Haskell representation of an Idris term that has the Idris type
+    \ty{SExp}, which we call \bn{tm}.
+  \item When we return a core syntax tree, we want to return it in normal form,
+    therefore we normalise \bn{tm} and return it.
+\end{enumerate}
+
+The primitive implementations for the other types, namely \ty{TyDecl},
+\ty{DataDefn}, \ty{FunDefn}, and \ty{FunClause}, are not significantly
+different from \ty{TT}. Hence we will not go over them.
+
+In the next section, we will see how exactly \fn{fromEditor} and \fn{toEditor}
+are used in the IDE mode of the compiler to communicate with the editor.
 
 
 \section{Extensions to the Idris IDE mode}\label{sec:idemode}

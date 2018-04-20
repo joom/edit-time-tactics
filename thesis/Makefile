@@ -30,4 +30,8 @@ clean:
 	@rm *.aux
 	@rm $(FILENAME).*
 
+publishbash:
+	./publish.sh
+
 preview: compile open clean
+publish: compile publishbash clean

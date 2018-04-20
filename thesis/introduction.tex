@@ -218,7 +218,6 @@ tactics.
 
 To achieve the advantages listed above, we make the following specific
 contributions in this thesis:
-% \vspace{-1em}
 \begin{itemize}
 \item We extend the primitive \Elab\ monad with the necessary primitive monadic
 actions that make writing an editor action with elaborator reflection possible.
@@ -253,13 +252,14 @@ Before we move on the other chapters, it might be helpful to take a brief look
 at the typographic conventions we use in this thesis: When we have code
 excerpts, we will use a monospace font.  Keywords will be written in \kw{black
 boldface}, types will be \ty{blue}, constant and function names will be
-\fn{green}, bound variables will be \bn{purple}, and metavariables and holes
-will be \texttt{\IdrisMetavar{cyan}}.\footnote{We are following the color
-conventions in Conor McBride's Epigram paper\cite{epigram} and David
-Christiansen's dissertation\cite{davidphd}.} We will have code excerpts in
-different programming languages such as Idris, Haskell, and Emacs Lisp in this
-thesis, hence we will always explicitly state what language the code is in, but
-we will use the same syntax highlighting for all of them.
+\fn{green}, bound variables will be \bn{purple}, metavariables and holes
+will be \texttt{\IdrisMetavar{cyan}}, and comments will be in
+\cm{dark gray}.\footnote{We are following the color conventions in Conor McBride's
+Epigram paper\cite{epigram} and David Christiansen's
+dissertation\cite{davidphd}.} We will have code excerpts in different
+programming languages such as Idris, Haskell, and Emacs Lisp in this thesis,
+hence we will always explicitly state what language the code is in, but we will
+use the same syntax highlighting for all of them.
 
 \TODO{Hopefully edit-time tactics will look just the same to the "end user". to
 the tactic writer, it looks like the "examples in action" section for tactic
@@ -267,27 +267,3 @@ writers. We have three different users: editor action users, simple action
 writers, and ones that want to define their own editorable instances. It would
 be ideal to have one working example in the introduction section to give a
 taste of what we actually did!}
-
-% One way to do this would be to have compiler plugins, like
-% GHC\footnote{Users can write compiler GHC plugins in Haskell starting from GHC 7.2.1.
-% \url{https://downloads.haskell.org/~ghc/7.2.1/docs/html/users_guide/compiler-plugins.html}}
-% and Coq\footnote{Users can write compiler Coq plugins in OCaml.}
-% However, the Idris compiler does not have a plugin system, and writing one for
-% this purpose would be an overkill.
-
-
-% Case-splitting on a nested tuple might seem like a mindless task. What if we
-% had a data type that required us to be clever when we are case-splitting,
-% then doing that for every function would get exhausting.
-% Red-black trees\cite{okasakiRedBlack} are a good example of that.
-% Suppose we want to balance a red-black tree, and we want to rotate the tree in
-% the cases where we have two red nodes consecutively. We want to write some
-% functions to rotate within the left and right subtrees. If we make use of
-% dependent types to ensure certain properties about our tree, then pattern
-% matching on our trees will be difficult to write by hand. However, we could
-% write a tactic that does that for us. Moreover, the interesting cases are when
-% we have two consecutive red nodes, so we might want to list them first in our
-% patterns.  An Agda formalization of the tree rotation was previously given by
-% Licata\cite{licataOPLSS}. In \autoref{sec:rbt}, we first describe an Idris
-% equivalent of that code, and then define a tactic to generate cases for
-% rotation.

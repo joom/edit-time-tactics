@@ -31,7 +31,7 @@ them.
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{export}
 \kw{data} \ty{Elab} : \ty{Type} -> \ty{Type} \kw{where}
-  -- the constructors we had before
+  \cm{-- the constructors we had before}
   \dt{Prim__FromEditor} : \{\bn{a} : \ty{Type}\} -> \ty{HasEditorPrim} \bn{a} -> \ty{SExp} -> \ty{Elab} \bn{a}
   \dt{Prim__ToEditor} : \{\bn{a} : \ty{Type}\} -> \ty{HasEditorPrim} \bn{a} -> \bn{a} -> \ty{Elab} \ty{SExp}
 
@@ -200,8 +200,8 @@ designed to reify the internal representation of S-expressions, and if the
 \ty{Term} it receives does not correspond to one, reification should fail.
 
 Now that we know how reflection and reification mean in the context of compiler
-implementation, we can move on to how they are used in implementing primitive
-instances for \ty{Editorable}.
+development, we can move on to how they are used in implementing primitive
+implementations for \ty{Editorable}.
 
 \section{Primitive \ty{Editorable} implementations}\label{sec:primitiveEditorableImpl}
 
@@ -231,7 +231,7 @@ constructor we are dealing with and behave accordingly.
 \fn{runElabAction} \bn{info} \bn{ist} \bn{fc} \bn{env} \bn{tm} \bn{ns} = \kw{do} \bn{tm}' <- \fn{eval} \bn{tm}
                                          \fn{runTacTm} \bn{tm}'
 
-  -- some helper functions ...
+  \cm{-- some helper functions ...}
 
   \fn{runTacTm} :: \ty{Term} -> \ty{ElabD} \ty{Term}
   \fn{runTacTm} \bn{tac}@(\fn{unApply} -> (\dt{P} _ \bn{n} _, \bn{args}))
@@ -239,7 +239,7 @@ constructor we are dealing with and behave accordingly.
     = \kw{do} ~[] <- \fn{tacTmArgs} \dt{0} \bn{tac} \bn{args}
           \fn{solve}
           \fn{returnUnit}
-    -- other cases for other constructors
+    \cm{-- other cases for other constructors}
 \end{Verbatim}
 \end{figure}
 
@@ -281,27 +281,27 @@ started to do in \autoref{code:runElabAction}.
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
 \fn{runTacTm} :: \ty{Term} -> \ty{ElabD} \ty{Term}
 \fn{runTacTm} \bn{tac}@(\fn{unApply} -> (\dt{P} _ \bn{n} _, \bn{args}))
-  -- other cases for other Elab primitives
+  \cm{-- other cases for other Elab primitives}
   | \bn{n} \fn{==} \bn{tacN} \dt{"Prim__FromEditor"}
   = \kw{do} ~[\bn{ty}, \bn{hasEditorPrim}, \bn{arg}] <- \fn{tacTmArgs} \dt{3} \bn{tac} \bn{args}
         \bn{ty'} <- \fn{eval} \bn{ty}
         \bn{arg'} <- \fn{eval} \bn{arg}
         \kw{case} \bn{ty'} \kw{of}
           \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
-            -- now we want to convert an S-expression to TT
+            \cm{-- now we want to convert an S-expression to TT}
           \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{tacN} \dt{"TyDecl"} ->
-            -- now we want to convert an S-expression to TyDecl
-          -- other cases for other core language types
+            \cm{-- now we want to convert an S-expression to TyDecl}
+          \cm{-- other cases for other core language types}
   | \bn{n} \fn{==} \bn{tacN} \dt{"Prim__ToEditor"}
   = \kw{do} ~[\bn{ty}, \bn{hasEditorPrim}, \bn{arg}] <- \fn{tacTmArgs} \dt{3} \bn{tac} \bn{args}
         \bn{ty'} <- \fn{eval} \bn{ty}
         \bn{arg'} <- \fn{eval} \bn{arg}
         \kw{case} \bn{ty'} \kw{of}
           \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
-            -- now we want to convert a TT into an S-expression
+            \cm{-- now we want to convert a TT into an S-expression}
           \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{tacN} \dt{"TyDecl"} ->
-            -- now we want to convert a TyDecl into an S-expression
-          -- other cases for other core language types
+            \cm{-- now we want to convert a TyDecl into an S-expression}
+          \cm{-- other cases for other core language types}
 \end{Verbatim}
 \end{figure}
 
@@ -338,7 +338,7 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
     \ty{Elab TT} in this context. Therefore in the Haskell implementation, we
     want to return the Haskell representation of the Idris representation of
     the Haskell representation of the given code. In other words, we have to
-    reflect \bn{t}, which is of the type \ty{Term}, and get a \Raw term, which
+    reflect \bn{t}, which is of the type \ty{Term}, and get a \Raw\ term, which
     is a Haskell representation of the Idris representation of \bn{t}.
     We can call the reflected term \bn{reflected}.
   \item \fn{runTacTm} requires us to return a \ty{Term}, therefore we
@@ -347,16 +347,6 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
   \item When we return a core syntax tree, we want to return it in normal form,
     therefore we normalise \bn{tmReflected} and return it.
 \end{enumerate}
-
-% Let's see in \autoref{code:ttFromEditor} how this can be implemented in the compiler.
-
-% \begin{figure}[ht]
-% \caption{The \TT\ case of \dt{Prim\_\_FromEditor}.}
-% \label{code:ttFromEditor}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
-% \dt{P} _ \bn{tyN} _ | \bn{tyN} \fn{==} \fn{reflm} \dt{"TT"} ->
-% \end{Verbatim}
-% \end{figure}
 
 For the \TT\ case of \dt{Prim\_\_ToEditor}, we have to do the following steps:
 \begin{enumerate}
@@ -385,5 +375,171 @@ different from \ty{TT}. Hence we will not go over them.
 In the next section, we will see how exactly \fn{fromEditor} and \fn{toEditor}
 are used in the IDE mode of the compiler to communicate with the editor.
 
-
 \section{Extensions to the Idris IDE mode}\label{sec:idemode}
+
+Idris IDE mode has an S-expression parser, which looks at the shape of an
+S-expression and creates a IDE mode command value based on it. We extend this
+parser by adding a line that says that if we see a symbol atom \dt{:elab-edit},
+a string atom for the \Elab\ action name, an S-expression list, and two integer
+atom for line and column numbers in that order, then we create a new IDE mode
+command.
+
+These commands are passed around for a while in the compiler, however
+eventually there are separate functions that deal with each editor command. We
+write the function for edit-time tactics under the name \fn{elabEditAt} in
+\autoref{code:elabEditAt}.
+
+\begin{figure}[ht]
+\caption{The function \fn{elabEditAt} that runs editor actions in the compiler.}
+\label{code:elabEditAt}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+\fn{elabEditAt}
+  :: \ty{FilePath}   \cm{-- ^ The file name in which the Elab action is run}
+  -> \ty{String}     \cm{-- ^ The name of the action}
+  -> (\ty{Int}, \ty{Int}) \cm{-- ^ The line and column number the action is run on}
+  -> [\ty{SExp}]     \cm{-- ^ The arguments to the action}
+  -> \ty{Idris} \ty{()}
+\fn{elabEditAt} \bn{filename} \bn{nameStr} \bn{pos} \bn{args} = ...
+\end{Verbatim}
+\end{figure}
+
+Once again the actual code block for \fn{elabEditAt} refers to many helper
+functions that are difficult to follow; we will instead explain what it does in
+detailed prose. This will read like much more detailed version of our
+description in \autoref{ssec:usingEditorable} about how \ty{Editorable} works
+in the compiler.
+
+Here are the steps \fn{elabEditAt} takes when it is called:
+\begin{enumerate}
+  \item The variable \bn{nameStr}, which has the Haskell type \ty{String},
+    holds the name of the \Elab\ action we want to run. However, we need
+    to parse this string into a \ty{Name}, in order to get any namespace
+    information that is provided inside \bn{nameStr}.
+    If there is any namespace information, we use \dt{NS}, otherwise we use
+    \dt{UN}.  We call the result \bn{name}, which has the type \ty{Name}.
+  \item Now we have \bn{name}, yet we do not know whether it really refers to a
+    existing \Elab\ action. If it does what is its type?
+    We lookup the context and find out its type, which we can call \bn{ty}, and
+    that has the Haskell type \ty{Type}. From the context, we also resolve the
+    name of the \Elab\ action if we need to, we call the resolved name \bn{ns}.
+  \item Using the resolved name \bn{ns}, we look up the flags declared for this function.
+    We check if the it has been declared an editor action using the
+    \kw{\%editor} modifier.  If not, we do not proceed.
+  \item We are given a list of \ty{SExp}s, which is the list that the editor
+    passes to the compiler to apply the editor action they want to call.
+    However, we have to check if this list contains the right number of
+    arguments, and for that we need to know how many arguments the editor action should have.
+    For that, we can write a function \fn{collectTypes} that takes a the
+    \fn{Type} \bn{ty} and gives us a list of \fn{Type}s, which are the
+    components of \bn{ty}, i.e.  curried arguments and also the return type.
+    \begin{figure}[ht]
+    \caption{The function \fn{collectTypes} to dissect a type signature to its components.}
+    \label{code:collectTypes}
+    \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
+    \fn{collectTypes} :: \ty{Type} -> [\ty{Type}]
+    \fn{collectTypes} (\dt{Bind} _ (\dt{Pi} _ _ \bn{t1} _) \bn{t2}) = \bn{t1} \fn{:} \fn{collectTypes} \bn{t2}
+    \fn{collectTypes} \bn{t} = [\bn{t}]
+    \end{Verbatim}
+    \end{figure}
+    We apply \bn{ty} to \fn{collectTypes} and name the result \bn{collected},
+    which is a list of \ty{Type}s.
+  \item We check if the length of \bn{collected} is exactly one less than the
+    length of \bn{args}, because the last element in \bn{collected} is the
+    return type of the \Elab\ action.
+  \item We zip \bn{collected} and \bn{args} and get a list of pairs of
+    \ty{Type} and \ty{SExp}.
+    For each of the pairs, we have to do the following and get a result for
+    each pair of \texttt{(\bn{argTy}, \bn{sexp})}:
+    \begin{enumerate}[(a)]
+      \item \label{item:fromEditor} Construct an Haskell representation of an
+        Idris term that calls \fn{fromEditor}. Remember that \fn{fromEditor} is
+        polymorphic and also has an interface constraint, therefore
+        constructing this as a \ty{Term} is not trivial.  As a shortcut, we can
+        construct a \ty{PTerm} that explicitly applies the polymorphic type,
+        which will be \bn{argTy} in this case.
+      \item Elaborate the \ty{PTerm} we construct above, which gives us
+        \bn{tm}, the Haskell representation of an Idris term that has the type
+        represented by \bn{argTy}, but in the Idris \Elab\ monad.
+      \item Since \bn{tm} is the Haskell representation of an \Elab\ action,
+        we should run it using \fn{runElabAction}. This gives us \bn{tm'}, the
+        Haskell representation of a term that has the type represented by
+        \bn{argTy}.
+      \item We return \bn{tm'} as the result for the pair
+        \texttt{(\bn{argTy}, \bn{sexp})}.
+    \end{enumerate}
+  \item We make a list of all the \bn{tm'}s returned for each pair.
+  \item Remember that this list consists of the results parsing each
+    S-expression into what type they represent. Therefore, its elements are
+    actually Haskell representations of argument for the \Elab\ action we want
+    to call. Hence, we construct a term by applying the elements of the list to
+    the variable reference to \bn{ns}, which we can call \bn{app}.
+  \item \label{item:extract}
+    Now we have a Haskell representation of an \Elab\ action, because we
+    applied all the arguments required.  From the last element of
+    \bn{collected}, which is supposed to be the return type, we can find out
+    what type the term we expect when we run \bn{app}.  The last element of
+    \bn{collected} is a Haskell representation of an Idris type in the shape of
+    \texttt{\ty{Elab} \bn{a}}, for some \bn{a}. We extract the Haskell
+    representation for the Idris type \bn{a} from it.  We name the extracted
+    representation \bn{lastTyInElab}.
+  \item Using \fn{runElabAction} and \bn{lastTyInElab}, we run \bn{app}. This
+    gives us \bn{res}, the Haskell representation of a term that has the Idris
+    type that \bn{lastTyInElab} represents.
+  \item We want to serialize this term before returning it as an S-expression.
+    The only way we know how to serialize is through the \fn{toEditor} function
+    in \ty{Editorable}, but remember that that is defined in Idris.
+    Hence we construct a Haskell representation of an Idris term that calls
+    \fn{toEditor}, similar to how we constructed an application term for
+    \fn{fromEditor} before in \autoref{item:fromEditor}.
+    For convenience in implementation resolution, we first construct a
+    \ty{PTerm}, then elaborate it. We call the elaborated term \bn{tm}.
+  \item Since \bn{tm} is the Haskell representation of an \Elab\ action, we
+    should run it using \fn{runElabAction}. We get the Haskell
+    representation of a term that has the Idris type \ty{SExp}.
+  \item We reify the Haskell representation of that term into a Haskell term
+    that has the Haskell type \ty{SExp}, using \fn{reifySExp}, and get
+    \bn{resSExp}.
+  \item We send a message to the client/editor and report that the action is
+    successful, and the result is \bn{resSExp}.
+\end{enumerate}
+
+This concludes the IDE mode section of implementing edit-time tactics.
+
+\section{Extensions to the type-checker for \kw{\%editor}}\label{sec:extCheck}
+
+The last remaining part of the implementation is an additional restriction to
+type-checking.
+
+If a function is declared an editor action with the \kw{\%editor} modifier, we
+want to find out during type-checking if it is viable to use them as an editor
+action, and an \Elab\ action viable is if the components of its type have
+implementations of the \Editorable\ interface. We discussed this idea in the
+\fn{toy} example in \autoref{ssec:primitiveEditorableDesign}, and also have
+seen the type errors you can get in \autoref{ssec:preclude}. Now let's see how
+we implement this feature.
+
+To the \fn{elabType'} function in the compiler, we add the following:
+\begin{enumerate}
+  \item We use \fn{collectTypes} that we defined in \autoref{code:collectTypes} to get the components of the type signature, we will call this list of \ty{Type}s \bn{collected}.
+  \item The last element in \bn{collected} is supposed to be return type. We
+    extract \bn{lastTyInElab}, which is the Haskell representation of the Idris
+    type in the Idris \Elab\ monad, the same way we did in
+    \autoref{item:extract}.
+  \item We replace the last element in \bn{collected} with \bn{lastTyInElab},
+    and name the new list \bn{toCheck}.
+  \item For every element \bn{ty} in \bn{toCheck}, we do the following:
+    \begin{enumerate}[(a)]
+      \item We want to find out if there is an \ty{Editorable} implementation
+        for the Idris type \bn{ty} represents. The easy way to do that is to
+        construct a \ty{PTerm} of a \fn{fromEditor} application and then
+        elaborate it, as we did in \label{item:fromEditor} before, which should
+        resolve implementation constraints, or give an error if it cannot.
+      \item If there is no error, move on to the next \bn{ty} silently.
+        If there is an error, that implies that there was no \ty{Editorable}
+        implementation for the Idris type \bn{ty} represents. Then we send an
+        error message like the ones in \autoref{ssec:preclude} back to the editor.
+    \end{enumerate}
+\end{enumerate}
+
+This concludes the implementation of edit-time tactics in the Idris compiler.
+In the next chapter, we will see real applications of edit-time tactics.

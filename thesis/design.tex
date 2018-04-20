@@ -198,7 +198,7 @@ for a type that we want to make serializable.
 \fn{toEditor} allows us to serialize a value of the type \bn{a} into an S-expression.
 Notice that both of these functions return a value in the \Elab\ monad.
 There are a few reasons for this:
-\begin{itemize}
+\begin{enumerate}
   \item The \Elab\ monad captures failure. Especially the \fn{fromEditor}
     function, which basically parses S-expressions, we want to fail if we are
     given an S-expression that is ill-formed for the type \bn{a}.
@@ -216,7 +216,7 @@ There are a few reasons for this:
     fail, is that users may want to type check or normalize terms, or look up
     information about existing types and functions during serialization and
     deserialization as well. This is only available in the \Elab\ monad.
-\end{itemize}
+\end{enumerate}
 
 \subsection{\ty{Editorable} implementations in Idris}
 
@@ -446,12 +446,12 @@ We will discuss the implementation of this in the compiler in
 \subsection{Using \ty{Editorable} in the compiler and the \kw{\%editor} modifier}\label{ssec:usingEditorable}
 
 The motivation behind the \ty{Editorable} interface is twofold:
-\begin{itemize}
+\begin{enumerate}
 \item to check if a given \Elab\ action is suitable to be used as an editor
   action.
 \item to use the \fn{fromEditor} and \fn{toEditor} definitions to serialize
   and deserialize data when the action is run.
-\end{itemize}
+\end{enumerate}
 
 The first motivation means all argument and return types should have an
 \ty{Editorable} implementation. If we want to write a toy editor action
@@ -460,7 +460,9 @@ then the compiler must check if \ty{TTName}, \TT\ (from the second argument)
 and \TT\ (from the return type) are all \Editorable. If any of the argument of
 return types do not have an \Editorable\ implementation, then we should not be
 able to run the given action from the editor. In fact, to make the distinction
-clearer, we add a new function modifier syntax \kw{\%editor} to Idris.
+clearer, we add a new function modifier syntax \kw{\%editor} to Idris, that
+checks it during type-checking.  We explain its implementation in
+\autoref{sec:extCheck}.
 
 \begin{figure}[ht]
 \caption{Type declaration for the \fn{toy} editor action we want to define.}
@@ -482,7 +484,7 @@ the editor via S-expressions. When the editor sends an S-expression like
 \texttt{((:elab-edit "toy" '("q" "S Z") 35 5) 20)} to the
 compiler with the intent of running an \Elab\ action,
 the following steps should happen:
-\begin{itemize}
+\begin{enumerate}
   \item The S-expression we are given contains the name of the \Elab\ action,
     namely \fn{toy} We must lookup the name in order to resolve its namespace
     and also learn the type of the action.
@@ -512,7 +514,7 @@ the following steps should happen:
     we can use \fn{toEditor} from the \Editorable\ implementation of \TT, which
     gives us an S-expression.
   \item We can now send that S-expression back to the editor.
-\end{itemize}
+\end{enumerate}
 
 \section{Examples in action}\label{sec:designExample}
 
@@ -619,7 +621,7 @@ By definition of \fn{idris-elab-hole-arg}, the result \dt{1} replaces the hole
 \end{Verbatim}
 \end{figure}
 
-\subsection{What \Editorable\ precludes}
+\subsection{What \Editorable\ precludes}\label{ssec:preclude}
 
 Suppose we wanted to write a polymorphic editor action, that merely returned its argument back.
 

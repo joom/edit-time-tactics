@@ -30,6 +30,7 @@
 }
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
+\usepackage{enumerate}
 
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
@@ -47,6 +48,7 @@
 \newcommand{\fn}[1]{\IdrisFunction{\texttt{#1}}}
 \newcommand{\dt}[1]{\IdrisData{\texttt{#1}}}
 \newcommand{\bn}[1]{\IdrisBound{\texttt{#1}}}
+\newcommand{\cm}[1]{\textcolor{darkgray}{\texttt{#1}}}
 \newcommand{\hole}[1]{\IdrisMetavar{\texttt{?}\IdrisMetavar{\texttt{#1}}}}
 \newcommand{\Elab}{\ty{Elab}}
 \newcommand{\String}{\ty{String}}

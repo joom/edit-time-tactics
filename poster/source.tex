@@ -93,16 +93,16 @@
   \indent Metaprogramming is a technique that allows users to write programs that
   write programs. In dependently-typed languages such as \textbf{Idris}, recent work on
   \textbf{elaborator reflection}\cite{elabref} paved the way for new applications of
-  metaprogramming by showing that it can be a substitute for \textbf{tactic-based proof
-  languages}.  The goal of our work is to use elaborator reflection to write
-  editor interaction actions in Idris.
+  metaprogramming by showing that it can be a substitute for \mbox{\textbf{tactic-based proof
+  languages}}.  The goal of our work is to use elaborator reflection to write
+  \mbox{editor} interaction actions in Idris.
   \medskip
 
   \indent Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case-splitting, and lemma extraction.
   Implementations of all of these Idris editor actions are hard-coded in the
-  compiler and they are written in Haskell. Our work will allow us to \textbf{rewrite
-  them in Idris as metaprograms}, and to move them into an Idris library instead
+  compiler and they are written in Haskell. Our work will allow us to \mbox{\textbf{rewrite
+  them in Idris as metaprograms}}, and to move them into an Idris library instead
   of having them embedded into the compiler.
   \medskip
 
@@ -115,7 +115,7 @@
   \medskip
 
   \indent{}  We also implement an intuitionistic theorem prover tactic that is meant to be
-  an better alternative to the built-in proof search editor action, and an
+  an better \mbox{alternative} to the built-in proof search editor action, and an
   add-clause tactic that exemplifies how we can move some of the hard-coded
   features from the compiler to a library.
 }
@@ -177,12 +177,12 @@
   \Large
   \setlength{\parindent}{1.5cm}
   \indent Editors communicate with the compiler via \mbox{S-expressions}, so
-  users should be able dictate how to convey a value of a given type.  We
+  users should be able \mbox{dictate} how to convey a value of a given type.  We
   define an interface in Idris, which can define serialization and
   deserialization of the terms of a type into an \ty{SExp} and vice versa.
 
   % \vspace{-0.2cm}
-  \hspace{-1.5cm}
+  \hspace{-3cm}
   \scalebox{3.5}{
     \begin{minipage}{6cm}
       \VerbatimInput[frame=none]{Editorable.tex}
@@ -199,7 +199,24 @@
 
 \column{0.25}
 \block{Type-checking with \ty{Editorable}\phantom{p}}{
+\Large
+  \setlength{\parindent}{1.5cm}
 
+  \indent We want to check during type-checking whether an \Elab\ action we
+  will use as an editor action is suitable for that task. We want to make sure
+  that all components of the type have an implementation of \ty{Editorable}.
+  We introduce a new function modifier syntax \kw{\%editor}, which enforces
+  this constraint.
+
+  \vspace{\baselineskip}
+  \vspace{0.35cm}
+
+  \indent If we have a function,\\
+  \texttt{\fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}}\\
+  and we declare it an editor action with \kw{\%editor}, then the types
+  \ty{TTName}, \ty{TT} (from the argument), and \ty{TT} (extracted from the
+  return type) must have implementations of \ty{Editorable}, so that we are
+  sure we know how to deserialize the arguments to \fn{toy} and \mbox{serialize} its result.
 }
 
 \column{0.25}

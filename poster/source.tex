@@ -2,8 +2,6 @@
 \documentclass[25pt, a0paper, landscape, margin=15.4mm]{tikzposter}
 \def\textmu{}
 
-%include agda.fmt
-
 \usepackage{natbib, textgreek, bussproofs, epigraph, float,
             enumerate, url, graphicx, listings, xfrac}
 \usepackage{amsmath}
@@ -50,18 +48,6 @@
 \newcommand{\FunDefn}{\ty{FunDefn}}
 \newcommand{\FunClause}{\ty{FunClause}}
 
-
-  % Math and code commands {{{
-  \newcommand{\nop}[0]{} % used to reconcile vim folds and latex curly braces
-  \renewcommand{\paragraph}[1]{\bigskip\textbf{#1}}
-  \newcommand{\figrule}{\begin{center}\hrule\end{center}}
-  \newcommand{\set}[1]{\left\{#1\right\}}
-  \DeclareRobustCommand{\shamrock}{\raisebox{-.035em}{\includegraphics[width=.75em, height=.75em]{symbols/command}}\nop}
-  \DeclareRobustCommand{\col}{\raisebox{-.035em}{\includegraphics[width=.30em, height=.75em]{symbols/colon}}\nop}
-  \newcommand{\conc}[2]{#1 \text{<#2>}}
-  \newcommand{\val}[2]{#1 \sym #2}
-  % }}}
-
 \newcommand{\T}[1]{\texttt{#1}}
 
 \usepackage{more}
@@ -83,41 +69,27 @@
 
 \begin{columns}  % See Section 4.4
 
-\column{0.5}
+\column{0.25}
 
   \block{Abstract\phantom{p}}{
   % \coloredbox[bgcolor=blue,fgcolor=white]{}
 
   \Large
   \setlength{\parindent}{1.5cm}
-  \indent Metaprogramming is a technique that allows users to write programs that
+  \indent Metaprogramming allows users to write programs that
   write programs. In dependently-typed languages such as \textbf{Idris}, recent work on
   \textbf{elaborator reflection}\cite{elabref} paved the way for new applications of
-  metaprogramming by showing that it can be a substitute for \mbox{\textbf{tactic-based proof
-  languages}}.  The goal of our work is to use elaborator reflection to write
+  metaprogramming by showing that it can be a substitute for \textbf{tactic-based proof
+  languages}.  The goal of our work is to use elaborator reflection to write
   \mbox{editor} interaction actions in Idris.
-  \medskip
 
-  \indent Currently in Idris modes of editors such as Emacs, users can perform actions
-  like type-checking holes, case-splitting, and lemma extraction.
-  Implementations of all of these Idris editor actions are hard-coded in the
-  compiler and they are written in Haskell. Our work will allow us to \mbox{\textbf{rewrite
-  them in Idris as metaprograms}}, and to move them into an Idris library instead
-  of having them embedded into the compiler.
-  \medskip
-
-  \indent  Furthermore, we can write our own tactics through elaborator
-  reflection, and run them from the editor, i.e. in \textbf{edit-time}.
-  This would extend the abilities of the editor interaction mode from the
-  current built-in features to anything that can be done with tactics.
-  In our work, we present the design and implementation of this feature in the
-  Idris compiler.
-  \medskip
-
-  \indent{}  We also implement an intuitionistic theorem prover tactic that is meant to be
-  an better \mbox{alternative} to the built-in proof search editor action, and an
-  add-clause tactic that exemplifies how we can move some of the hard-coded
-  features from the compiler to a library.
+  \indent  Now we can write new tactics as \Elab\ \mbox{actions}
+  and run them from the editor, i.e. in \textbf{edit-time}.
+  The old editor interaction mode only had a limited number of built-in
+  actions, like type-checking holes, case-splitting, and lemma
+  extraction. Our work extends its abilities to anything that can be done with
+  tactics. We present the design and implementation of this
+  feature for the Idris compiler.
 }
 
 
@@ -169,6 +141,42 @@
 \end{tikzcd}
 }
 }
+
+
+\column{0.25}
+\block{How it works in Emacs\phantom{p}}{
+\Large
+
+  \setlength{\parindent}{1.5cm}
+  Suppose we have the following snippet:
+
+  \hspace{-3cm}
+  \scalebox{3.5}{
+    \begin{minipage}{6cm}
+      \VerbatimInput[frame=none]{Before.tex}
+    \end{minipage}
+  }
+  \vspace{1.5cm}
+
+  We want to finish the fill the hole \hole{a} automatically, by
+  running the \fn{prover} tactic in the editor.
+  Place the cursor on \hole{a} and execute the shortcut we assigned in Emacs
+  for \fn{prover}:
+
+  \hspace{-3cm}
+  \scalebox{3.5}{
+    \begin{minipage}{6cm}
+      \VerbatimInput[frame=none]{After.tex}
+    \end{minipage}
+  }
+  \vspace{1.5cm}
+
+  \normalsize
+  (\fn{prover} uses Hezarfen, which we describe in applications.)
+
+}
+
+
 \end{columns}
 
 \begin{columns}
@@ -202,13 +210,13 @@
 \Large
   \setlength{\parindent}{1.5cm}
 
-  \indent We want to check during type-checking whether an \Elab\ action we
-  will use as an editor action is suitable for that task. We want to make sure
-  that all components of the type have an implementation of \ty{Editorable}.
-  Let's introduce a new function modifier \mbox{syntax} \kw{\%editor}, which enforces
-  this constraint.
+  \indent We want to ascertain during type-checking that an \Elab\ action we
+  will use as an \mbox{editor} action is suitable for that task. That \mbox{requires}
+  checking that all components of the type signature have an implementation of
+  \ty{Editorable}.  Let's introduce a new function modifier \mbox{syntax}
+  \kw{\%editor}, which enforces this constraint in compile-time.
 
-  \vspace{\baselineskip}
+  % \vspace{\baselineskip}
   \vspace{0.35cm}
 
   \indent If we have a function\\
@@ -263,7 +271,7 @@
   \vspace{-0.5cm}
   \bibliographystyle{plain}
   \renewcommand{\section}[2]{}%
-  \bibliography{paper}
+  \bibliography{../thesis/paper}
 }
 \end{columns}
 

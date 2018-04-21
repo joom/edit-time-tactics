@@ -101,10 +101,10 @@
 \begin{abstract}
   Metaprogramming is a technique that allows users to write programs that
   write programs. In dependently-typed languages such as Idris, recent work on
-  elaborator reflection paved the way for new applications of metaprogramming
-  by showing that it can be a substitute for tactic-based proof languages.
-  The goal of our work is to use elaborator reflection to write editor
-  interaction actions in Idris.
+  elaborator reflection\cite{elabref} paved the way for new applications of
+  metaprogramming by showing that it can be a substitute for tactic-based proof
+  languages. The goal of our work is to use elaborator reflection to write
+  editor interaction actions in Idris.
 
   Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case-splitting, and lemma extraction.
@@ -121,8 +121,8 @@
   Idris compiler.
 
   We also implement an intuitionistic theorem prover tactic that is meant to be an
-  better alternative to the built-in proof search editor action, and a case
-  splitting tactic that exemplifies how we can move some of the hard-coded
+  better alternative to the built-in proof search editor action, and an
+  add-clause tactic that exemplifies how we can move some of the hard-coded
   features from the compiler to a library.
 \end{abstract}
 

@@ -1,0 +1,8 @@
+\kw{\%editor}
+\fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}
+\fn{toy} \bn{n} \bn{t} = \kw{do}
+  (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
+  \kw{case} \bn{ty} \kw{of}
+    \kw{`(}\ty{Nat}\kw{)} => \fn{pure} \bn{t}
+    _ => \fn{fail} \dt{[ NamePart} \bn{n}
+              , \dt{TextPart "is not a Nat!"]}

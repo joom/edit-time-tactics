@@ -1,5 +1,5 @@
 \RequirePackage{amsmath}
-\documentclass[25pt, a0paper, landscape, margin=25.4mm]{tikzposter}
+\documentclass[25pt, a0paper, landscape, margin=15.4mm]{tikzposter}
 \def\textmu{}
 
 %include agda.fmt
@@ -12,10 +12,12 @@
 \usepackage{color}
 \usepackage{fancyvrb}
 \usepackage{inconsolata}
-% \usepackage{tgpagella}
+\usepackage{tgpagella}
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
-\usepackage{enumerate}
+\usepackage{enumitem}
+% \sloppy
+
 % \usepackage[usenames,dvipsnames]{xcolor}
 
 \definecolor{IdrisRed}{RGB}{166, 0, 2}
@@ -81,9 +83,9 @@
 
 \begin{columns}  % See Section 4.4
 
-\column{0.33}
+\column{0.5}
 
-\block{Abstract}{
+  \block{Abstract\phantom{p}}{
   % \coloredbox[bgcolor=blue,fgcolor=white]{}
 
   \Large
@@ -118,32 +120,130 @@
   features from the compiler to a library.
 }
 
-\block{Background}{
 
-}
-
-\column{0.33}
-\block{Metaprogramming concepts}{
+\column{0.50}
+  \block
+  {Crash course on the Idris compiler and Idris metaprogramming}{
   \Large
-
+  \scalebox{1.5}{
+\newcommand\mlnode[1]{
+  \begin{minipage}{8cm}
+    \linespread{1}\selectfont \begin{center} \small  #1 \end{center}
+  \end{minipage}}
+\begin{tikzcd}[ampersand replacement=\&]
+  \mlnode{
+    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term\\
+    \dt{()}
+  }
+  \arrow[rrr, "\text{\small reflection}" description, bend right=10]
+  \&  \&  \&
+  \mlnode{
+    Haskell representation of Idris core language terms\\ \medskip \scriptsize
+    such as the \ty{Term} term\\
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[lll, "\text{\small reification}" description, bend right=10] \\
+  \&  \&  \&\\
+  \mlnode{
+    Idris terms\\ \medskip \footnotesize such as the \ty{()} term\\
+    \dt{()}
+  }
+  \arrow[r, "\text{\small elaboration}" description, bend right=50]
+  \&
+  \mlnode{
+    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term\\
+    \dt{MkUnit}
+  }
+  \arrow[l, "\text{\small delaboration}" description, bend right=50]
+  \arrow[rr, "\text{\small quotation}" description, bend right=35]
+  \arrow[uurr, "\text{\small \emph{internally represented as}}" description, dashed, bend left=17]
+  \& \&
+  \mlnode{
+    Idris representation of the Haskell representation of Idris core language terms\\
+    \medskip \scriptsize such as the \TT\ term\\
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
+    (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
+  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
+\end{tikzcd}
 }
+}
+\end{columns}
 
-
-\column{0.33}
-\begin{frame}[fragile]
-\block{The \ty{Editorable} interface}{
+\begin{columns}
+\column{0.25}
+\block{The \ty{Editorable} interface\phantom{p}}{
   \Large
+  \setlength{\parindent}{1.5cm}
+  \indent Editors communicate with the compiler via \mbox{S-expressions}, so
+  users should be able dictate how to convey a value of a given type.  We
+  define an interface in Idris, which can define serialization and
+  deserialization of the terms of a type into an \ty{SExp} and vice versa.
 
-% \begin{Verbatim}
-% \kw{interface} \ty{Editorable} \bn{a} \kw{where}
-%   \fn{fromEditor} : \ty{SExp} -> \ty{Elab} \bn{a}
-%   \fn{toEditor} : \bn{a} -> \ty{Elab} \ty{SExp}
-% \end{Verbatim}
+  % \vspace{-0.2cm}
+  \hspace{-1.5cm}
+  \scalebox{3.5}{
+    \begin{minipage}{6cm}
+      \VerbatimInput[frame=none]{Editorable.tex}
+    \end{minipage}
+  }
+  \vspace{1.5cm}
+
+  \indent Usually we can define \ty{Editorable} implementations in Idris
+  itself. But for Idris types that represent the Haskell representation of
+  Idris core terms, such as \ty{TT} and \ty{TyDecl}, we need to define
+  \ty{Editorable} implementations primitively in order to be able to parse,
+  elaborate, delaborate, and pretty print them.
+}
+
+\column{0.25}
+\block{Type-checking with \ty{Editorable}\phantom{p}}{
 
 }
-\end{frame}
 
-\block{References}{
+\column{0.25}
+\block{Toy example}{
+\Large
+  \setlength{\parindent}{1.5cm}
+  \vspace{-1.7cm}
+  \hspace{-3cm}
+  \scalebox{3.5}{
+    \begin{minipage}{6cm}
+      \VerbatimInput[frame=none]{Toy.tex}
+    \end{minipage}
+  }
+  \vspace{1.5cm}
+
+  \indent We can run \fn{toy} from the editor with a hole name and
+  some string representing a \TT\ term. If the type of the hole is \ty{Nat},
+  then \fn{toy} returns the term it was given, otherwise fails.
+
+  \indent Idris code cannot tell Emacs to replace the name under cursor with
+  some expression; we have to write 5-10 lines of trivial Emacs Lisp code
+  to glue the \Elab\ action to our editor.
+  \mbox{\emph{(If we are using Emacs, of course.)}}
+}
+
+\column{0.25}
+\block{Useful applications}{
+\Large
+  \vspace{-0.7cm}
+  \begin{enumerate}[labelsep=0.5cm]
+    \renewcommand{\labelenumi}{(\arabic{enumi})}
+    \item Replace the existing built-in editor actions (written in Haskell as a
+      part of the compiler) with edit-time tactics (written in Idris). In our
+      work, we present a replacement for the ``add clause'' action.
+    \item Write a proof search mechanism better than the built-in one, as an
+      edit-time tactic. In our work, we present \textbf{Hezarfen}, a theorem
+      prover tactic that decides intuitionistic propositional logic, generates
+      \TT\ proof terms, and simplifies the proof terms as much as possible.
+\end{enumerate}
+}
+
+\block[titleoffsety=3cm, bodyoffsety=3cm]
+  {References}{
+  \vspace{-0.5cm}
   \bibliographystyle{plain}
   \renewcommand{\section}[2]{}%
   \bibliography{paper}

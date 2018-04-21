@@ -1,5 +1,44 @@
 \chapter{Applications} \label{chap:applications}
 
+\section{A tactic to replace the built-in add clause action}\label{sec:addClause}
+
+We have seen in \autoref{chap:introduction} how the ``Add initial match clause
+to type declaration'' editor action works. When the cursor is on the type
+signature of a function that does not have any clauses, we can run this editor
+action and get an initial clause for the function.
+
+In this section we implement this editor action for top-level type
+declarations, using edit-time tactics. The Idris code we need to write is in
+\autoref{code:addClause}.
+
+\begin{figure}[ht]
+\caption{Implementation of the edit-time tactic for ``add clause''.}
+\label{code:addClause}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{collectTypes} : \ty{TT} -> (\bn{xs} : \ty{List} \ty{TT} ** \ty{NonEmpty} \bn{xs})
+\fn{collectTypes} (\dt{Bind} _ (\dt{Pi} \bn{ty} _) \bn{t}) =
+  (\bn{ty} \fn{::} \bn{fst} (\fn{collectTypes} \bn{t}) ** \dt{IsNonEmpty})
+\fn{collectTypes} \bn{t} = (\dt{[}\bn{t}\dt{]} ** \dt{IsNonEmpty})
+
+\kw{%editor}
+\fn{addClause} : \ty{TTName} -> \ty{Elab} (\ty{FunClause} \ty{TT})
+\fn{addClause} \bn{n} =
+  \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
+     \kw{let} (\bn{collected} \dt{**} \bn{nonEmpty}) = \fn{collectTypes} \bn{ty}
+     \kw{let} (\bn{argTys}, \bn{retTy}) = (\fn{init} \bn{collected}, \fn{last} \bn{collected})
+     \bn{argNames} <- \fn{traverse} (\fn{const} \fn{fresh}) \bn{argTys}
+     \kw{let} \bn{lhsUntyped} = \fn{foldl} \dt{RApp} (\dt{Var} \bn{n}) (\fn{map} \dt{Var} \bn{argNames})
+     \bn{env} <- \fn{getEnv}
+     (lhsTyped, _) <- \fn{check} \bn{env} \bn{lhsUntyped}
+     \bn{holeName} <- \fn{fresh}
+     \kw{let} \bn{rhs} = \dt{Bind} \bn{holeName} (\dt{GHole} \bn{retTy}) (\dt{V} \dt{0})
+     \fn{pure} (\bn{MkFunClause} \bn{lhsTyped} \bn{rhs})
+\end{Verbatim}
+\end{figure}
+
+\TODO{Explain the Emacs Lisp side}
+
+
 \section{Theorem prover for intuitionistic propositional logic}\label{sec:hezarfen}
 
 In this section, we describe the tactic Hezarfen\footnote{ The name is
@@ -71,7 +110,3 @@ etc.
 
 To fully simplify a \Raw\ term, we repeatedly apply it to \fn{reduce} until
 fixpoint, which should be improved in future work.
-
-\section{A tactic to replace the built-in add clause action}\label{sec:addClause}
-
-

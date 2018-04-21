@@ -1,0 +1,40 @@
+\makeatletter
+\def\title#1{\gdef\@title{\scalebox{\TP@titletextscale}{%
+\begin{minipage}[t]{\linewidth}
+\centering
+#1
+\par
+\vspace{0.5em}
+\end{minipage}%
+}}}
+\makeatother
+
+\makeatletter
+\renewenvironment{tikzfigure}[1][]{
+  \def \rememberparameter{#1}
+  \vspace{10pt}
+  \refstepcounter{figurecounter}
+  \begin{center}
+  }{
+    \ifx\rememberparameter\@empty
+    \else %nothing
+    \\[10pt]
+    {\Large Fig.~\thefigurecounter: \rememberparameter}
+    \fi
+  \end{center}
+}
+\makeatother
+
+\settitle{
+\centering
+\vbox{
+\color{white}
+\vspace*{1em}
+\centering
+{\bfseries\sffamily\fontsize{60pt}{72pt}\selectfont\@title\par}
+\vspace*{0.1em}{\LARGE\sffamily \@author \par}
+\vspace*{0.1em}{\Large\sffamily Advisor: Daniel R. Licata \par}
+\vspace*{0.1em}{\large\sffamily \@institute\par}
+%\@titlegraphic \\
+%[\TP@titlegraphictotitledistance]
+}}

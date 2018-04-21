@@ -135,7 +135,7 @@ programming experience.
 \section{Motivation}
 
 Now that we are familiar with what an editor action is, we can describe problem
-this project solves. The editor actions we reviewed above are features embedded
+our project solves. Editor actions we reviewed above are features embedded
 in the compiler. If you want to define a new action, the only way possible is
 to change the compiler source code and build your own version of the compiler,
 and then edit the source code of your editor mode to use that feature you
@@ -234,19 +234,29 @@ We write an alternative proof search tactic called Hezarfen, a full-blown
 theorem prover for intuitionistic propositional logic, and then we show how
 to use this on holes when we are in the editor.
 Details can be found in \autoref{sec:hezarfen}.
-\item We define a case-split tactic that can be run from the editor, which can
-replace the hard-coded case-split editor action.
+\item We define a add clause tactic that can be run from the editor, which can
+replace the hard-coded add clause editor action.
+Details can be found in \autoref{sec:addClause}
 \end{itemize}
 
 Some of the features we implemented in this thesis have already made their way to
 the Idris compiler, and the rest also will once they are reviewed by the
 other Idris contributors.
 
-In \autoref{chap:background}, we will go over the basics of the Idris
-programming language and its metaprogramming machinery.
-Now that we have an idea about the motivations for edit-time tactics,
-we will discuss their design in \autoref{chap:design} and their implementation
-in \autoref{chap:implementation}.
+\TODO{Hopefully edit-time tactics will look just the same to the "end user". to
+the tactic writer, it looks like the "examples in action" section for tactic
+writers. We have three different users: editor action users, simple action
+writers, and ones that want to define their own editorable instances. It would
+be ideal to have one working example in the introduction section to give a
+taste of what we actually did!}
+
+
+Now that we have gotten a taste of edit-time tactics, let's go over the basics
+of the Idris programming language and its metaprogramming machinery in
+\autoref{chap:background}.
+We will discuss the design of the edit-time tactics feature in
+\autoref{chap:design} and their implementation in
+\autoref{chap:implementation}.
 
 Before we move on the other chapters, it might be helpful to take a brief look
 at the typographic conventions we use in this thesis: When we have code
@@ -260,10 +270,3 @@ dissertation\cite{davidphd}.} We will have code excerpts in different
 programming languages such as Idris, Haskell, and Emacs Lisp in this thesis,
 hence we will always explicitly state what language the code is in, but we will
 use the same syntax highlighting for all of them.
-
-\TODO{Hopefully edit-time tactics will look just the same to the "end user". to
-the tactic writer, it looks like the "examples in action" section for tactic
-writers. We have three different users: editor action users, simple action
-writers, and ones that want to define their own editorable instances. It would
-be ideal to have one working example in the introduction section to give a
-taste of what we actually did!}

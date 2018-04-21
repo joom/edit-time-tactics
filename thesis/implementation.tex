@@ -77,30 +77,26 @@ for moving from one to another.
   \end{minipage}}
 \begin{tikzcd}
   \mlnode{
-    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term
-
+    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term\\
     \dt{()}
   }
   \arrow[rrr, "\text{\small reflection}" description, bend right=10]
   &  &  &
   \mlnode{
     Haskell representation of Idris core language terms\\ \medskip \scriptsize
-    such as the \ty{Term}\footnotemark term
-
+    such as the \ty{Term}\footnotemark term\\
     \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
   }
   \arrow[lll, "\text{\small reification}" description, bend right=10] \\
   &  &  &\\
   \mlnode{
-    Idris terms\\ \medskip \footnotesize such as the \ty{()} term
-
+    Idris terms\\ \medskip \footnotesize such as the \ty{()} term\\
     \dt{()}
   }
   \arrow[r, "\text{\small elaboration}" description, bend right=50]
   &
   \mlnode{
-    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term
-
+    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term\\
     \dt{MkUnit}
   }
   \arrow[l, "\text{\small delaboration}" description, bend right=50]
@@ -109,8 +105,7 @@ for moving from one to another.
   & &
   \mlnode{
     Idris representation of the Haskell representation of Idris core language terms\\
-    \medskip \scriptsize such as the \TT\ term
-
+    \medskip \scriptsize such as the \TT\ term\\
     \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
     (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
   }
@@ -118,6 +113,7 @@ for moving from one to another.
   \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
 \end{tikzcd}
 \end{figure}
+
 \footnotetext{In the compiler source code in Haskell, both \ty{Term} and
   \ty{Type} are aliases for \ty{TT Name}. This should not be confused with the
   type of reflected names, \ty{TTName}, defined in Idris. In the compiler, the

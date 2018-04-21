@@ -1,0 +1,154 @@
+\RequirePackage{amsmath}
+\documentclass[25pt, a0paper, landscape, margin=25.4mm]{tikzposter}
+\def\textmu{}
+
+%include agda.fmt
+
+\usepackage{natbib, textgreek, bussproofs, epigraph, float,
+            enumerate, url, graphicx, listings, xfrac}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{filecontents}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{inconsolata}
+% \usepackage{tgpagella}
+\usepackage{tikz-cd}
+\usepackage{adjustbox}
+\usepackage{enumerate}
+% \usepackage[usenames,dvipsnames]{xcolor}
+
+\definecolor{IdrisRed}{RGB}{166, 0, 2}
+\definecolor{IdrisBlue}{RGB}{0, 0, 182}
+\definecolor{IdrisGreen}{RGB}{13, 84, 8}
+\definecolor{IdrisPurple}{RGB}{126, 2, 236}
+
+\newcommand{\IdrisData}[1]{\textcolor{IdrisRed}{#1}}
+\newcommand{\IdrisType}[1]{\textcolor{IdrisBlue}{#1}}
+\newcommand{\IdrisBound}[1]{\textcolor{IdrisPurple}{#1}}
+\newcommand{\IdrisFunction}[1]{\textcolor{IdrisGreen}{#1}}
+\newcommand{\IdrisMetavar}[1]{\textcolor{cyan}{#1}}
+\newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
+\newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
+\usepackage{setspace, microtype}
+\fvset{commandchars=\\\{\},formatcom=\singlespacing, frame=single}
+\newcommand{\ty}[1]{\IdrisType{\texttt{#1}}}
+\newcommand{\kw}[1]{\IdrisKeyword{\texttt{#1}}}
+\newcommand{\fn}[1]{\IdrisFunction{\texttt{#1}}}
+\newcommand{\dt}[1]{\IdrisData{\texttt{#1}}}
+\newcommand{\bn}[1]{\IdrisBound{\texttt{#1}}}
+\newcommand{\cm}[1]{\textcolor{darkgray}{\texttt{#1}}}
+\newcommand{\hole}[1]{\IdrisMetavar{\texttt{?}\IdrisMetavar{\texttt{#1}}}}
+\newcommand{\Elab}{\ty{Elab}}
+\newcommand{\String}{\ty{String}}
+\newcommand{\TT}{\ty{TT}}
+\newcommand{\Raw}{\ty{Raw}}
+\newcommand{\Editorable}{\ty{Editorable}}
+\newcommand{\TyDecl}{\ty{TyDecl}}
+\newcommand{\FunDefn}{\ty{FunDefn}}
+\newcommand{\FunClause}{\ty{FunClause}}
+
+
+  % Math and code commands {{{
+  \newcommand{\nop}[0]{} % used to reconcile vim folds and latex curly braces
+  \renewcommand{\paragraph}[1]{\bigskip\textbf{#1}}
+  \newcommand{\figrule}{\begin{center}\hrule\end{center}}
+  \newcommand{\set}[1]{\left\{#1\right\}}
+  \DeclareRobustCommand{\shamrock}{\raisebox{-.035em}{\includegraphics[width=.75em, height=.75em]{symbols/command}}\nop}
+  \DeclareRobustCommand{\col}{\raisebox{-.035em}{\includegraphics[width=.30em, height=.75em]{symbols/colon}}\nop}
+  \newcommand{\conc}[2]{#1 \text{<#2>}}
+  \newcommand{\val}[2]{#1 \sym #2}
+  % }}}
+
+\newcommand{\T}[1]{\texttt{#1}}
+
+\usepackage{more}
+
+\title{Edit-Time Tactics in Idris}
+\institute{Wesleyan University} % See Section 4.1
+\author{Joomy Korkut}
+
+\usetheme{Simple}  % See Section 5
+
+\begin{document}
+% \definecolor{myblue}{RGB}{89,65,242}
+\definecolor{myblue}{RGB}{0, 128, 110}
+\colorlet{titlebgcolor}{myblue}
+\colorlet{innerblocktitlefgcolor}{myblue}
+\colorlet{blocktitlefgcolor}{myblue}
+
+\maketitle  % See Section 4.1
+
+\begin{columns}  % See Section 4.4
+
+\column{0.33}
+
+\block{Abstract}{
+  % \coloredbox[bgcolor=blue,fgcolor=white]{}
+
+  \Large
+  \setlength{\parindent}{1.5cm}
+  \indent Metaprogramming is a technique that allows users to write programs that
+  write programs. In dependently-typed languages such as \textbf{Idris}, recent work on
+  \textbf{elaborator reflection}\cite{elabref} paved the way for new applications of
+  metaprogramming by showing that it can be a substitute for \textbf{tactic-based proof
+  languages}.  The goal of our work is to use elaborator reflection to write
+  editor interaction actions in Idris.
+  \medskip
+
+  \indent Currently in Idris modes of editors such as Emacs, users can perform actions
+  like type-checking holes, case-splitting, and lemma extraction.
+  Implementations of all of these Idris editor actions are hard-coded in the
+  compiler and they are written in Haskell. Our work will allow us to \textbf{rewrite
+  them in Idris as metaprograms}, and to move them into an Idris library instead
+  of having them embedded into the compiler.
+  \medskip
+
+  \indent  Furthermore, we can write our own tactics through elaborator
+  reflection, and run them from the editor, i.e. in \textbf{edit-time}.
+  This would extend the abilities of the editor interaction mode from the
+  current built-in features to anything that can be done with tactics.
+  In our work, we present the design and implementation of this feature in the
+  Idris compiler.
+  \medskip
+
+  \indent{}  We also implement an intuitionistic theorem prover tactic that is meant to be
+  an better alternative to the built-in proof search editor action, and an
+  add-clause tactic that exemplifies how we can move some of the hard-coded
+  features from the compiler to a library.
+}
+
+\block{Background}{
+
+}
+
+\column{0.33}
+\block{Metaprogramming concepts}{
+  \Large
+
+}
+
+
+\column{0.33}
+\begin{frame}[fragile]
+\block{The \ty{Editorable} interface}{
+  \Large
+
+% \begin{Verbatim}
+% \kw{interface} \ty{Editorable} \bn{a} \kw{where}
+%   \fn{fromEditor} : \ty{SExp} -> \ty{Elab} \bn{a}
+%   \fn{toEditor} : \bn{a} -> \ty{Elab} \ty{SExp}
+% \end{Verbatim}
+
+}
+\end{frame}
+
+\block{References}{
+  \bibliographystyle{plain}
+  \renewcommand{\section}[2]{}%
+  \bibliography{paper}
+}
+\end{columns}
+
+
+\end{document}

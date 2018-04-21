@@ -18,152 +18,60 @@ Instead we want to design Hezarfen as a library that provides an \Elab\ action
 that can be used as a tactic in proofs, and also as a custom editor action that
 helps us when the built-in proof search mechanism does not suffice.
 
+Using this library, we want to define the \Elab\ action we used in
+\autoref{sec:communication}, with the type
+\texttt{\fn{prover} : \ty{TTName} -> \ty{Elab} \ty{TT}}.
+This tactic takes the name of the hole it is supposed to fill, and gives back a
+\TT\ term in the \Elab\ monad.
 
-% We can improve this by having our
-% theorem prover generate Idris expressions of the type \Raw, one of the
-% types used for the inner representation of the core language of Idris.  We can
-% then write a tactic that takes the goal type, which will of the \Raw, and
-% tries to fill the hole with the generated term.  Let's prove a theorem using
-% this tactic:
+Since Hezarfen's proof terms are send back to the editor and put back into the
+source code, we should aim to make our proof terms as simple as possible.
+Hence we should implement both proof term generation, and simplification.
 
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-% \IdrisFunction{noContradiction} = \IdrisKeyword{\%runElab} \IdrisFunction{hezarfenExpr}
-% \end{Verbatim}
-
-% Through the elaborator reflection, that will turn into this\footnote{
-%   The definition is not changed at all. If it were, it could simply be written
-%   as
-
-% \texttt{\fn{noContradiction} \dt{(}\bn{pf}\dt{,} \bn{contra}\dt{)} = \bn{contra} \bn{pf}} } when we compile the file:
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{noContradiction} : \IdrisFunction{Not} \IdrisType{(}\IdrisImplicit{p}\IdrisType{,} \IdrisFunction{Not} \IdrisImplicit{p}\IdrisType{)}
-% \IdrisFunction{noContradiction} = \textbackslash\IdrisBound{h20} =>
-%      \IdrisKeyword{let} \IdrisBound{i20} = \IdrisFunction{fst} \IdrisBound{h20} \IdrisKeyword{in} \IdrisKeyword{let} \IdrisBound{j20} = \IdrisFunction{snd} \IdrisBound{h20} \IdrisKeyword{in} \IdrisFunction{void} (\IdrisBound{j20} \IdrisBound{i20})
-% \end{Verbatim}
-
-
-
-
-
-
-
+\subsection{Proof term generation}
 
 \TODO{Explain how the tactic works, especially the nested implication rule which is a bit confusing.}
 
 % explain the nested impl rule in depth
 % and possibly one or two more, to show what they look like in general
 
+\subsection{Simplification}
 
-% \subsection{Red-Black Trees}\label{ssec:rbt}
+In \texttt{Hezarfen.Simplify}, we define a function \fn{reduce} that simplifies
+a given \Raw\ term into another \Raw\ term in the \Elab\ monad.\footnote{We
+depend on the \Elab\ monad for fresh name generation.}
+A rudimentary implementation of this function that does not include all the
+simplification steps is given in \autoref{code:reduce}.
 
-% let's translate the same problem to Idris.
+\begin{figure}[ht]
+\caption{Rudimentary implementation of \fn{reduce} in Hezarfen.}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{reduce} : \ty{Raw} -> \ty{Elab} \ty{Raw}
+\fn{reduce} \fn{t} = \kw{case} \bn{t} \kw{of}
+  \cm{-- Eta reduction:  (\textbackslash{}x => f x) becomes f}
+  \dt{RBind} \bn{n} (\dt{Lam} \bn{b}) (\dt{RApp} \bn{t'} (\dt{Var} \bn{n'})) =>
+    \kw{if} \bn{n} \fn{==} \bn{n'}
+      \kw{then} \fn{reduce} \bn{t'}
+      \kw{else} \fn{pure} \fn{$} \dt{RBind} \bn{n} (\dt{Lam} \bn{b}) !(\fn{reduce} (\dt{RApp} !(\fn{reduce} \bn{t'}) (\dt{Var} \bn{n'})))
 
-% Suppose we want to balance a red-black tree, where
-% the right subtree is well-formed, represented with the type \path{WellRedTree}, but
-% the left one is well-formed except the root, represented with the type
-% \path{AlmostWellRedTree}. We also have a key and value that should be stored in
-% the root. Our task is to form a well-formed red-black tree with these.
+  \cm{-- (id x) becomes x}
+  \dt{RApp} (\dt{RApp} (\dt{Var} \kw{\`{}\{}\fn{id}\kw{\}}) \bn{c}) \bn{x} => \fn{reduce} \bn{x}
 
-% \subsection{Nonlinear Patterns}
+  \dt{RBind} \bn{n} \bn{b} \bn{t'} => \fn{pure} \fn{$} \dt{RBind} \bn{n} \bn{b} !(\fn{reduce} \bn{t'})
+  \dt{RApp} \bn{t1} \bn{t2} => \fn{pure} \fn{$} \dt{RApp} !(\fn{reduce} \bn{t1}) !(\fn{reduce} \bn{t2})
+  _ => \fn{pure} \bn{t}
+\end{Verbatim}
+\end{figure}
 
-% In Idris, there is no way to include the equality of two variables as a condition to match the pattern in the first place.
-% In Haskell, you can add a guard after the pattern that checks if those two
-% given variables are equal, assuming that their type has an \path{Eq} instance.
-% In OCaml, you can do the same with the \path{when} keyword.
-% However, these are not ideal. Prolog users will wonder whether we can just name
-% those variables the same thing, in order to check if they are equal. The answer
-% is no, yet in Idris, if we have an equality proof about two things, we can use
-% the same name for both since they are already the same.\footnote{In Agda the first one will have a normal name, but the other one will have the same name prepended with a dot. This is called a ``dot pattern''.} That means we would
-% first have to generate an equality proof for two things, which is something we
-% can do with views in Idris.
+In the full implementation, we do more complex simplifications, such as
+simplifying \texttt{(\textbackslash{}\bn{x} => \fn{g} (\fn{f} \bn{x}))} into
+\texttt{(\fn{g} \fn{.} \fn{f})}, removing unused \kw{let} bindings,
+substituting a \kw{let} binding in the body if the binding is only used once,
+etc.
 
-% Using nonlinear patterns, this is how we would write a list membership check
-% function:
+To fully simplify a \Raw\ term, we repeatedly apply it to \fn{reduce} until
+fixpoint, which should be improved in future work.
 
-% \begin{figure}[ht]
-% \caption{Code with nonlinear patterns, that we are trying to simulate}
-% \label{code:nonlinear}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{elem} : \IdrisType{Eq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
-% \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
-% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{True}
-% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{False}
-% \end{Verbatim}
-% \end{figure}
+\section{A tactic to replace the built-in add clause action}\label{sec:addClause}
 
-% As we said before, this is not valid Idris. However, this would work:
 
-% \begin{figure}[ht]
-% \caption{The code with view, that simulates nonlinear patterns}
-% \label{code:nonlinearWith}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{elem} : \IdrisType{DecEq} \IdrisImplicit{a} => \IdrisImplicit{a} -> \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Bool}
-% \IdrisFunction{elem} _ \IdrisData{[]} = \IdrisData{False}
-% \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) \IdrisKeyword{with} (\IdrisFunction{decEq} \IdrisBound{x} \IdrisBound{y})
-%   \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{x} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{Yes} \IdrisBound{Refl} = \IdrisData{True}
-%   \IdrisFunction{elem} \IdrisBound{x} (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) | \IdrisData{No} \IdrisBound{contra} = \IdrisData{False}
-% \end{Verbatim}
-% \end{figure}
-
-% Even though this is a workaround and not really nonlinear patterns, we can
-% write an \Elab\ editor action that runs on a nonlinear pattern, such as
-% \autoref{code:nonlinear} and converts that into a function that uses Idris
-% views, such as \autoref{code:nonlinearWith}.
-
-% This can be generalized to things that are not like Prolog-style patterns.
-% Brady describes a view that matches on the last element of
-% a list, as presented in \autoref{code:listlast}.
-
-% \begin{figure}[ht]
-% \caption{Brady's view to match the last element of a list.\cite{tdd}}
-% \label{code:listlast}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisKeyword{data} \IdrisType{ListLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Type} \IdrisKeyword{where}
-%   \IdrisData{Empty} : \IdrisType{ListLast} \IdrisData{[]}
-%   \IdrisData{NonEmpty} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> (\IdrisBound{x} : \IdrisImplicit{a}) -> \IdrisType{ListLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]})
-
-% \IdrisFunction{listLast} : (\IdrisBound{xs} : \IdrisType{List} \IdrisImplicit{a}) -> \IdrisType{ListLast} \IdrisBound{xs}
-% \IdrisFunction{listLast} \IdrisData{[]} = \IdrisData{Empty}
-% \IdrisFunction{listLast} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) = \IdrisKeyword{case} \IdrisFunction{listLast} \IdrisBound{xs} \IdrisKeyword{of}
-%                        \IdrisData{Empty} => \IdrisData{NonEmpty} \IdrisData{[]} \IdrisBound{x}
-%                        \IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{y} => \IdrisData{NonEmpty} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) \IdrisBound{y}
-% \end{Verbatim}
-% \end{figure}
-
-% Now, suppose we want to write a function to match the last element of a list.
-% If we developed such an \Elab\ editor action, we could write the code in
-% \autoref{code:safeLast1} and get the result in \autoref{code:safeLast2}.
-
-% \begin{figure}[ht]
-% \caption{Matching the last element of a list, what we are trying to simulate}
-% \label{code:safeLast1}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
-% \IdrisFunction{safeLast} \IdrisData{[]} = \IdrisData{Nothing}
-% \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) = \IdrisData{Just} \IdrisBound{x}
-% \end{Verbatim}
-% \end{figure}
-
-% \begin{figure}[ht]
-% \caption{The code that matches the last element of a list with a view}
-% \label{code:safeLast2}
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \IdrisFunction{safeLast} : \IdrisType{List} \IdrisImplicit{a} -> \IdrisType{Maybe} \IdrisImplicit{a}
-% \IdrisFunction{safeLast} \IdrisBound{l} \IdrisKeyword{with} (\IdrisFunction{listLast} \IdrisBound{l})
-%   \IdrisFunction{safeLast} \IdrisData{[]} | \IdrisData{Empty} = \IdrisData{Nothing}
-%   \IdrisFunction{safeLast} (\IdrisBound{xs} \IdrisFunction{++} \IdrisData{[}\IdrisBound{x}\IdrisData{]}) | (\IdrisData{NonEmpty} \IdrisBound{xs} \IdrisBound{x}) = \IdrisData{Just} \IdrisBound{x}
-% \end{Verbatim}
-% \end{figure}
-
-% If we want to run the same tactic on all of these, we have to write an \Elab\ action
-% that can
-% \begin{enumerate}
-% \item Look at a pattern and detect nonlinearities
-% \item Look at a pattern and detect we used functions instead of constructors inside
-% \item Look up the type of the interesting patterns
-% \item Search for a view function that could be used to achieve this pattern
-% \item Try to apply possible view functions by unifying the input pattern with the view type constructors
-% \end{enumerate}
-
-% \TODO{Write the tactic and explain how it works}

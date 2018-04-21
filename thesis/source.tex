@@ -103,13 +103,13 @@
   write programs. In dependently-typed languages such as Idris, recent work on
   elaborator reflection paved the way for new applications of metaprogramming
   by showing that it can be a substitute for tactic-based proof languages.
-  The goal of this work is to use elaborator reflection to write editor
+  The goal of our work is to use elaborator reflection to write editor
   interaction actions in Idris.
 
   Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case-splitting, and lemma extraction.
   Implementations of all of these Idris editor actions are hard-coded in the
-  compiler and they are written in Haskell. This work will allow us to rewrite
+  compiler and they are written in Haskell. Our work will allow us to rewrite
   them in Idris as metaprograms, and to move them into an Idris library instead
   of having them embedded into the compiler.
 
@@ -117,7 +117,7 @@
   reflection, and run them from the editor, i.e. in edit-time.
   This would extend the abilities of the editor interaction mode from the
   current built-in features to anything that can be done with tactics.
-  In this work, we present the design and implementation of this feature in the
+  In our work, we present the design and implementation of this feature in the
   Idris compiler.
 
   We also implement an intuitionistic theorem prover tactic that is meant to be an
@@ -144,8 +144,8 @@ him for his kindness and patience.
 
 I am incredibly fortunate to have met David Christiansen last summer and talked
 to him about his work on metaprogramming for dependent types.
-He laid the foundation that makes this project possible in his
-dissertation\cite{davidphd}, and pitched me the idea of using elaborator
+In his dissertation\cite{davidphd} he laid the foundation that makes this
+project possible, and he later pitched me the idea of using elaborator
 reflection for interactive editing.
 I could not have finished this work without him putting up with my incessant
 stream of questions. (My words, not his.)

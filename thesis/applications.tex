@@ -7,9 +7,9 @@ to type declaration'' editor action works. When the cursor is on the type
 signature of a function that does not have any clauses, we can run this editor
 action and get an initial clause for the function.
 
-In this section we implement this editor action for top-level type
-declarations, using edit-time tactics. The Idris code we need to write is in
-\autoref{code:addClause}.
+In this section we implement this editor action for top-level type declarations
+without implicit arguments or interface constraints, using edit-time tactics.
+The Idris code we need to write is in \autoref{code:addClause}.
 
 \begin{figure}[ht]
 \caption{Implementation of the edit-time tactic for ``add clause''.}
@@ -42,10 +42,52 @@ This one, however, also returns a proof that the resulting list is not empty.
 The function takes a list and you the same list with the last element removed,
 namely \fn{init}, requires a proof that the list be non-empty.
 
-\TODO{Finish explaining code}
+The \fn{addClause} tactic only takes one input, which is the name of the function
+we will add an initial clause for.
+Using this name, we look up the type of that function, and get its components
+using \fn{collectTypes}. We know that there is at least one member of that
+list, so we name the last element \bn{retTy}, for the return type, and we name
+the rest \bn{argTy}, since they represent types of the arguments.
+For each of member of \bn{argTy}, we generate a new name using
+\fn{fresh}\footnote{\fn{fresh} is defined in Hezarfen, not in a standard
+library. The standard way of creating fresh names is \fn{gensym}, but we wrote
+wrapper function \fn{fresh} that does not generate \dt{MN}, and gives variables
+readable names, usually one-letter.}. We later use these names and make them
+into variable terms, using \dt{Var}, and create a function application using
+all of these names. This application is supposed to represent the left-hand
+side in our final definition. The right-hand side is a hole term that has the
+type \bn{retTy}.  This concludes our type declaration term.
 
-\TODO{Talk about the Emacs lisp part}
+The Emacs Lisp code we write for this exactly the same as the existing
+add-clause editor action, we only have to change the part that Emacs sends a
+message to the compiler. Our message now should refer to \fn{addClause} instead
+of the built-in add-clause editor action.
 
+Let's see this \Elab\ action at work in \autoref{code:exampleAddClause1}.
+
+\begin{figure}[ht]
+\caption{Example function to run \fn{addClause} on.}
+\label{code:exampleAddClause1}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
+\end{Verbatim}
+\end{figure}
+
+If we put the cursor on \fn{example} and execute the Emacs Lisp code somehow, which is often done via a shortcut, we will get the result in \autoref{code:exampleAddClause2}.
+
+\begin{figure}[ht]
+\caption{Example function to run \fn{addClause} on.}
+\label{code:exampleAddClause2}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
+\fn{example} \bn{a} \bn{b} = \hole{c}
+\end{Verbatim}
+\end{figure}
+
+This concludes the rudimentary replacement the the existing add-clause section.
+For simplicity purposes, we have not covered the type signatures with implicit
+arguments or interface constraints. One can easily write a tactic to handle
+those cases as well.
 
 \section{Theorem prover for intuitionistic propositional logic}\label{sec:hezarfen}
 

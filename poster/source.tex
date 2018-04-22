@@ -13,8 +13,6 @@
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
 \usepackage{enumitem}
-% \usepackage{relsize}
-% \relscale{0.5}
 
 \definecolor{IdrisRed}{RGB}{166, 0, 2}
 \definecolor{IdrisBlue}{RGB}{0, 0, 182}
@@ -96,7 +94,9 @@
   \block
   {Crash course on the Idris compiler and Idris metaprogramming}{
   \Large
-  \scalebox{1.5}{
+  \hspace{-5cm}
+  \scalebox{1.62}{
+\newcommand\graphnode[1]{\scalebox{1.1}{\text{\small #1}}}
 \newcommand\mlnode[1]{
   \begin{minipage}{8cm}
     \linespread{1}\selectfont \begin{center} \small  #1 \end{center}
@@ -106,28 +106,28 @@
     Haskell terms\\ \medskip \footnotesize such as the \ty{()} term\\
     \dt{()}
   }
-  \arrow[rrr, "\text{\small reflection}" description, bend right=10]
+  \arrow[rrr, "\graphnode{reflection}" description, bend right=10]
   \&  \&  \&
   \mlnode{
     Haskell representation of Idris core language terms\\ \medskip \scriptsize
     such as the \ty{Term} term\\
     \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
   }
-  \arrow[lll, "\text{\small reification}" description, bend right=10] \\
+  \arrow[lll, "\graphnode{reification}" description, bend right=10] \\
   \&  \&  \& \\
   \mlnode{
     Idris terms\\ \medskip \footnotesize such as the \ty{()} term\\
     \dt{()}
   }
-  \arrow[r, "\text{\small elaboration}" description, bend right=50]
+  \arrow[r, "\graphnode{elaboration}" description, bend right=40]
   \&
   \mlnode{
     Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term\\
     \dt{MkUnit}
   }
-  \arrow[l, "\text{\small delaboration}" description, bend right=50]
-  \arrow[rr, "\text{\small quotation}" description, bend right=35]
-  \arrow[uurr, "\text{\small \emph{internally represented as}}" description, dashed, bend left=17]
+  \arrow[l, "\graphnode{delaboration}" description, bend right=40]
+  \arrow[rr, "\graphnode{quotation}" description, bend right=30]
+  \arrow[uurr, "\graphnode{\emph{internally represented as}}" description, dashed, bend left=17]
   \& \&
   \mlnode{
     Idris representation of the Haskell representation of Idris core language terms\\
@@ -135,8 +135,8 @@
     \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
     (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
   }
-  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
-  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
+  \arrow[ll, "\graphnode{unquotation}" description, bend right=30]
+  \arrow[uu, leftrightarrow, "\graphnode{\emph{correspondence}}" description, dashed]
 \end{tikzcd}
 }
 }
@@ -157,10 +157,10 @@
   }
   \vspace{1.5cm}
 
-  We want to finish the fill the hole \hole{a} automatically, by
+  We want to fill the hole \hole{a} automatically, by
   running the \fn{prover} tactic in the editor.
   Place the cursor on \hole{a} and execute the shortcut we assigned in Emacs
-  for \fn{prover}:
+  for \fn{prover}. We get:
 
   \hspace{-3cm}
   \scalebox{3.5}{
@@ -252,25 +252,27 @@
 \column{0.25}
 \block{Useful applications}{
 \Large
-  \vspace{-0.7cm}
+  \vspace{-0.3cm}
   \begin{enumerate}[labelsep=0.5cm]
     \renewcommand{\labelenumi}{(\arabic{enumi})}
     \item Replace the existing built-in editor actions (written in Haskell as a
-      part of the compiler) with edit-time tactics (written in Idris). In our
+      part of the compiler) with edit-time tactics (written in Idris). \mbox{In our}
       work, we present a replacement for the ``add clause'' action.
     \item Write a proof search mechanism better than the built-in one, as an
-      edit-time tactic. In our work, we present \textbf{Hezarfen}, a theorem
+      edit-time \mbox{tactic}. \mbox{In our} work, we present \textbf{Hezarfen}, a theorem
       prover tactic that decides intuitionistic propositional logic, generates
       \TT\ proof terms, and simplifies the proof terms as much as possible.
 \end{enumerate}
 }
 
-\block[titleoffsety=3cm, bodyoffsety=3cm]
-  {References}{
+\definecolor{mygray}{RGB}{80,80,80}
+\block[titleoffsety=4.7cm, bodyoffsety=4.7cm]
+  {\phantom{References}}{
   \vspace{-0.5cm}
+  \textcolor{mygray}{
   \bibliographystyle{plain}
   \renewcommand{\section}[2]{}%
-  \bibliography{../thesis/paper}
+  \bibliography{../thesis/paper}}
 }
 \end{columns}
 

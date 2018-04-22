@@ -220,22 +220,21 @@ contributions in this thesis:
 \begin{itemize}
 \item We extend the primitive \Elab\ monad with the necessary primitive monadic
 actions that make writing an editor action with elaborator reflection possible.
+(\autoref{sec:stdlib})
 \item We define an Idris interface (or type class in Haskell terminology)
 called \ty{Editorable} for serializing and deserializing Idris expressions.
 For the reflected type that represents the core language terms of Idris,
-implementations of this interface are primitives.
+implementations of this interface are primitives. (\autoref{sec:types})
 \item We add an interval map in which keys are intervals of source code
 positions (pair of line and column numbers) and values are local contexts at
 those positions. This allows us to inspect what local variables are available to
-use anywhere in the source code.
+use anywhere in the source code. (\autoref{sec:extendIState})
 \item The current proof search mechanism in Idris is not particularly advanced.
 We write an alternative proof search tactic called Hezarfen, a full-blown
 theorem prover for intuitionistic propositional logic, and then we show how
-to use this on holes when we are in the editor.
-Details can be found in \autoref{sec:hezarfen}.
+to use this on holes when we are in the editor.  (\autoref{sec:hezarfen})
 \item We define a add clause tactic that can be run from the editor, which can
-replace the hard-coded add clause editor action.
-Details can be found in \autoref{sec:addClause}
+replace the hard-coded add clause editor action.  (\autoref{sec:addClause})
 \end{itemize}
 
 Some of the features we implemented in this thesis have already made their way to

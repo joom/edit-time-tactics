@@ -69,6 +69,7 @@
 \newcommand{\Red}[1]{{\color{red} #1}}
 \newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}
 \newcommand{\FYI}[1]{{\color{green}{[FYI: #1]}}}
+\newcommand{\forceindent}{\hspace{\parindent}}
 \sloppy
 
 
@@ -99,12 +100,12 @@
 \begin{document}
 
 \begin{abstract}
-  Metaprogramming is a technique that allows users to write programs that
-  write programs. In dependently-typed languages such as Idris, recent work on
-  elaborator reflection\cite{elabref} paved the way for new applications of
-  metaprogramming by showing that it can be a substitute for tactic-based proof
-  languages. The goal of our work is to use elaborator reflection to write
-  editor interaction actions in Idris.
+  \forceindent Metaprogramming is a technique that allows users to write
+  programs that write programs. In dependently-typed languages such as Idris,
+  recent work on elaborator reflection\cite{elabref} paved the way for new
+  applications of metaprogramming by showing that it can be a substitute for
+  tactic-based proof languages. The goal of our work is to use elaborator
+  reflection to write editor interaction actions in Idris.
 
   Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case-splitting, and lemma extraction.
@@ -134,13 +135,13 @@
 \end{dedication}
 
 \begin{acknowledgements}
-First and foremost, I would like to thank Dan Licata, my research advisor.
-Even though the topic I picked was not very close to the work he does, he
-played along and gave me very helpful advice whenever I got stuck.
-Since this project also had a user interface aspect, his insight as a
-long-time user of proof assistants shaped my decisions.
-He has had more impact on my research taste than anyone, and I am indebted to
-him for his kindness and patience.
+\forceindent First and foremost, I would like to thank Dan Licata, my research
+  advisor.  Even though the topic I picked was not very close to the work he
+  does, he played along and gave me very helpful advice whenever I got stuck.
+  Since this project also had a user interface aspect, his insight as a
+  long-time user of proof assistants shaped my decisions.  He has had more
+  impact on my research taste than anyone, and I am indebted to him for his
+  kindness and patience.
 
 I am incredibly fortunate to have met David Christiansen last summer and talked
 to him about his work on metaprogramming for dependent types.
@@ -151,11 +152,12 @@ I could not have finished this work without him putting up with my incessant
 stream of questions. (My words, not his.)
 
 I would like to express my gratitude to James Lipton and Edward Morehouse for
-reading and evaluating my thesis. I would also like to thank Cyrus Omar and
-Matthew Wilson, for agreeing to read my thesis draft. Cyrus coined the term
-``edit-time tactics'' and even though he did so in a different
+reading and evaluating my thesis. I would also like to thank Cyrus Omar for
+coining the term ``edit-time tactics''. Even though he did so in a different
 context\cite{hazelnut}, I cannot think of a better way to describe this
-project.
+project. I would like to thank Matthew Wilson for reading my draft many
+times, and helping me put my project in perspective with our conversations
+about the history and future of IDEs and programming.
 
 I want to thank Joseph Cutler and Mitchell Riley for the programming languages
 discussions we had over the year; I am grateful for our little PL community.

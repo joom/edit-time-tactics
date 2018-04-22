@@ -25,16 +25,23 @@
 }
 \makeatother
 
-\settitle{
-\centering
-\vbox{
-\color{white}
-\vspace*{1em}
-\centering
-{\bfseries\sffamily\fontsize{60pt}{72pt}\selectfont\@title\par}
-\vspace*{0.1em}{\LARGE\sffamily \@author \par}
-\vspace*{0.1em}{\Large\sffamily Advisor: Daniel R. Licata \par}
-\vspace*{0.1em}{\large\sffamily \@institute\par}
-%\@titlegraphic \\
-%[\TP@titlegraphictotitledistance]
-}}
+\makeatletter
+\renewcommand\TP@maketitle{%
+    \centering
+    \tikz[remember picture,overlay]
+    \node[scale=0.4,anchor=east,xshift=6cm,yshift=10cm,inner sep=0pt]
+    {\includegraphics[width=0.14\textwidth]{idris-logo.eps}};
+    \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \color{titlefgcolor}
+    \vspace*{1em}
+    {\bfseries\sffamily\fontsize{60pt}{72pt}\selectfont\@title\par}
+    \vspace*{0.1em}{\LARGE\sffamily \@author \par}
+    \vspace*{0.1em}{\Large\sffamily Advisor: Daniel R. Licata \par}
+    \vspace*{0.1em}{\large\sffamily \@institute\par}
+    \end{minipage}
+    \tikz[remember picture,overlay]
+    \node[scale=0.6,anchor=west,xshift=-20cm,yshift=6cm,inner sep=0pt]
+    {\includegraphics[width=0.14\textwidth]{wesleyan-logo.eps}};
+}
+\makeatother

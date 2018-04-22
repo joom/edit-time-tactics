@@ -1,4 +1,4 @@
-FILENAME=thesis
+FILENAME=poster
 SOURCENAME=source
 OUTPUTNAME=output
 LATEX=pdflatex
@@ -29,5 +29,6 @@ open:
 clean:
 	@rm *.aux
 	@rm $(FILENAME).*
+	@rm *-eps-converted-to.pdf
 
 preview: compile open clean

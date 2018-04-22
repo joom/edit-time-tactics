@@ -1,9 +1,8 @@
 \RequirePackage{amsmath}
 \documentclass[25pt, a0paper, landscape, margin=15.4mm]{tikzposter}
-\def\textmu{}
+\tikzposterlatexaffectionproofoff
 
-\usepackage{natbib, textgreek, bussproofs, epigraph, float,
-            enumerate, url, graphicx, listings, xfrac}
+\usepackage{natbib, textgreek, float, enumerate, url, xfrac}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{filecontents}
@@ -14,9 +13,8 @@
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
 \usepackage{enumitem}
-% \sloppy
-
-% \usepackage[usenames,dvipsnames]{xcolor}
+% \usepackage{relsize}
+% \relscale{0.5}
 
 \definecolor{IdrisRed}{RGB}{166, 0, 2}
 \definecolor{IdrisBlue}{RGB}{0, 0, 182}
@@ -59,11 +57,12 @@
 \usetheme{Simple}  % See Section 5
 
 \begin{document}
-% \definecolor{myblue}{RGB}{89,65,242}
-\definecolor{myblue}{RGB}{0, 128, 110}
-\colorlet{titlebgcolor}{myblue}
-\colorlet{innerblocktitlefgcolor}{myblue}
-\colorlet{blocktitlefgcolor}{myblue}
+\definecolor{myblue}{RGB}{89,65,242}
+\definecolor{mygreen}{RGB}{0, 128, 110}
+\colorlet{titlebgcolor}{mygreen}
+\colorlet{titlefgcolor}{white}
+\colorlet{innerblocktitlefgcolor}{mygreen}
+\colorlet{blocktitlefgcolor}{mygreen}
 
 \maketitle  % See Section 4.1
 

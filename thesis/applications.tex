@@ -15,7 +15,7 @@ declarations, using edit-time tactics. The Idris code we need to write is in
 \caption{Implementation of the edit-time tactic for ``add clause''.}
 \label{code:addClause}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\fn{collectTypes} : \ty{TT} -> (\bn{xs} : \ty{List} \ty{TT} ** \ty{NonEmpty} \bn{xs})
+\fn{collectTypes} : \ty{TT} -> (\bn{xs} : \ty{List} \ty{TT} \dt{**} \ty{NonEmpty} \bn{xs})
 \fn{collectTypes} (\dt{Bind} _ (\dt{Pi} \bn{ty} _) \bn{t}) =
   (\bn{ty} \fn{::} \bn{fst} (\fn{collectTypes} \bn{t}) ** \dt{IsNonEmpty})
 \fn{collectTypes} \bn{t} = (\dt{[}\bn{t}\dt{]} ** \dt{IsNonEmpty})
@@ -36,7 +36,15 @@ declarations, using edit-time tactics. The Idris code we need to write is in
 \end{Verbatim}
 \end{figure}
 
-\TODO{Explain the Emacs Lisp side}
+The \fn{collectTypes} function we write in Idris is very similar to the one we
+defined in \autoref{code:collectTypes} for the compiler implementation.
+This one, however, also returns a proof that the resulting list is not empty.
+The function takes a list and you the same list with the last element removed,
+namely \fn{init}, requires a proof that the list be non-empty.
+
+\TODO{Finish explaining code}
+
+\TODO{Talk about the Emacs lisp part}
 
 
 \section{Theorem prover for intuitionistic propositional logic}\label{sec:hezarfen}

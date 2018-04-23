@@ -1,7 +1,7 @@
 \chapter{Introduction} \label{chap:introduction}
 
 The rising popularity of statically typed functional languages led to
-the concept of ``type-driven development'' (hereinafter referred to as TDD),
+the programming methodology of ``type-driven development'' (hereinafter referred to as TDD),
 which is a style of development that revolves around the types of missing parts in
 programs. The expressions we have not written yet, or ones we do not know
 how to write, can be left as holes in our program, and the program still
@@ -13,9 +13,9 @@ be. These types can guide us when we try to fill the holes to complete the progr
 In other words, TDD lets us write our programs incrementally and top-down. This
 not only lets us type-check our program at every step, it also gives us clever
 hints about the following steps, based on the types and the local contexts.
-% Especially as dependent types gradually sneak into mainstream languages, like
-% they already have to Haskell\cite{eisenberg} and Scala\cite{scalaDep} now, we
-% predict that TDD will only get more popular.
+\footnote{Especially as dependent types gradually sneak into mainstream
+languages, like they already have to Haskell\cite{eisenberg} and
+Scala\cite{scalaDep} now, we predict that TDD will only get more popular.}
 This idea was originally born in the world of proof assistants and then it was
 borrowed by more practical functional languages.
 Interactive editing based on types has been used in proof assistants for a long
@@ -41,9 +41,11 @@ run) with every edit. This has changed with the advancement of integrated
 development environments (IDEs), programs that have certain functionalities
 such as code completion, syntax checking, displaying compiler error messages on
 their corresponding lines, searching in documentation etc.
-These features are convenient, but they are different from TDD.
-While IDEs can also use types to assist the user, they do not direct the
-entire development process around types per se.
+Through these features, IDEs enable rapid feedback and interaction cycles
+between the user and checking tools of the language and computation
+environment, but they are different from TDD. While IDEs can also use types to
+assist the user, they do not direct the entire development process around types
+per se.
 TDD is not a program, it is merely a style of programming in which
 the development process takes the form of a conversation between the
 type-checker/compiler and the user's editor/IDE.  However, this requires
@@ -73,17 +75,17 @@ and the editor mode of Lean\cite{lean}.\footnote{Haskell's typed holes in GHC
 are exciting, but they do not enjoy the seamless editor interaction yet that
 Agda and Idris do.}
 Idris has a special place among these proving languages since it tries to
-prioritize general purpose programming. Among the mainstream languages
+prioritize general purpose programming. Compared to mainstream languages
 that have mature IDEs, Idris still has an unusual standing since it also is a
 proof assistant.\cite{idrisfaq}
 This unique position of Idris provides motivation for editor features on par
 with mature IDEs for other languages, as well as the TDD-style development
 workflow via editor actions.
-Our work strives to bring the long-standing traditions of proof assistants and
-IDEs closer together, by introducing a feature called ``edit-time tactics''.
-The word ``edit-time'' is a wordplay on the terms ``compile time'' and ``run
-time'', and it means that we run the tactics when were are still in the editor,
-in order to use them to help us define new editor actions.
+Therefore, our work strives to bring the long-standing traditions of proof
+assistants and IDEs closer together, by introducing the ``edit-time tactics''
+feature.  The word ``edit-time'' is a wordplay on the terms ``compile time''
+and ``run time'', and it means that we run the tactics when were are still
+writing our program in the editor.
 The area of bringing IDE features to proof assistants is not new\cite{ctcoq,
 developingReuse, realTheoremProvers, toolSupport}, but it has been focusing
 on their usefulness as proof tools, not necessarily how they can help
@@ -177,41 +179,18 @@ compose them easily. For instance, if we had case-splitting as an \Elab\
 action, we could define a tactic to case-split on many arguments at the same time.
 \end{itemize}
 
-The ability to run tactics as editor actions has a consequence
-that we have not explored much in this thesis.
-Idris programs are usually meant to be executed, unlike Coq or
-Agda programs, which are usually only meant to be type checked.\footnote{Of
-  course there are backends for these languages, such as the OCaml
-  backend for Coq and the Haskell backend for Agda.}
-This means Idris programs will be compiled more often than Agda or Coq in the long run,
-since not much code is added to proofs after its completion, but practical programs tend to change in time. Therefore, minimizing compile time is more of a priority for Idris.
-Idris tactics generate proof terms in compile time, but the
-compilation can take a long time for complex tactics\footnote{Similar problems
-are observed in Coq. For example, theorems that use the famous \texttt{omega}
-tactic that decides Presburger arithmetic take a long time to compile, and it
-usually generates a huge proof term.},
-not to mention that the implementation of elaborator
-reflection in Idris has significant performance issues.\cite{leanmeta}
-Yet we still want to utilize complex tactics to generate proofs or terms.
-Using edit-time tactics, one would run a tactic once from the editor, generate
-the proof term and serialize and send that to the editor and put it back in the
-file.
-If we think of the differences between the traditions of writing the proof
-terms directly and writing tactics, the former more common in Agda and Idris
-and the latter in Coq and Isabelle, this work will constitute a one way bridge
-between the two, by making use of the elaborator reflection to create proof
-terms in the editor in a smarter and quicker way.
+To see what an edit-time tactic will look like, let's see an actual example in Emacs.
 
-The problem with that approach is that the generated proof terms can be (and
-often are) gigantic and hideous, especially if generating a minimal proof term
-is not a priority for the tactic we are using.
-If there was a generic mechanism to simplify and minimize the generated proof
-terms, and even write them in a way that makes use of dependent pattern
-matching, then this could have been a more usable consequence of this work.
-Ideally, we would want the artifact we are handing in to the reader of our
-proofs to look just like what it would be if we had not used this system.
-We leave that for future work.  However, even without proof simplification,
-this still could be a last resort solution to long compile times for tactics.
+\vspace{1em}
+\includegraphics[scale=0.6]{hezarfen1}
+
+In this example, we have defined an editor action \fn{prover} using the tactic
+we explain in \autoref{sec:hezarfen}, set up an Emacs shortcut for it, and then
+run it on a hole that we want to fill, using the tactic. We get the following
+result:
+
+\vspace{1em}
+\includegraphics[scale=0.6]{hezarfen2}
 
 \section{Contributions}
 
@@ -241,18 +220,27 @@ Some of the features we implemented in this thesis have already made their way t
 the Idris compiler, and the rest also will once they are reviewed by the
 other Idris contributors.
 
-\TODO{Hopefully edit-time tactics will look just the same to the "end user". to
-the tactic writer, it looks like the "examples in action" section for tactic
-writers. We have three different users: editor action users, simple action
-writers, and ones that want to define their own editorable instances. It would
-be ideal to have one working example in the introduction section to give a
-taste of what we actually did!}
+We envision three different audiences for this thesis:
+\begin{enumerate}[(1)]
+\item Idris programmers who use editor actions in their editor, who will now
+  have access to more editor actions. For them, reading the applications of
+edit-time tactics in \autoref{chap:applications} would be the most helpful.
+\item Advanced Idris programmers who want to write simple editor actions, using
+  the common Idris types and reflected types. More advanced Idris programmers
+    may want to write more complex editor actions that involve data types
+    that they design.
+    They may want to read \autoref{chap:design} in order to understand the
+    design of our feature and how that will limit them while they write new
+    edit-time tactics.
+\item Compiler developers and contributors for Idris and other
+  dependently-typed languages.  They may want to read
+    \autoref{chap:implementation} in order to observe what we needed to change
+    in the compiler, and how they can add this feature to a different language.
+\end{enumerate}
 
-
-
-
-Now that we have gotten a taste of edit-time tactics, let's go over the basics
-of the Idris programming language and its metaprogramming machinery in
+Now that we have gotten a taste of edit-time tactics and we know what to look
+for while reading this thesis, let's go over the basics of the Idris
+programming language and its metaprogramming machinery in
 \autoref{chap:background}.
 We will discuss the design of the edit-time tactics feature in
 \autoref{chap:design} and their implementation in
@@ -268,5 +256,5 @@ will be \texttt{\IdrisMetavar{cyan}}, and comments will be in
 Epigram paper\cite{epigram} and David Christiansen's
 dissertation\cite{davidphd}.} We will have code excerpts in different
 programming languages such as Idris, Haskell, and Emacs Lisp in this thesis,
-hence we will always explicitly state what language the code is in, but we will
-use the same syntax highlighting for all of them.
+for that reason we will always explicitly state what language the code is in,
+but we will use the same syntax highlighting for all of them.

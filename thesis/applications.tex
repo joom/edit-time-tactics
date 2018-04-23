@@ -76,7 +76,7 @@ Let's see this \Elab\ action at work in \autoref{code:exampleAddClause1}.
 If we put the cursor on \fn{example} and execute the Emacs Lisp code somehow, which is often done via a shortcut, we will get the result in \autoref{code:exampleAddClause2}.
 
 \begin{figure}[ht]
-\caption{Example function to run \fn{addClause} on.}
+\caption{Result of running \fn{addClause} on the \fn{example} function.}
 \label{code:exampleAddClause2}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
@@ -95,13 +95,12 @@ In this section, we describe the tactic Hezarfen\footnote{ The name is
   pronounced {[\textipa{hezaRf\ae n}]}, like ``has are fan'', and it means
     polymath in Turkish.  Tactic source code is available at
     \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
-propositional logic theorems.
-
+propositional logic theorems.\footnote{Similar to Coq's \texttt{tauto} tactic.}
 This tactic will be based on LJT\cite{ljt} and its Haskell
 implementation Djinn\cite{djinn}, which generates Haskell expressions
 for a given type.
 
-However, Djinn is a standalone program that takes commands
+Djinn is a standalone program that takes commands
 interactively, and when it generates an expression it prints it on the screen.
 Instead we want to design Hezarfen as a library that provides an \Elab\ action
 that can be used as a tactic in proofs, and also as a custom editor action that
@@ -113,15 +112,77 @@ Using this library, we want to define the \Elab\ action we used in
 This tactic takes the name of the hole it is supposed to fill, and gives back a
 \TT\ term in the \Elab\ monad.
 
-Since Hezarfen's proof terms are send back to the editor and put back into the
+Since Hezarfen's proof terms are sent back to the editor and put back into the
 source code, we should aim to make our proof terms as simple as possible.
-Hence we should implement both proof term generation, and simplification.
+Hence we should implement both proof term generation and simplification.
 
 \subsection{Proof term generation}
 
-\TODO{Explain how the tactic works, especially the nested implication rule which is a bit confusing.}
+In Hezarfen, define two types \ty{Context} and \ty{Sequent} to help us
+represent the proof rules as manipulations of the goal type.
 
-% explain the nested impl rule in depth
+\begin{figure}[ht]
+\caption{Definitions of \ty{Context} and \ty{Sequent} for Hezarfen.}
+\label{code:hezarfenTypes}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\kw{data} \ty{Context} = \dt{Ctx} (\ty{List} (\ty{TTName}, \ty{Raw})) (\ty{List} (\ty{TTName}, \ty{Raw}))
+\kw{data} \ty{Sequent} = \dt{Seq} \ty{Context} \ty{Raw}
+\end{Verbatim}
+\end{figure}
+
+A context is two lists of pairs that consist of names mapped to \Raw\ terms
+that represent the type of the term that the name refers to.
+The reason we want to have two lists is that we want to distinguish between the
+consumed and unconsumed bindings. Once we use up one entry in the second list,
+we delete that from the second list. But we may want to add new bindings, which
+we do on the first list. Suppose we have $(C \vee D) \supset B$ in our context,
+when we are checking the premises we want to remove that from the second list
+and add $C \supset B$ and $D \supset B$ to the first list. In Dyckhoff's
+presentation, this rule looks like:
+
+\begin{prooftree}
+  \AxiomC{$C \supset B,\ D \supset B,\ \Gamma \Longrightarrow G$}
+  \UnaryInfC{$(C \vee D) \supset B,\ \Gamma \Longrightarrow G$}
+\end{prooftree}
+\vspace{\baselineskip}
+
+But in Hezarfen's source code, this rule is written as in \autoref{code:hezarfenTypes}.
+
+\begin{figure}[ht]
+\caption{The ``\ty{Either} implies'' case in Hezarfen}
+\label{code:hezarfenTypes}
+\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\fn{breakdown'} : \ty{Sequent} -> \ty{Elab} \ty{Tm}
+\fn{breakdown'} \bn{goal} = \kw{case} \bn{goal} \kw{of}
+  \cm{-- numerous previous cases}
+  \dt{Seq} (\dt{Ctx} \bn{g} ((\bn{n}, \kw{\`{}(}(\dt{Either} ~\bn{d} ~\bn{e}) -> ~\bn{b}\kw{)}) :: \bn{o})) \bn{c} =>
+    \kw{let} (\bn{n1}, \bn{n2}, \bn{newgoal}) = !(\fn{appDisjImplL} (\dt{Ctx} \bn{g} \bn{o}) (\bn{d}, \bn{e}, \bn{b}, \bn{c})) \kw{in}
+    \kw{let} (\bn{l1}, \bn{l2}) = (!\fn{fresh}, !\fn{fresh}) \kw{in}
+    \fn{pure} \fn{$} \dt{RBind} \bn{n1} (\dt{Let} \kw{\`{}(}~\bn{d} -> ~\bn{b}\kw{)}
+                      (\dt{RBind} \bn{l1} (\dt{Lam} \bn{d}) (\dt{RApp} (\dt{Var} \bn{n})
+                        \kw{\`{}(}\dt{Left} {\bn{a}=~\bn{d}} {\bn{b}=~\bn{e}} ~(\dt{Var} \bn{l1})\kw{)})))
+          \fn{$} \dt{RBind} \bn{n2} (\dt{Let} \kw{\`{}(}~\bn{e} -> ~\bn{b}\kw{)}
+                      (\dt{RBind} \bn{l2} (\dt{Lam} \bn{e}) (\dt{RApp} (\dt{Var} \bn{n})
+                        \kw{\`{}(}\dt{Right} {\bn{a}=~\bn{d}} {\bn{b}=~\bn{e}} ~(\dt{Var} \bn{l2})\kw{)})))
+            !(\fn{breakdown} \dt{False} \bn{newgoal})
+\end{Verbatim}
+\end{figure}
+
+Understanding this code fully is not necessary, our goal is to give the greater
+picture. This piece of code checks our second list in the context to see if
+there is a name with the type \texttt{(\ty{Either} \bn{d} \bn{e}) -> \bn{b}},
+for some \bn{d}, \bn{e} and \bn{b}. If there is, using this name \bn{n}, we can
+create two functions, one with the type \texttt{\bn{d} -> \bn{b}} and the other
+with the type \texttt{\bn{e} -> \bn{b}}. We generate two fresh names so we can
+name these functions, and then we create a proof term, in which we generate
+lambda bindings for these two functions we define in terms of \bn{n}. The rest
+of the proof proceeds recursively.
+
+The remaining rules of proof term generation proceed similarly. For more detail
+on what the generated proof terms are, see Dyckhoff's paper or Hezarfen's
+source code.
+
+% explain the nested impl rule in depth ???
 % and possibly one or two more, to show what they look like in general
 
 \subsection{Simplification}
@@ -160,3 +221,10 @@ etc.
 
 To fully simplify a \Raw\ term, we repeatedly apply it to \fn{reduce} until
 fixpoint, which should be improved in future work.
+
+There is also recent work on writing code generating theorem provers that
+are more modular and efficient since they depend on an intermediate proof
+representation that is later reconstructed.\cite{theoremProverCodeGeneration}
+Hezarfen directly deals with the untyped core language syntax tree, both for
+the input terms that represent types, and for the proof term it returns, and
+this causes some overhead in our tactic.

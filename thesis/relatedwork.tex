@@ -30,11 +30,11 @@ that enables this feature can be found at
 On the IDE feature side of things, Alan Zimmerman and Matthew Pickering
 developed \texttt{ghc-exactprint}\footnote{It can be found here:
 \url{http://hackage.haskell.org/package/ghc-exactprint}}, which is a library
-that helps IDE and tooling development by providing a way to refactor Haskell
-programs without changing a part of the program unintentionally. As they put
-it, their library respects ``the identity refactoring'', which is non-trivial
-if your system allows many different kinds of
-transformations.\cite{ghc-exactprint-blog}
+that helps IDE and tooling development by providing a way to automatically
+refactor Haskell programs without changing a part of the program
+unintentionally. As they put it, their library respects ``the identity
+refactoring'', which is non-trivial if your system allows many different kinds
+of transformations.\cite{ghc-exactprint-blog}
 There is also the Haskell IDE Engine project that aims integrate many Haskell
 tools based on the GHC API to the editor workflow, by providing a backend for
 editor modes.\footnote{The project can be found here:
@@ -50,7 +50,7 @@ Lindblad and Benke (2006) introduced a term search algorithm called
 Agsy, a proof search mechanism that aims to save users' time by automating
 parts of the proof that are straightforward but tedious to write.\cite{agsy}
 Agda has a derivative of this mechanism implemented as a part of its compiler.
-Kokke and Swierstra (2015) used the old reflection system of Agda to define a
+Kokke and Swierstra (2015) used the Agda's prior reflection system to define a
 new proof search mechanism in Agda itself.\cite{autoinagda}
 The Hezarfen tactic we discussed in \autoref{sec:hezarfen} is not as advanced
 as their \fn{auto} function, yet in their paper, they discussed a feature

@@ -14,7 +14,7 @@ This means Idris programs will be compiled more often than Agda or Coq in the
 long run, since not much code is added to proofs after its completion, but
 practical programs tend to change in time. Therefore, minimizing compile time
 is more of a priority for Idris.
-Idris tactics generate proof terms in compile time, but the
+Idris tactics generate proof terms at compile time, but the
 compilation can take a long time for complex tactics\footnote{Similar problems
 arise in Coq as well. For example, theorems that use the famous \texttt{omega}
 tactic that decides Presburger arithmetic\cite{omega} take a long time to compile, and it
@@ -27,7 +27,7 @@ the proof term and serialize and send that to the editor and put it back in the
 file.
 If we think of the differences between the traditions of writing the proof
 terms directly and writing tactics, the former more common in Agda and Idris
-and the latter in Coq and Isabelle, this work will constitute a one way bridge
+and the latter in Coq, this work will constitute a one way bridge
 between the two, by making use of the elaborator reflection to create proof
 terms in the editor in a smarter and quicker way.
 
@@ -48,7 +48,7 @@ for tactics.
 We explained in \autoref{chap:introduction} that this thesis focuses on writing
 the backend of an editor action in Idris, and that we still had to write some
 Emacs Lisp (if we are using Emacs). However, Idris supports many different
-code generation targets\cite{idriscodegen} seamlessly.
+code generation targets~\cite{idriscodegen} seamlessly.
 
 For example, since compiling to JavaScript is built-in, we can use JavaScript
 code generation to write the editor interaction frontend for Visual Studio Code
@@ -66,10 +66,10 @@ are written in Idris via their respective code generation targets.
 
 \section{Final words}
 
-In this thesis we extended the capabilities of the editor interaction mode of
-Idris, by allowing users to define new editor actions in Idris itself. We did
+In this thesis, we extended the capabilities of the editor interaction mode of
+Idris by allowing users to define new editor actions in Idris itself. We did
 so through a metaprogramming technique that was introduced to Idris recently by
-Christiansen and Brady\cite{elabref}.
+Christiansen and Brady~\cite{elabref}.
 
 Editors communicate with the compiler via S-expressions, so we gave users the
 power to dictate how a value of a given Idris type should exactly be
@@ -83,7 +83,7 @@ Idris core language terms.
 
 Using this feature, we showed a simple \fn{toy} example, and then the
 \fn{addClause} example that can replace an existing built-in editor action,
-and Hezarfen, which is meant to be a better proof search mechanism then the
+and Hezarfen, which is meant to be a better proof search mechanism than the
 built-in one. We believe there is potential to write even more of the built-in
 editor actions as edit-time tactics. We also believe that as more decision
 procedures are coded up in Idris, edit-time tactics can become a more popular

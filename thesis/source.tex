@@ -11,8 +11,23 @@
 \usepackage[T1]{tipa}
 \usepackage{graphicx}
 \graphicspath{ {images/} }
-\usepackage{tgpagella}
-\usepackage{inconsolata}
+
+% \usepackage{ifxetex}
+% \ifxetex
+%   \usepackage{fontspec}
+%   \setmonofont
+%     [Ligatures=TeX, % recommended
+%     UprightFont={* Light},
+%     ItalicFont={* Light Italic},
+%     BoldFont={* Medium},
+%     BoldItalicFont={* Medium Italic}]
+%     {Iosevka}
+%   \setmainfont{TeX Gyre Pagella}
+% \else
+  \usepackage{inconsolata}
+  \usepackage{tgpagella}
+% \fi
+
 \usepackage{ragged2e}
 \usepackage[hang, flushmargin]{footmisc}
 \usepackage[backref=page,hyperfootnotes=false]{hyperref}
@@ -58,6 +73,7 @@
 \newcommand{\TyDecl}{\ty{TyDecl}}
 \newcommand{\FunDefn}{\ty{FunDefn}}
 \newcommand{\FunClause}{\ty{FunClause}}
+\newcommand{\mt}[1]{\mbox{\texttt{#1}}}
 
 \newcommand{\quadthree}{\qquad\quad}
 \newcommand{\quadfour}{\quadthree\quad}
@@ -89,7 +105,6 @@
 \theoremstyle{definition}
 \newtheorem{defn}{Definition}[chapter]
 
-\newcommand{\T}[1]{\texttt{#1}}
 \lstset{mathescape=true,basicstyle=\ttfamily}
 
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
@@ -100,29 +115,30 @@
 \begin{document}
 
 \begin{abstract}
-  \forceindent Metaprogramming is a technique that allows users to write
+  \forceindent Metaprogramming allows users to write
   programs that write programs. In dependently-typed languages such as Idris,
-  recent work on elaborator reflection\cite{elabref} paved the way for new
-  applications of metaprogramming by showing that it can be a substitute for
-  tactic-based proof languages. The goal of our work is to use elaborator
-  reflection to write editor interaction actions in Idris.
+  recent work on \mbox{\emph{elaborator reflection}~\cite{elabref}} paved the
+  way for new applications of metaprogramming by showing that a tactic-based
+  proof language can be substituted with a monadic interface that exposes the
+  internal elaborator. The goal of our work is to use elaborator reflection to
+  write editor interaction actions in Idris.
 
   Currently in Idris modes of editors such as Emacs, users can perform actions
   like type-checking holes, case-splitting, and lemma extraction.
   Implementations of all of these Idris editor actions are hard-coded in the
-  compiler and they are written in Haskell. Our work will allow us to rewrite
-  them in Idris as metaprograms, and to move them into an Idris library,
+  compiler, and they are written in Haskell. Our work will allow us to rewrite
+  them in Idris as metaprograms and to move them into an Idris library,
   instead of having them embedded into the compiler.
 
-  Furthermore, we can write our own tactics through elaborator
-  reflection, and run them from the editor, i.e. in edit-time.
+  Furthermore, Idris users can write our own tactics through elaborator
+  reflection and run them from the editor, i.e.\ in edit-time.
   This would extend the abilities of the editor interaction mode from the
   current built-in features to anything that can be done with tactics.
   In our work, we present the design and implementation of this feature in the
   Idris compiler.
 
-  We also implement an intuitionistic theorem prover tactic that is meant to be an
-  better alternative to the built-in proof search editor action, and an
+  We also implement an intuitionistic theorem prover tactic, which is meant to
+  be an better alternative to the built-in proof search editor action, and an
   add-clause tactic that exemplifies how we can move some of the hard-coded
   features from the compiler to a library.
 \end{abstract}
@@ -131,7 +147,7 @@
   \epigraph{``What do compilers do? They manipulate programs! Making it easy
   for users to manipulate their own programs, and also easy to interlace their
   manipulations with the compiler’s manipulations, creates a powerful new
-  tool.''}{\textit{Tim Sheard and Simon Peyton Jones}\cite{th}}
+  tool.''}{\textit{Tim Sheard and Simon Peyton Jones}~\cite{th}}
 \end{dedication}
 
 \begin{acknowledgements}
@@ -145,7 +161,7 @@
 
 I am incredibly fortunate to have met David Christiansen last summer and talked
 to him about his work on metaprogramming for dependent types.
-In his dissertation\cite{davidphd} he laid the foundation that makes this
+In his dissertation~\cite{davidphd} he laid the foundation that makes this
 project possible, and he later pitched me the idea of using elaborator
 reflection for interactive editing.
 I could not have finished this work without him putting up with my incessant
@@ -154,7 +170,7 @@ stream of questions. (My words, not his.)
 I would like to express my gratitude to James Lipton and Edward Morehouse for
 reading and evaluating my thesis. I would also like to thank Cyrus Omar for
 coining the term ``edit-time tactics''. Even though he did so in a different
-context\cite{hazelnut}, I cannot think of a better way to describe this
+context~\cite{hazelnut}, I cannot think of a better way to describe this
 project. I would like to thank Matthew Wilson for reading my draft many
 times, and helping me put my project in perspective with our conversations
 about the history and future of IDEs and programming.
@@ -199,5 +215,5 @@ but I made it through thanks to all of you.
 \include{relatedwork}
 \include{conclusion}
 \bibliography{paper}
-\bibliographystyle{plain}
+\bibliographystyle{plainnat}
 \end{document}

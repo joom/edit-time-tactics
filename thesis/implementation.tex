@@ -7,7 +7,7 @@
 \newcommand{\LREd}{\texttt{Language.Reflection.Editor}}
 
 Out of the types we skimmed through in \autoref{ssec:reflectedTypes}, \TT,
-\Raw, and \ty{TTName} live in the \texttt{Language.Reflection} module, and
+\Raw, and \ty{TTName} reside in the \texttt{Language.Reflection} module, and
 \ty{TyDecl}, \ty{DataDefn}, and \ty{FunDefn} live in \LRE. This is because
 Idris only has quotation of terms, as we reviewed in \autoref{ssec:quotation},
 so the definitions we will need in quotations are in \LR. The ones that are not
@@ -47,12 +47,13 @@ them.
 
 We make the additions in \autoref{code:newElabConstructors} in \LRE.  Notice
 that \kw{export} for \Elab\ does not export the constructors for the module,
-and we do not want to export all the primitive actions without any limits. For
-that purpose, we define \fn{prim\_\_fromEditor} and \fn{prim\_\_toEditor} that
-we actually can export. Compared to the types of the constructors we defined,
-types of the functions we defined are tweaked by making the \ty{HasEditorPrim}
-argument automatically inferrable by proof search, which is
-an accomodating feature of Idris usable via the \kw{auto} keyword.
+and we do not want to export all the primitive actions without any limits; we
+want to make \Elab\ more abstract. For that purpose, we define
+\fn{prim\_\_fromEditor} and \fn{prim\_\_toEditor} that we actually can export.
+Compared to the types of the constructors we defined, types of the functions we
+defined are made more user-friendly by making the \ty{HasEditorPrim} argument
+automatically inferrable by proof search, which is a helpful feature of Idris
+usable via the \kw{auto} keyword.
 
 We will inspect in \label{sec:primitiveEditorableImpl} how these new
 constructors will be used in the compiler, but first we have to clarify some
@@ -135,7 +136,7 @@ section, we will use the generalized definition.
 
 Let's give an example and see what we mean by this.
 We defined the Idris type \ty{SExp} in \autoref{code:definitionSExp}.
-When we will define \fn{fromEditor} and \fn{toEditor} in \label{sec:primitiveEditorableImpl},
+When we will define \fn{fromEditor} and \fn{toEditor} in \autoref{sec:primitiveEditorableImpl},
 we will need to convert Haskell terms of the Haskell type \ty{SExp} into the
 internal representation of an Idris term of the Idris type \ty{SExp}, and vice
 versa.
@@ -164,7 +165,7 @@ internal representations of Idris terms of the Idris type \ty{SExp}.}
 \end{figure}
 
 Observe that in the \fn{reflectSExp}, we are returning a \Raw\ term, a core
-language term that is untyped. This mainly for convenience, it is easier to
+language term that is untyped. This mainly for convenience: it is easier to
 write the syntax trees for untyped terms. We can always type-check them later.
 
 To get a Haskell term of the type \ty{SExp} from an internal representation of
@@ -192,10 +193,10 @@ Observe in \fn{reifySExp} that we are returning
 \ty{ElabD SExp}.\footnote{\ty{ElabD} is an alias for the \ty{Elab'} monad
 combined with some special state, this does not concern us in this thesis.}
 This is because reification, unlike reflection, can fail. This function is
-designed to reify the internal representation of S-expressions, and if the
+designed to reify the internal representation of S-expressions. If the
 \ty{Term} it receives does not correspond to one, reification should fail.
 
-Now that we know how reflection and reification mean in the context of compiler
+Now that we know what reflection and reification mean in the context of compiler
 development, we can move on to how they are used in implementing primitive
 implementations for \ty{Editorable}.
 
@@ -205,17 +206,17 @@ In \autoref{ssec:primitiveEditorableDesign} we discussed why core language
 types like \ty{TT}, \ty{TyDecl}, \ty{DataDefn}, \ty{FunDefn}, and
 \ty{FunClause} must have primitive implementations of the
 \Editorable\ interface. Recall that for each of these types, the editor can
-only send a piece of code to the compiler, as a string which contains code in
+only send a piece of code to the compiler as a string which contains code in
 the surface language, however these types are in the core language. There are
 many steps in between that we are missing, such as parsing, elaboration,
 delaboration and pretty printing.
 
 Now let's see how we implemented this in the Idris compiler. Tactic evaluation
-in the compiler happens in the \fn{runElabAction} defined in the compiler
+in the compiler happens in \fn{runElabAction}, which is defined in the compiler
 source code. Inside that, there is a helper function \fn{runTacTm} that takes a
 typed term corresponding to a value in the \Elab\ monad of Idris, which should
 correspond to a \Elab\ primitive constructor applied to arguments, i.e. when
-the \Elab\ action term is in a normal form. Then we can check what primitive
+the \Elab\ action term is in a normal form. Then we can check which primitive
 constructor we are dealing with and behave accordingly.
 
 \begin{figure}[ht]
@@ -241,7 +242,7 @@ constructor we are dealing with and behave accordingly.
 
 In \autoref{code:runElabAction} we can observe how \fn{runElabAction} is
 defined in the compiler.
-It takes many arguments, such as informaion for the elaborator, the internal
+It takes many arguments, such as information for the elaborator, the internal
 state of the compiler at that point, the source location of the action, the
 environment under which the \Elab\ term should be evaluated to a normal form, the
 term that represents the \Elab\ action term, and a namespace.  For our purposes,
@@ -250,26 +251,26 @@ we do not have to worry about all of these.
 In the definition of \fn{runElabAction} we evaluate \bn{tm} to a normal form
 of the \Elab\ action, and then we check in \fn{runTacTm} which form we want run.
 
-If we have a normal form of the \Elab\ action, that means when we decide
-that what we have is a variable term, which is a constructor, represented by
+If we have a non-neutral normal form of the \Elab\ action, that means when we decide
+that what we have is a global variable term, which is a constructor, represented by
 \dt{P}, or it is a series of applications to a variable term that is a
 constructor. We can handle both situations with the
 \texttt{\fn{unApply} :: \ty{Term} -> (\ty{Term}, [\ty{Term}])} function,
-which takes a dissects multiple curried function applications into the the term
-that should be a function, and the list of argument terms passed to
+which dissects multiple curried function applications into the the term
+that should be a function and the list of argument terms passed to
 it.\footnote{A term that is not a function application will be treated as a
 function application with no arguments passed.}
 
-We included in \autoref{code:runElabAction} how an example \Elab\ action
+\autoref{code:runElabAction} demonstrates how an example \Elab\ action
 term is treated by \fn{runTacTm}. For the primitive version of the \fn{solve}
 action, which is represented by the \dt{Prim\_\_Solve} constructor in \Elab,
 we first make sure that there are no given arguments, and then run
 \texttt{\fn{solve} :: \ty{Elab'} \bn{aux} \ty{()}} in the internal elaborator
 monad. If these all succeed, we return the reflected unit term back.
 
-Now, in order to add more \Elab\ primitives, we have to do similar cases for
-\dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}, which we
-started to do in \autoref{code:runElabAction}.
+Now, in order to add more \Elab\ primitives, we have to implement similar cases
+for \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}, which
+we started to do in \autoref{code:runElabAction}.
 
 \begin{figure}[ht]
 \caption{Adding cases for \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm} in the compiler.}
@@ -312,29 +313,32 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
     the \dt{Prim\_\_FromEditor}, we have to reify this using \fn{reifySExp} and
     get a Haskell term with the Haskell type \ty{SExp}.
   \item Remember from \autoref{ssec:primitiveEditorableDesign} that we should
-    receive a string atom S-expression. We fail is the \ty{SExp} we get in the
+    receive a string atom S-expression. We fail if the \ty{SExp} we get in the
     previous step is not a string atom. Otherwise we have access to the string
     \bn{s}.
-  \item Parse the string \bn{s} into a abstract syntax tree term \bn{pterm} of
+  \item We parse the string \bn{s} into a abstract syntax tree term \bn{pterm} of
     the surface syntax, which is represented by the type \ty{PTerm} in the
     compiler. We therefore obtain the variable \bn{pterm}.
   \item Elaboration cannot resolve namespaces in the parsed surface syntax
     terms.  Using the current context, we write a function
-    \texttt{\fn{resolveNames} :: \ty{Context} -> \ty{PTerm} -> \ty{Either} \ty{Err} \ty{PTerm}}
+    \mt{\fn{resolveNames} :: \ty{Context} -> \ty{PTerm} -> \ty{Either} \ty{Err} \ty{PTerm}}
     that traverses the the surface language abstract syntax tree using
     Uniplate\cite{uniplate}, and then at the \dt{PRef} terms, i.e. variable
     references, we search the context to find the matching fully namespaced
-    name. If there is a unique find, we change the name. If there are multiple
-    finds, we return an error that there is ambiguity in the name. If there are
+    name. If there is a unique matching name, we change the name. If there are multiple
+    matching names, we return an error that there is ambiguity in the name. If there are
     no finds, we leave it as is and let elaboration handle the rest.
     We apply the current context and \bn{pterm} to this function and obtain
-    \bn{pterm'}, the surface syntax term with resolved names.
+    \bn{pterm'}, the surface syntax term with resolved names.\footnote{
+     We can do better when there is a known context and type, e.g. at a hole.
+     Then we could elaborate in a local synthesized context to use types for
+     overloading. This is a possible direction for future work.}
   \item Elaborate \bn{pterm'} into the core language and get \bn{t}.
   \item Now, remember that our function \fn{fromEditor} must return
     \ty{Elab TT} in this context. Therefore in the Haskell implementation, we
     want to return the Haskell representation of the Idris representation of
     the Haskell representation of the given code. In other words, we have to
-    reflect \bn{t}, which is of the type \ty{Term}, and get a \Raw\ term, which
+    reflect \bn{t}, which is a \ty{Term}, and then get a \Raw\ term, which
     is a Haskell representation of the Idris representation of \bn{t}.
     We can call the reflected term \bn{reflected}.
   \item \fn{runTacTm} requires us to return a \ty{Term}, therefore we
@@ -343,6 +347,7 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
   \item When we return a core syntax tree, we want to return it in normal form,
     therefore we normalise \bn{tmReflected} and return it.
 \end{enumerate}
+% David's comment: do we always want the normal form? why?
 
 For the \TT\ case of \dt{Prim\_\_ToEditor}, we have to do the following steps:
 \begin{enumerate}
@@ -382,9 +387,9 @@ During elaboration, we cannot have any unbound variables, otherwise we get an
 error.
 
 Nevertheless, the editor can send to the compiler code pieces that contain local variables.
-Handling global context is easy, but when it comes to local context, if the
+Handling the global context is easy, but when it comes to a local context, e.g. if the
 code snippet we received uses a variable whose binding is introduced by
-\kw{let}, \kw{case}, or a lambda, elaboration is doomed to fail.
+\kw{let}, \kw{case}, or a lambda elaboration is doomed to fail.
 We need to find a way to get the local context at a given position, and then
 pass it to elaboration.
 
@@ -392,15 +397,16 @@ If we restricted \Elab\ editor actions to only holes, this would not have been
 a problem, since holes already provide a way to query the local context at
 them. For other names and terms, however, we do not have a way.
 
-To solve this problem, David Christiansen suggested an interval map in which
-keys are source locations, i.e. a pair of line and column numbers, and values
-are local contexts, i.e. environments. We use the finger tree implementation of
-interval maps in Haskell.\cite{fingertrees}
+To solve this problem, we extended the elaboration state with an interval map
+in which keys are source locations, i.e. a pair of line and column numbers, and
+values are local contexts, i.e. environments. We use the finger tree
+implementation of interval maps in Haskell.\cite{fingertrees}
 
 For those who are unfamiliar, an interval map is a data structure that maps
 intervals to values. Every entry consists of the interval between two keys, and
-a value it maps to. Then one can query the map with a single key, and get the
-values in the map which are mapped by the intervals that single key is in.
+a value associated with the interval. One can query the map with a single
+key, and get the values in the map which are mapped by the intervals that
+the key is in.
 
 During elaboration, we still have access to the source locations of all terms.
 Therefore we can register the interval between the start and end locations of
@@ -408,23 +414,23 @@ the term in the source code, and then map it to the local context.
 Following the terminology we used in the compiler, we will call this map the
 \textbf{source map}.
 
-This task required a significant effort of refactoring, since the source map
-needs to preserved during elaboration of different parts, and also after
+This task required significant refactoring, since the source map
+needs to be preserved during elaboration of different parts, and also after
 elaboration. Elaboration itself cannot change the internal Idris state
-\ty{IState}, however it has its own state \ty{ElabState}. When elaboration
-finishes, we then go to \ty{IState} and update it with the additions.
+\ty{IState}; however, it has its own state \ty{ElabState}. When elaboration
+finishes, we then update \ty{IState} with the additions.
 
 In the next section, we will see how exactly \fn{fromEditor} and \fn{toEditor}
 are used in the IDE mode of the compiler to communicate with the editor.
 
 \section{Extensions to the Idris IDE mode}\label{sec:idemode}
 
-Idris IDE mode has an S-expression parser, which looks at the shape of an
+Idris' IDE mode has an S-expression parser, which looks at the shape of an
 S-expression and creates a IDE mode command value based on it. We extend this
 parser by adding a line that says that if we see a symbol atom \dt{:elab-edit},
 a string atom for the \Elab\ action name, an S-expression list, and two integer
-atom for line and column numbers in that order, then we create a new IDE mode
-command.
+atoms for line and column numbers (in that order), then we add a new IDE mode
+command in the compiler.
 
 These commands are passed around for a while in the compiler, however
 eventually there are separate functions that deal with each editor command. We
@@ -447,7 +453,7 @@ write the function for edit-time tactics under the name \fn{elabEditAt} in
 
 Once again the actual code block for \fn{elabEditAt} refers to many helper
 functions that are difficult to follow; we will instead explain what it does in
-detailed prose. This will read like much more detailed version of our
+detailed prose. This will read like a much more detailed version of our
 description in \autoref{ssec:usingEditorable} about how \ty{Editorable} works
 in the compiler.
 
@@ -461,15 +467,15 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     \dt{UN}.  We call the result \bn{name}, which has the type \ty{Name}.
   \item Now we have \bn{name}, yet we do not know whether it really refers to a
     existing \Elab\ action. If it does what is its type?
-    We lookup the context and find out its type, which we can call \bn{ty}, and
-    that has the Haskell type \ty{Type}. From the context, we also resolve the
+    We consult the context and find out its type, which we can call \bn{ty}, which
+    has the Haskell type \ty{Type}. From the context, we also resolve the
     name of the \Elab\ action if we need to, we call the resolved name \bn{ns}.
   \item Using the resolved name \bn{ns}, we look up the flags declared for this function.
     We check if the it has been declared an editor action using the
     \kw{\%editor} modifier.  If not, we do not proceed.
   \item We are given a list of \ty{SExp}s, which is the list that the editor
     passes to the compiler to apply the editor action they want to call.
-    However, we have to check if this list contains the right number of
+    However, we have to check whether this list contains the right number of
     arguments, and for that we need to know how many arguments the editor action should have.
     For that, we can write a function \fn{collectTypes} that takes a the
     \fn{Type} \bn{ty} and gives us a list of \fn{Type}s, which are the
@@ -484,7 +490,12 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     \end{Verbatim}
     \end{figure}
     We apply \bn{ty} to \fn{collectTypes} and name the result \bn{collected},
-    which is a list of \ty{Type}s.
+    which is a list of \ty{Type}s.\footnote{Observe that this throws away the
+    binding structure of the $\Pi$-type, which mean \kw{\%editor} actions
+    cannot have dependent types. As we mentioned before about polymorphic
+    editor actions, we believe monomorphic non-dependently-typed editor actions
+    suffice for almost all editor actions. We leave further exploration for
+    future work.}
   \item We check if the length of \bn{collected} is exactly one less than the
     length of \bn{args}, because the last element in \bn{collected} is the
     return type of the \Elab\ action.
@@ -495,11 +506,11 @@ Here are the steps \fn{elabEditAt} takes when it is called:
   \item We zip \bn{collected} and \bn{args} and get a list of pairs of
     \ty{Type} and \ty{SExp}.
     For each of the pairs, we have to do the following and get a result for
-    each pair of \texttt{(\bn{argTy}, \bn{sexp})}:
+    each \mbox{pair of \mt{(\bn{argTy}, \bn{sexp})}}:
     \begin{enumerate}[(a)]
       \item \label{item:fromEditor} Construct an Haskell representation of an
         Idris term that calls \fn{fromEditor}. Remember that \fn{fromEditor} is
-        polymorphic and also has an interface constraint, therefore
+        polymorphic and also has an interface constraint; therefore,
         constructing this as a \ty{Term} is not trivial.  As a shortcut, we can
         construct a \ty{PTerm} that explicitly applies the polymorphic type,
         which will be \bn{argTy} in this case.
@@ -533,8 +544,8 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     type that \bn{lastTyInElab} represents.
   \item We want to serialize this term before returning it as an S-expression.
     The only way we know how to serialize is through the \fn{toEditor} function
-    in \ty{Editorable}, but remember that that is defined in Idris.
-    Hence we construct a Haskell representation of an Idris term that calls
+    in \ty{Editorable}, but remember that \fn{toEditor} is defined in Idris.
+    We thus construct a Haskell representation of an Idris term that calls
     \fn{toEditor}, similar to how we constructed an application term for
     \fn{fromEditor} before in \autoref{item:fromEditor}.
     For convenience in implementation resolution, we first construct a
@@ -549,7 +560,7 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     successful, and the result is \bn{resSExp}.
 \end{enumerate}
 
-This concludes the IDE mode section of implementing edit-time tactics.
+\noindent This concludes the IDE mode section of implementing edit-time tactics.
 
 \section{Extensions to the type-checker for the \kw{\%editor} modifier}\label{sec:extCheck}
 
@@ -558,11 +569,15 @@ type-checking.
 
 If a function is declared an editor action with the \kw{\%editor} modifier, we
 want to find out during type-checking if it is viable to use them as an editor
-action, and an \Elab\ action viable is if the components of its type have
-implementations of the \Editorable\ interface. We discussed this idea in the
-\fn{toy} example in \autoref{ssec:primitiveEditorableDesign}, and also have
-seen the type errors you can get in \autoref{ssec:preclude}. Now let's see how
-we implement this feature.
+action, and an \Elab\ action is \emph{viable} is if the components of its type have
+implementations of the \Editorable\ interface.\footnote{
+  David Christiansen notes that this process could be internalized into Idris
+  as a universe \`a la Tarski, instead of the \`a la Russell solution we
+  present in our thesis. This approach can also be a starting point for
+  dependently-typed editor actions.} We discussed this idea in the \fn{toy}
+example in \autoref{ssec:primitiveEditorableDesign}, and also have seen the
+type errors you can get in \autoref{ssec:preclude}. Now let's see how we
+implement this feature.
 
 To the \fn{elabType'} function in the compiler, we add the following:
 \begin{enumerate}

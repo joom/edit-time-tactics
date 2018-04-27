@@ -5,21 +5,21 @@
 
 Idris is a dependently typed functional programming language. In simple terms,
 dependent types allow us to do computation in types, just like we can do
-computation in terms.\cite{davidphd} Moreover, we can use the computation
+computation in terms~\cite{davidphd}. Moreover, we can use the computation
 in types to shape our definitions of computations in terms.
 
 A helpful intuition for functional programmers is to think about how the
 concept that functions are values was a initially a novel idea, and now in
 dependently typed programming, we promote types to values as well.
 Thus a function can now take a term as an argument and return a type as a
-result.\cite{lambdacube,henk}
-For those familiar with Haskell type families\cite{typefamilies}, this is
+result~\cite{lambdacube,henk}.
+For those familiar with Haskell type families~\cite{typefamilies}, this is
 similar to that, but notice that type families are like functions from types to types,
-while we can have functions from terms to types.
+while dependent types allow us to have functions from \emph{terms} to types.
 
 In \autoref{code:vect}, we define a data type of vectors. It is exactly
 like lists, except now the length is stored within the type. In other
-words, as we add elements, the length is computed in type level.
+words, as we add elements, the length is computed at the type level.
 
 After that, we define a function that zips two vectors. Notice that only two
 cases are enough to cover all possible paths of this function. If we were to
@@ -27,7 +27,7 @@ define a \zip\ function for lists, we would need four cases: both empty, both
 non-empty, one empty and one non-empty, and one non-empty and one empty.
 However, our \zip\ function takes two arguments that are of the same length
 \bn{n}.  Therefore, we cannot have a case with one empty and one non-empty,
-because that contradicts with the fact that both vectors are of the same
+because that contradicts the fact that both vectors are of the same
 length. Notice that the \zip\ function returns a vector of length \bn{n}.
 In other words, the input vectors and the resulting vector are guaranteed to be
 of the same length.
@@ -48,9 +48,9 @@ of the same length.
 
 In \autoref{code:evenodd}, we define
 two similar data types that ensure that the given natural number is even or
-odd, and compute the number within the type at every step. Later we give a
+odd, and compute the number within the type at every step. Later, we give a
 function that takes a natural number and generates either a value of the type
-that ensures evenness or one that ensures oddity. This corresponds to a proof that for all $n \in \mathbb{N}$, $n$ is even or $n$ is odd.
+that ensures evenness or one that ensures oddness. This corresponds to a proof that for all $n \in \mathbb{N}$, $n$ is even or $n$ is odd.
 
 \begin{figure}[ht]
 \caption{Example of a dependently typed Idris code, parity of natural numbers}
@@ -76,30 +76,30 @@ that ensures evenness or one that ensures oddity. This corresponds to a proof th
 
 Unlike other dependently typed languages like Agda and Coq, Idris is not total
 by default. This is because Idris prioritizes general purpose programming
-rather than theorem proving. However, users can opt in to enable totality
-checking either for the entire module or for specific functions.
+rather than theorem proving. However, users can opt in to totality
+checking either for the entire module or for specific declarations.
 We did the latter for \fn{evenOrOdd} by using the keyword \kw{total}.
 Similarly, we could require the \zip\ function from the previous example to be
-total if we wanted to.\footnote{Clearly Idris cannot decide whether a given
+total if we wanted to.\footnote{Clearly Idris cannot decide whether an arbitrary
 function is total, since that would solve the halting problem. Instead it
 acknowledges the ones that are obviously terminating, and for all the other
 ones, even if they are actually total, it throws a totality check error.}
 
-Haskell's type classes and type class instances are called interfaces and
-implementations in Idris, respectively. In Haskell there can only be one
-instance for the same type class and the type, but in Idris for the same
-interface and the type, there can be multiple implementations. You can name
-implementations and specify the implementation you want to use by its name,
+Haskell's type classes and type class instances are called \emph{interfaces} and
+\emph{implementations} in Idris, respectively. In Haskell there can only be one
+instance for the same type class and the type, but in Idris there can be
+multiple implementations for the same interface and the type. You can name
+implementations and specify the implementation you want to use by its name
 when you are writing a function. For our purposes, we will not use multiple
 implementations.
 
 \section{Elaborator reflection}\label{sec:elabref}
 
 Idris programs are elaborated from high-level Idris syntax trees into a core
-language called \texttt{TT}, and then type checked.\cite{idris}
+language called \ty{TT}, and then type checked~\cite{idris}.
 The implementation of the Idris elaboration in the compiler is written as a
-Haskell monad called \texttt{Elab}.
-Recent work on elaborator reflection\cite{elabref} allowed Idris users to
+Haskell monad called \ty{Elab}.
+Recent work on elaborator reflection~\cite{elabref} allowed Idris users to
 access this monad from Idris itself, by implementing a primitive monad
 \Elab\ in Idris itself, that can only be used for metaprogramming in compile
 time.
@@ -107,7 +107,7 @@ time.
 \subsection{Reflected core language types}\label{ssec:reflectedTypes}
 
 Since the \Elab\ monad in Idris needs to work with core language terms and
-definitions, we have to use data types in Idris representing them.
+definitions, we have to use data types in Idris that represent them.
 We want to have a correspondence between the internal data type that represents
 the core language syntax in the compiler, and the ones defined in Idris.
 
@@ -122,7 +122,7 @@ tree types in the compiler; we will call the ones we defined ``reflected
 types''.
 
 The most important one these types is called \TT,
-which is type of the core language typed terms, and its definition can be seen
+which represents the core language's typed terms, and its definition can be seen
 in \autoref{code:ttDef}.
 
 \begin{figure}[ht]
@@ -154,8 +154,8 @@ As a quick summary:
 \item\dt{UType} creates a uniqueness type for a given uniqueness universe.
 \end{itemize}
 
-This summary is meant to be an overview, so refer to \cite{idris} and
-\cite{elabref} if this is not perfectly clear. For our purposes, we will mostly
+This summary is meant to be an overview, so refer to \citet{idris} and
+\citet{elabref} if this is not perfectly clear. For our purposes, we will mostly
 be concerned with \dt{P}, \dt{Bind} and \dt{App}.
 
 The other important type that is used in elaborator reflection is \ty{Raw},
@@ -178,8 +178,9 @@ seen in \autoref{code:rawDef}.
 
 The constructors of \ty{Raw} are almost the same ones as \TT,
 except a few of them are missing and variables do not have to be annotated with
-their types.
-
+their types. This makes \Raw\ terms easier to type by hand, if necessary.
+Therefore \TT\ terms will usually be treated as the output from the type
+checker, and \Raw\ terms will be the input to the type checker.
 
 The \ty{TTName} type is the type of names in the core language, its full definition can be seen in \autoref{code:ttnameDef}.
 
@@ -197,9 +198,9 @@ The \ty{TTName} type is the type of names in the core language, its full definit
 
 As a quick summary:
 \begin{itemize}
-\item\dt{UN} represents the variable names without any namespace.
-\item\dt{NS} represents the variable names with a given namespace. For example, the name \texttt{Prelude.Bool.True} is represented as
-  \texttt{\dt{NS} (\dt{UN} \dt{"True"}) \dt{["Bool", "Prelude"]}}.
+\item\dt{UN} represents user-provided variable names without any namespace.
+\item\dt{NS} represents variable names with a given namespace. For example, the name \texttt{Prelude.Bool.True} is represented as
+  \mbox{\texttt{\dt{NS} (\dt{UN} \dt{"True"}) \dt{["Bool", "Prelude"]}}}.
 \item\dt{MN} represents machine generated names with a hint string and a fresh integer for that hint.
 \item\dt{SN} represents special names, which are used for metavariables, implementations etc. We will not deal with them in this thesis.
 \end{itemize}
@@ -216,7 +217,7 @@ namespace: \texttt{\IdrisKeyword{\`{}\{}False\IdrisKeyword{\}}} would give you
 
 There are many other types used in the reflection of the core language, but we
 will not give their definitions here since they are not as common as \TT,
-\ty{Raw}, and \ty{TTName}. However, it would be useful to at least list the
+\ty{Raw}, and \ty{TTName}. However, it is useful to at least list the most
 important ones and describe what they represent.
 
 \begin{itemize}
@@ -230,7 +231,7 @@ important ones and describe what they represent.
 
 Writing \TT\ and \ty{Raw} terms by hand can get tedious, hence there is a
 quotation syntax that elaborates a given expression into its corresponding
-\TT\ or \ty{Raw} term.\cite{idrisQuotation}
+\TT\ or \ty{Raw} term~\cite{idrisQuotation}.
 The syntax \texttt{\`{}(\fn{e})}, where \fn{e} is an Idris expression, gives
 us the typed or untyped core language syntax tree for \fn{e}. For example,
 \texttt{\`{}(\fn{not} \dt{True})} gives us the following \TT\ term:
@@ -250,7 +251,7 @@ us the typed or untyped core language syntax tree for \fn{e}. For example,
 \end{Verbatim}
 \end{figure}
 
-The \ty{Raw} term for the same expression is a bit more reasonable:
+The \ty{Raw} term for the same expression is a bit smaller:
 \begin{figure}[ht]
   \caption{The \Raw\ term we get when we quote \texttt{\fn{not} \dt{True}}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -268,20 +269,20 @@ necessary when Idris cannot infer the type. For \dt{True}, it is trivial to
 infer that type is \ty{Bool}, but for \dt{5}, the type can be \ty{Int},
 \ty{Integer}, \ty{Nat}, or anything that satisfies the \ty{Num} interface.
 Therefore, we have to specify the type when we are quoting. The
-syntax for that is \texttt{\`{}(\fn{e} : \ty{t})},
-e.g. \texttt{\`{}(\dt{5} : \ty{Nat})}.
+syntax for that is \mbox{\texttt{\`{}(\fn{e} : \ty{t})}},
+e.g. \mbox{\texttt{\`{}(\dt{5} : \ty{Nat})}}.
 
 We also can do antiquotation. If we have some variable expression \fn{x} that has the
 type \TT\ or \ty{Raw}, then we can construct a syntax tree using it within the
-quotation, with the syntax \texttt{\`{}(\fn{not} ~\fn{x})}.
+quotation, with the syntax \mbox{\texttt{\`{}(\fn{not} \textasciitilde\fn{x})}}.
 Note that antiquotation works for expressions, not just variables. The type of
 expression or variable we have in the antiquotation has to match the type of
 the quotation. In other words, only \TT\ expressions can be used in an
-antiquotation in a \TT\ quotation, and mutatis mutandis for \ty{Raw}.
+antiquotation in a \TT\ quotation, and \emph{mutatis mutandis} for \ty{Raw}.
 
 \subsection{\protect\Elab\ monad}
 
-The elaborator reflection\cite{elabref} feature that has been added to the
+The elaborator reflection~\cite{elabref} feature that has been added to the
 Idris compiler recently provides a tool for metaprogramming with a monad called
 \Elab.  This monad is implemented as a primitive and it can only be run during
 compile time, or in the interactive proof shell.
@@ -302,19 +303,24 @@ that has the type \ty{t}.
 Like the declaration above, this expression also adds the newly generated
 declarations and definitions to the context.
 
-\Elab\ monad holds a proof state inside, which has a goal type, a proof term that is incrementally built up, a hole queue, a collection of open unification problems, and a supply of fresh names.\cite{elabref}
+The \Elab\ monad holds a proof state inside, which has a goal type, a proof
+term that is incrementally built up, a hole queue, a collection of open
+unification problems, and a supply of fresh names~\cite{elabref}.
+This state is really held in the Haskell \Elab\ monad, though it can be
+observed from Idris.
+
 Tactics can change the proof state. Here are some examples that do that:
 \begin{itemize}
 \item\texttt{\IdrisFunction{claim} : \IdrisType{TTName} -> \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
-Creates a new hole with a given name and a type.
+  Creates a new hole with a given name and a type.
 \item\texttt{\IdrisFunction{fill} : \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
-Create a guess to fill the current hole with a term. Fail if the types do not unify.
+Create a guess to fill the current hole with a term. Fail if the types do not unify\cite{mcbridephd}.
 \item\texttt{\IdrisFunction{solve} : \IdrisType{Elab} \IdrisType{()}}\\
-Try to finalize the guess in the hole. Fail if there is no guess.
+Try to finalize the guess in the hole. Fail if there is no guess\cite{mcbridephd}.
 \end{itemize}
 
-There are a lot more tactics, which we will not list here. A more thorough list
-can be found in \cite{elabref} and Idris documentation.
+\noindent There are a lot more tactics, which we will not list here. A more thorough list
+can be found in \citet{elabref} and Idris documentation.
 
 We also have access to \Elab\ actions that do not change the proof state, but give us access to the context or other compiler primitives:
 \begin{itemize}
@@ -336,7 +342,7 @@ Let's define a polymorphic identity function.
 
 
 \begin{figure}[ht]
-  \caption{A proof of the identity function using elaborator reflection in Idris.}
+  \caption{The identity function using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{id} : (\bn{a} : \ty{Type}) -> \bn{a} -> \bn{a}
 \fn{id} = \kw{%runElab} (\kw{do} \fn{intro} \kw{`\{\{}ty\kw{\}\}}
@@ -348,17 +354,24 @@ Let's define a polymorphic identity function.
 
 For anyone familiar with Coq, this will look very similar to a normal Coq
 proof. First we take the type as an argument, and then a value of that type,
-and we return the same value. Elaborator reflection proofs are a bit more
-unpolished compared to Coq proofs because of the core language terms,
-quotation and special name syntax, but it is essentially very similar,
-hence the name ``tactics'' we use to refer to monadic \Elab\ actions.
+and we return the same value. Elaborator reflection proofs look a bit more
+unpolished compared to Coq proofs\footnote{This is because Coq has the Gallina
+language for proof terms and Ltac~\cite{ltac} for tactics, therefore, while
+Idris does not have such a distinction; it only has one language: Idris itself.
+Therefore the syntaxes for core language terms, quotation and special names
+look more cluttered.  Another reason that elaborator reflection looks more
+unpolished is that Coq tactics are designed to just inhabit a type, while
+\Elab\ is designed for \emph{programs} where we want to control the precise
+computational behavior.}, but it is essentially very similar to Coq
+tactics, hence the name ``tactics'' we use to refer to monadic \Elab\ actions.
 
-Let's prove something not as trivial. This time we want to prove that
-$(\forall n \in \mathbb{N})\ n = n + 0$, for the standard definition of
+
+Let's prove a lemma in Idris. This time we want to prove that
+\mbox{$(\forall n \in \mathbb{N})\ n = n + 0$}, for the standard definition of
 addition. Since that requires more complex tactics like induction, we will
 import the Pruviloj\footnote{Pruviloj is the Idris library included in
 the Idris distribution. It contains complex tactics written with elaborator
-reflection.} library.\cite{davidphd}
+reflection.} library~\cite{davidphd}.
 
 \begin{figure}[ht]
   \caption{A proof that $(\forall n \in \mathbb{N})\ n = n + 0$ using elaborator reflection in Idris.}
@@ -378,17 +391,17 @@ reflection.} library.\cite{davidphd}
 \end{Verbatim}
 \end{figure}
 
-The proof proceeds as such: we first take in the argument \bn{n}, and then do
+The proof proceeds as follows: we first take in the argument \bn{n}, and then do
 an induction on \bn{n}. Because of the way induction works in Pruviloj, we have
 to simplify the goal using \fn{compute}\footnote{Its Coq equivalent would be
 \texttt{simpl}.}.
-And for the base case the goal is just proving \dt{0} \dt{=} \dt{0}.
+For the base case, the goal is just proving \dt{0} \ty{=} \dt{0}.
 For the inductive step, we have to restructure the goal with \fn{attack} and
 then reintroduce the input and then introduce the induction hypothesis. Then we
 rewrite the goal with the induction hypothesis and then the goal becomes
 trivial. Understanding this proof completely is not crucial for this thesis,
-but if you want to fully comprehend \fn{attack} and {solve}, you can refer to
-\cite{elabref}.
+but if you want to fully comprehend \fn{attack} and \fn{solve}, you can refer to
+\citet{elabref}.
 
 Finally let's do an example for a declaration with elaborator reflection:
 
@@ -401,8 +414,8 @@ Finally let's do an example for a declaration with elaborator reflection:
 \end{Verbatim}
 \end{figure}
 
-The example above first declares that \fn{n} will have the type \ty{Nat}.
-Then it defines it as \texttt{\IdrisFunction{n} = \IdrisData{Z}}.
+\noindent The example above first declares that \fn{n} will have the type \ty{Nat}.
+Then it defines it as \mbox{\texttt{\IdrisFunction{n} = \IdrisData{Z}}}.
 
 Now that we have seen different use cases for elaborator reflection, we can move on to the
 design of the edit-time tactics feature.
@@ -411,7 +424,7 @@ design of the edit-time tactics feature.
 % Previous versions of Idris had a tactic based prover\footnote{As of Idris
 % 1.1.1 it is still available, with the warning that it will be deprecated in the
 % future versions.}, which embedded the proof tactics in a Haskell monad in the
-% implementation.\cite{elabref}
+% implementation~\cite{elabref}
 
 % what sorts of things stay, what sorts of things go away with elaboration
 % mcbride dependent pattern matching? (Epigram paper?)

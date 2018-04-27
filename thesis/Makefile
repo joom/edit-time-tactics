@@ -1,7 +1,7 @@
 FILENAME=thesis
 SOURCENAME=source
 OUTPUTNAME=output
-LATEX=pdflatex
+LATEX=xelatex
 
 default: preview
 

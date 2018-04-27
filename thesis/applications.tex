@@ -1,6 +1,6 @@
 \chapter{Applications} \label{chap:applications}
 
-\section{A tactic to replace the built-in add clause action}\label{sec:addClause}
+\section{A tactic to replace the built-in ``add clause'' action}\label{sec:addClause}
 
 We have seen in \autoref{chap:introduction} how the ``Add initial match clause
 to type declaration'' editor action works. When the cursor is on the type
@@ -29,7 +29,7 @@ The Idris code we need to write is in \autoref{code:addClause}.
      \bn{argNames} <- \fn{traverse} (\fn{const} \fn{fresh}) \bn{argTys}
      \kw{let} \bn{lhsUntyped} = \fn{foldl} \dt{RApp} (\dt{Var} \bn{n}) (\fn{map} \dt{Var} \bn{argNames})
      \bn{env} <- \fn{getEnv}
-     (lhsTyped, _) <- \fn{check} \bn{env} \bn{lhsUntyped}
+     (\bn{lhsTyped}, _) <- \fn{check} \bn{env} \bn{lhsUntyped}
      \bn{holeName} <- \fn{fresh}
      \kw{let} \bn{rhs} = \dt{Bind} \bn{holeName} (\dt{GHole} \bn{retTy}) (\dt{V} \dt{0})
      \fn{pure} (\bn{MkFunClause} \bn{lhsTyped} \bn{rhs})
@@ -40,26 +40,26 @@ The \fn{collectTypes} function we write in Idris is very similar to the one we
 defined in \autoref{code:collectTypes} for the compiler implementation.
 This one, however, also returns a proof that the resulting list is not empty.
 The function takes a list and you the same list with the last element removed,
-namely \fn{init}, requires a proof that the list be non-empty.
+namely \fn{init}, requires a proof that the list is non-empty.
 
 The \fn{addClause} tactic only takes one input, which is the name of the function
 we will add an initial clause for.
 Using this name, we look up the type of that function, and get its components
-using \fn{collectTypes}. We know that there is at least one member of that
+using \fn{collectTypes}. We know that there is at least one member in that
 list, so we name the last element \bn{retTy}, for the return type, and we name
-the rest \bn{argTy}, since they represent types of the arguments.
-For each of member of \bn{argTy}, we generate a new name using
-\fn{fresh}\footnote{\fn{fresh} is defined in Hezarfen, not in a standard
+the rest \bn{argTys}, since they represent types of the arguments.
+For each of member of \bn{argTys}, we generate a new name using
+\fn{fresh}.\footnote{\fn{fresh} is defined in Hezarfen, not in a standard
 library. The standard way of creating fresh names is \fn{gensym}, but we wrote
 wrapper function \fn{fresh} that does not generate \dt{MN}, and gives variables
-readable names, usually one-letter.}. We later use these names and make them
+readable names, usually one-letter.} We later use these names and make them
 into variable terms, using \dt{Var}, and create a function application using
 all of these names. This application is supposed to represent the left-hand
 side in our final definition. The right-hand side is a hole term that has the
 type \bn{retTy}.  This concludes our type declaration term.
 
 The Emacs Lisp code we write for this exactly the same as the existing
-add-clause editor action, we only have to change the part that Emacs sends a
+add-clause editor action, so we only have to change the part that Emacs sends a
 message to the compiler. Our message now should refer to \fn{addClause} instead
 of the built-in add-clause editor action.
 
@@ -86,7 +86,7 @@ If we put the cursor on \fn{example} and execute the Emacs Lisp code somehow, wh
 
 This concludes the rudimentary replacement the the existing add-clause section.
 For simplicity purposes, we have not covered the type signatures with implicit
-arguments or interface constraints. One can easily write a tactic to handle
+arguments or interface constraints. One can write a tactic to handle
 those cases as well.
 
 \section{Theorem prover for intuitionistic propositional logic}\label{sec:hezarfen}
@@ -96,17 +96,17 @@ In this section, we describe the tactic Hezarfen\footnote{ The name is
     polymath in Turkish.  Tactic source code is available at
     \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
 propositional logic theorems.\footnote{Similar to Coq's \texttt{tauto} tactic.}
-This tactic will be based on LJT\cite{ljt} and its Haskell
-implementation Djinn\cite{djinn}, which generates Haskell expressions
-for a given type.
+This tactic will be based on Dyckhoff's LJT~\cite{ljt} and its Haskell
+implementation Djinn~\cite{djinn}, which generates Haskell expressions
+that have a given type.
 
 Djinn is a standalone program that takes commands
 interactively, and when it generates an expression it prints it on the screen.
-Instead we want to design Hezarfen as a library that provides an \Elab\ action
+Instead, we want to design Hezarfen as a library that provides an \Elab\ action
 that can be used as a tactic in proofs, and also as a custom editor action that
 helps us when the built-in proof search mechanism does not suffice.
 
-Using this library, we want to define the \Elab\ action we used in
+As a part of this library, we want to define the \Elab\ action we used in
 \autoref{sec:communication}, with the type
 \texttt{\fn{prover} : \ty{TTName} -> \ty{Elab} \ty{TT}}.
 This tactic takes the name of the hole it is supposed to fill, and gives back a
@@ -114,7 +114,7 @@ This tactic takes the name of the hole it is supposed to fill, and gives back a
 
 Since Hezarfen's proof terms are sent back to the editor and put back into the
 source code, we should aim to make our proof terms as simple as possible.
-Hence we should implement both proof term generation and simplification.
+Hence, we should implement both proof term generation and simplification.
 
 \subsection{Proof term generation}
 
@@ -133,10 +133,10 @@ represent the proof rules as manipulations of the goal type.
 A context is two lists of pairs that consist of names mapped to \Raw\ terms
 that represent the type of the term that the name refers to.
 The reason we want to have two lists is that we want to distinguish between the
-consumed and unconsumed bindings. Once we use up one entry in the second list,
-we delete that from the second list. But we may want to add new bindings, which
-we do on the first list. Suppose we have $(C \vee D) \supset B$ in our context,
-when we are checking the premises we want to remove that from the second list
+\emph{consumed} and \emph{unconsumed} bindings. Once we use up an entry in the second list,
+we delete it from the second list. But we may want to add new bindings, which
+we do on the first list. Suppose we have $(C \vee D) \supset B$ in our context.
+When we are checking the premises we want to remove it from the second list
 and add $C \supset B$ and $D \supset B$ to the first list. In Dyckhoff's
 presentation, this rule looks like:
 
@@ -168,7 +168,7 @@ But in Hezarfen's source code, this rule is written as in \autoref{code:hezarfen
 \end{Verbatim}
 \end{figure}
 
-Understanding this code fully is not necessary, our goal is to give the greater
+Understanding this code fully is not necessary; our goal is to give the greater
 picture. This piece of code checks our second list in the context to see if
 there is a name with the type \texttt{(\ty{Either} \bn{d} \bn{e}) -> \bn{b}},
 for some \bn{d}, \bn{e} and \bn{b}. If there is, using this name \bn{n}, we can

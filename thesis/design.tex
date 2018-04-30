@@ -48,7 +48,7 @@ computation, the compiler responds with the message on the second line.
 
 Let's look at how these messages are formed. The built-in add clause command
 needs to know the line number after which we are adding a clause, which is
-\texttt{5}, and the name of the function we are adding a clause for, which is
+\texttt{4}, and the name of the function we are adding a clause for, which is
 \fn{height}.
 Also, for communication purposes, we require that messages have unique IDs,
 which is what the number \texttt{8} we have at the end of the message is.
@@ -511,7 +511,7 @@ the following steps should happen:
     \fn{toy} are \ty{TTName} and \TT, and we are given the S-expressions
     \texttt{"q"} and \texttt{"S Z"}. If we zip these lists, we get pairs of
     S-expressions and what type they will have when they are parsed.
-    Parse them using the \fn{fromEditor} function for their respective
+    Then, Idris parses them using the \fn{fromEditor} function for their respective
     \Editorable\ implementations.
   \item Then we will have a list of terms in the compiler that correspond to a
     \ty{TTName} and a \TT.  All we have done so far was to check if \fn{toy}
@@ -554,6 +554,7 @@ of Emacs Lisp:
 
 \begin{figure}[ht]
 \caption{Necessary Emacs Lisp code to run the \fn{toy} action.}
+\label{code:elispToy}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Emacs Lisp}}, labelposition=topline]
 (\kw{defun} \fn{idris-elab-hole-arg} (\bn{action} \bn{args})
   \dt{"Run Elab action in editor, replace the hole with the result"}
@@ -607,16 +608,17 @@ The following communication happens in the background with the compiler:
 \begin{figure}[ht]
   \caption{Communication to run \fn{toy} on the hole \hole{q}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{S-expression}}, labelposition=topline]
--> ((:elab-edit "toy" ("q" "S Z") 35 5)
+-> ((:elab-edit "toy" ("q" "S Z") 35 5) 20)
 <- (:return (:ok "1" nil) 20)
 \end{Verbatim}
 \end{figure}
 
 We send the \Elab\ action name \fn{toy} and the list of arguments as an
 S-expression. Idris sends back the result of the \Elab\ action when run with
-the arguments \hole{q} as the name, and the core language term for \dt{S Z}.
-Since the type of our hole is \ty{Nat} here, \fn{toy} just returns the same
-term we give it, but it pretty prints it as \dt{1}.
+the arguments \hole{q} as the name, and the core language term for \dt{S Z},
+which is \mt{\dt{Prelude.Nat.S Prelude.Nat.Z}}. Since the type of our hole is
+\ty{Nat} here, \fn{toy} just returns the same term we give it, but it pretty
+prints it as \dt{1}.
 
 By the definition of \fn{idris-elab-hole-arg}, the result \dt{1} replaces the hole
 \hole{q} in the file. The resulting code is this:
@@ -689,7 +691,8 @@ Here is another custom editor action we want to preclude:
 
 We do not have a way to serialize and deserialize functions of the type
 \texttt{\ty{Nat} -> \ty{Nat}}, so therefore we should not allow \fn{funAction}
-to be declared an editor action.
+to be declared an editor action.\footnote{Remember that we cannot inspect a
+function's body; we can only apply arguments to a function.}
 When we try to compile \fn{funAction}, we get the following error:
 
 \begin{figure}[ht]

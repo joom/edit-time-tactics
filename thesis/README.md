@@ -72,3 +72,35 @@ Library-defined derived actions / edit-time tactics (from Hazelnut slides)
   * This solves the local context problem we have in fromEditor. (done)
   * We have to record every type to this interval map during elaboration. (done)
   * We can add a REPL command that gets a sourceposition and returns info. (trying)
+
+## Ed Morehouse's questions:
+
+* S-expressions seem pretty limiting.  What might be a better encoding for
+abstract syntax in the communications protocol between an editor and a
+compiler?
+* What are the prospects for building editor interactions into a compiler from
+the start?  Is it feasible to implement delaboration in such a way that the
+compiler could respond directly with surface-syntax terms that fit in the
+current binding context?
+* What other low-hanging fruit can you implement with this tool?  For example,
+  could you uniformly rename a binder within a file? Lift a hole to a lemma?
+  Prune unused arguments to a function? etc.
+
+## David Christiansen's questions:
+
+* How is the performance?
+* What if the editor buffer is modified since last type-check?
+* Is anything in the way of ripping out the Haskell editing interface and doing it all in Idris?
+* How could the design of elaborator reflection better support edit-time tactics?
+
+Inline questions:
+* How much of the proof term size is due to calling normalize?
+  * JK: I'd say not much, since the proof term size is mostly about how the
+  tactic is designed. Coq's omega returns a huge proof term because of the
+  order in which it tries different cases.
+* Lean has a similar system
+
+Other benefits:
+* Library and DSL authors can provide domain-specific editor tactics
+* Users gain control and customization
+* More people can extend Idris. Contributing to the standard library is much easier than to the compiler.

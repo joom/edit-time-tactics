@@ -496,7 +496,7 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     editor actions, we believe monomorphic non-dependently-typed editor actions
     suffice for almost all editor actions. We leave further exploration for
     future work.}
-  \item We check if the length of \bn{collected} is exactly one less than the
+  \item We check if the length of \bn{collected} is exactly one more than the
     length of \bn{args}, because the last element in \bn{collected} is the
     return type of the \Elab\ action.
   \item Using the interval map we defined in \autoref{sec:extendIState} and the
@@ -508,13 +508,13 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     For each of the pairs, we have to do the following and get a result for
     each \mbox{pair of \mt{(\bn{argTy}, \bn{sexp})}}:
     \begin{enumerate}[(a)]
-      \item \label{item:fromEditor} Construct an Haskell representation of an
+      \item \label{item:fromEditor} We construct an Haskell representation of an
         Idris term that calls \fn{fromEditor}. Remember that \fn{fromEditor} is
         polymorphic and also has an interface constraint; therefore,
         constructing this as a \ty{Term} is not trivial.  As a shortcut, we can
         construct a \ty{PTerm} that explicitly applies the polymorphic type,
         which will be \bn{argTy} in this case.
-      \item Elaborate the \ty{PTerm} we construct above, which gives us
+      \item We elaborate the \ty{PTerm} we construct above, which gives us
         \bn{tm}, the Haskell representation of an Idris term that has the type
         represented by \bn{argTy}, but in the Idris \Elab\ monad.
       \item Since \bn{tm} is the Haskell representation of an \Elab\ action, we
@@ -569,7 +569,7 @@ type-checking.
 
 If a function is declared an editor action with the \kw{\%editor} modifier, we
 want to find out during type-checking if it is viable to use them as an editor
-action, and an \Elab\ action is \emph{viable} is if the components of its type have
+action, and an \Elab\ action is \emph{viable} if the components of its type have
 implementations of the \Editorable\ interface.\footnote{
   David Christiansen notes that this process could be internalized into Idris
   as a universe \`a la Tarski, instead of the \`a la Russell solution we
@@ -595,7 +595,7 @@ To the \fn{elabType'} function in the compiler, we add the following:
         construct a \ty{PTerm} of a \fn{fromEditor} application and then
         elaborate it, as we did in \label{item:fromEditor} before, which should
         resolve implementation constraints, or give an error if it cannot.
-      \item If there is no error, move on to the next \bn{ty} silently.
+      \item If there is no error, we move on to the next \bn{ty} silently.
         If there is an error, that implies that there was no \ty{Editorable}
         implementation for the Idris type \bn{ty} represents. Then we send an
         error message like the ones in \autoref{ssec:preclude} back to the editor.

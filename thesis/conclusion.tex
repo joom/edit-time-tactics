@@ -17,10 +17,10 @@ is more of a priority for Idris.
 Idris tactics generate proof terms at compile time, but the
 compilation can take a long time for complex tactics\footnote{Similar problems
 arise in Coq as well. For example, theorems that use the famous \texttt{omega}
-tactic that decides Presburger arithmetic\cite{omega} take a long time to compile, and it
+tactic that decides Presburger arithmetic~\cite{omega} take a long time to compile, and it
 usually generates a huge proof term.},
 not to mention that the implementation of elaborator
-reflection in Idris has significant performance issues.\cite{leanmeta}
+reflection in Idris has significant performance issues~\cite{leanmeta}.
 Yet we still want to utilize complex tactics to generate proofs or terms.
 Using edit-time tactics, one would run a tactic once from the editor, generate
 the proof term and serialize and send that to the editor and put it back in the
@@ -84,11 +84,18 @@ Idris core language terms.
 Using this feature, we showed a simple \fn{toy} example, and then the
 \fn{addClause} example that can replace an existing built-in editor action,
 and Hezarfen, which is meant to be a better proof search mechanism than the
-built-in one. We believe there is potential to write even more of the built-in
-editor actions as edit-time tactics. We also believe that as more decision
-procedures are coded up in Idris, edit-time tactics can become a more popular
-feature.
-Hopefully our work will get dependently-typed languages one step closer to the
+built-in one. We believe there is potential to replace even more of the
+built-in editor actions with edit-time tactics, such as case-splitting and
+lifting a hole into a lemma. We can also add new general edit-time tactics,
+such as renaming a binder, renaming a function within a file, pruning unused
+arguments in a function, etc.
+
+We also believe that as more decision procedures are coded up in Idris,
+edit-time tactics can become a more popular feature. Especially library and DSL
+authors can ship custom editor actions for their package, which would allow
+library users to write code more easily with that library or DSL.
+
+Hopefully our work will bring dependently-typed languages one step closer to the
 state-of-the-art IDEs, and even give them an edge by allowing the reuse of the
 existing metaprogramming mechanisms and tactic engineering efforts to write
 editor actions.

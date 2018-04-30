@@ -2,7 +2,7 @@
 
 \section{In Haskell}
 
-Template Haskell \cite{th} is the main metaprogramming mechanism in Haskell.
+Template Haskell~\cite{th} is the main metaprogramming mechanism in Haskell.
 It is similar to elaborator reflection in the sense that metaprograms are
 defined in a monad called \ty{Q}, which allows metaprograms to create fresh
 names and look up definitions.
@@ -34,7 +34,7 @@ that helps IDE and tooling development by providing a way to automatically
 refactor Haskell programs without changing a part of the program
 unintentionally. As they put it, their library respects ``the identity
 refactoring'', which is non-trivial if your system allows many different kinds
-of transformations.\cite{ghc-exactprint-blog}
+of transformations~\cite{ghc-exactprint-blog}.
 There is also the Haskell IDE Engine project that aims integrate many Haskell
 tools based on the GHC API to the editor workflow, by providing a backend for
 editor modes.\footnote{The project can be found here:
@@ -48,10 +48,10 @@ There is a line of work on bringing more automated theorem proving,
 proof automation and tactics, or metaprogramming to Agda.
 Lindblad and Benke (2006) introduced a term search algorithm called
 Agsy, a proof search mechanism that aims to save users' time by automating
-parts of the proof that are straightforward but tedious to write.\cite{agsy}
+parts of the proof that are straightforward but tedious to write~\cite{agsy}.
 Agda has a derivative of this mechanism implemented as a part of its compiler.
 Kokke and Swierstra (2015) used the Agda's prior reflection system to define a
-new proof search mechanism in Agda itself.\cite{autoinagda}
+new proof search mechanism in Agda itself~\cite{autoinagda}.
 The Hezarfen tactic we discussed in \autoref{sec:hezarfen} is not as advanced
 as their \fn{auto} function, yet in their paper, they discussed a feature
 similar to edit-time tactics as future work:
@@ -61,7 +61,7 @@ similar to edit-time tactics as future work:
   automation using the reflection mechanism better with Agda's IDE. For
   instance, we could create an IDE feature which replaces a call to
   \fn{auto} with the proof terms that it generates. As a result, reloading
-  the file would no longer need to recompute the proof terms.''\cite{autoinagda}
+  the file would no longer need to recompute the proof terms.''~\cite{autoinagda}
 \end{quote}
 
 In this thesis, we generalized their suggestion to all tactics, and specified
@@ -76,36 +76,158 @@ usage of the word ``reflection'' so far.
   technology reflection is the capability of converting some piece of concrete
   code into an abstract syntax tree object that can be manipulated in the same
   system. Reflection in the proof technical sense is the method of mechanically
-  constructing a proof of a theorem by inspecting its shape.''\cite{reflInAgda}
+  constructing a proof of a theorem by inspecting its shape.''~\cite{reflInAgda}
 \end{quote}
 
 We have been concerned with the first meaning of ``reflection'' in this thesis,
 however the work on the second meaning of this word is still relevant to proof
 automation, and their ideas can be reused in our edit-time tactics. Work by van
 der Walt and Swierstra showed compelling examples of proof by reflection in
-Agda, such as a proof mechanism for boolean tautologies.\cite{pfByReflAgda}
+Agda, such as a proof mechanism for boolean tautologies~\cite{pfByReflAgda}.
 
 \section{In Coq}
 
 Coq has a metaprogramming mechanism called
 \texttt{template-coq}\footnote{It can be found here:
 \url{https://github.com/Template-Coq/template-coq}} that is based on
-Malecha's term reification. \cite{malecha-phd}. Recently a typed
-version of this system is also introduced. \cite{typed-template-coq}
+Malecha's term reification~\cite{malecha-phd}. Recently a typed
+version of this system is also introduced~\cite{typed-template-coq}.
 However, we are not aware of any work on using template metaprograms in Coq to
 write new features for the editor.
 
 Aside from this, there is a large body of work on proof automation, proof
 engineering and tactic languages in Coq.  Coq's original tactic language is
-Ltac\cite{ltac}, which is separate from its Coq's term language Gallina.
-However, alternatives to Ltac have been developed, such as Mtac\cite{mtac} and
-MetaCoq\cite{metacoq}.  Especially Mtac\cite{mtac}, which is a tactic language
+Ltac~\cite{ltac}, which is separate from its Coq's term language Gallina.
+However, alternatives to Ltac have been developed, such as Mtac~\cite{mtac} and
+MetaCoq~\cite{metacoq}.  Especially Mtac, which is a tactic language
 for Coq that facilitates custom proof search by providing a monadic interface,
 has inspired further research in the area, including Idris' elaborator
-reflection.\cite{elabref}
+reflection~\cite{elabref}.
 
-Chlipala's \emph{Certified Programming with Dependent Types}\cite{cpdt} has
+Chlipala's \emph{Certified Programming with Dependent Types}~\cite{cpdt} has
 emerged as the canonical introductory textbook for proof engineering; it
 explains the basics of tactic programming and even delves into proof search and
 proof by reflection. Note that we use the word reflection in the proof
 technical sense, \hyperref[quote:reflection]{as mentioned in the quote above}.
+
+\section{In Lean}
+
+Lean~\cite{lean}, which has a tactic metaprogramming system~\cite{leanmeta}
+similar to Idris' elaborator reflection, also allows running tactics in
+edit-time, and it does not require writing any code for the editor mode
+frontend.\footnote{No Emacs Lisp if you are using Emacs.} The type of these
+editor actions can be seen in \autoref{code:holecommand}.
+
+\begin{figure}[ht]
+\caption{Definition of \ty{hole\_command} in Lean.}
+\label{code:holecommand}
+\begin{Verbatim}
+\kw{meta} \kw{structure} \ty{hole_command} :=
+  (\bn{name}   : \ty{string})
+  (\bn{descr}  : \ty{string})
+  (\bn{action} : \ty{list} \ty{pexpr} \ensuremath{\to} \ty{tactic} (\ty{list} (\ty{string} \ty{\ensuremath{\times}} \ty{string})))
+\end{Verbatim}
+\end{figure}
+
+They provide the following documentation for \ty{hole\_command}:\footnote{From
+the \href{https://github.com/leanprover/lean/blob/17fe3decaf8ae236f0d0ff51ac8fd7f6940acdee/library/init/meta/hole\_command.lean}{source
+code}
+of Lean 3.4.1.}
+
+\begin{quote}
+  ``The front-end (e.g., Emacs, VS Code) can invoke commands for holes
+  \mt{\{! ... !\}} in a declaration. A command is a tactic that takes zero or
+  more pre-terms in the hole, and returns a list of pair \mt{(\bn{s},
+  \bn{descr})} where \bn{s} is a substitution and 'descr' is a short explanation
+  for the substitution.  Each string \bn{s} represents a different way to fill
+  the hole.  The frontend is responsible for replacing the hole with the
+  string/alternative selected by the user.  This infrastructure can be used to
+  implement auto-fill and/or refine commands. An action may return an empty
+  list. This is useful for actions that just return information such as: the
+  type of an expression, its normal form, etc.''
+\end{quote}
+
+In comparison to the edit-time tactics mechanism presented in our work, Lean's
+system is very restrictive. It only allows editor action that run on holes, but
+our system allows any kind of editor action as long as the user writes the
+necessary glue code in the editor mode language. We already showed in
+\autoref{code:elispToy}, what the glue code to fill a hole would look like in
+Emacs Lisp. Another downside of Lean's system is that editor actions can only
+have a single type, as opposed to our system, which allows any kind of
+\Elab\ action as long as the components of the a type all have an
+\Editorable\ implementation. Our system lets users write more expressive custom
+editor actions.
+
+\section{Others}
+
+A question we received from Edward Morehouse was ``What are the prospects for
+building editor interactions into a compiler from the start?  Is it feasible to
+implement delaboration in such a way that the compiler could respond directly
+with surface-syntax terms that fit in the current binding context?'' We believe
+we should discuss the existing work on languages that are designed
+with editor interaction in mind.
+
+Building editor interactions in a compiler from the start is not a new idea,
+both Idris and Agda have done this already. They did not, however, take
+metaprogrammable editor interactions into account, and that is what our work
+brings to Idris. We believe a path through Racket, a language-oriented
+programming~\cite{racketManifesto, feltey2016languages} language would be an
+interesting take on building a language around its editor interactions.
+DrRacket~\cite{drracket}, Racket's IDE, makes writing editor interaction easy
+for the languages defined in Racket. This not only eliminates a lot of
+boilerplate code, but it also allows using Racket itself to define new editor
+actions. There are already dependently-typed languages defined in Racket: one
+example is Cur\footnote{It can be found here:
+\url{http://github.com/wilbowma/cur}}~\cite{cur}, a proof assistant with
+powerful metaprogramming tools. There is also Pudding\footnote{It can be found
+here: \url{http://github.com/david-christiansen/pudding}}, a proof assistant in
+development that uses Racket for specifications, proof automation, code
+extraction and also extensions to the proof assistant itself.
+Another one is Pie\footnote{It can be found
+here: \url{http://github.com/the-little-typer/pie}}~\cite{theLittleTyper}, a
+minimal language used for educational purposes.
+We believe there is potential
+for stronger editor interaction for these languages through metaprogramming.
+
+Another path that is worth exploring more is structure editors. In the proof
+assistant world, The Alfa proof editor~\cite{alfa} has established a proof
+interface based on structure editor manipulating proof trees. More recently and
+for a simpler type theory, the Hazel project~\cite{hazelnut,hazelEditor}
+explored what a language designed around its editor would look like.
+Specifically, they designed a structure editor and a type theory to deal with
+incomplete programs in this setting. They also coined the term ``edit-time'' to
+mean when the user is writing a program in the editor, and suggested
+``edit-time tactics'' as future work\footnote{We learned this from their slides
+and also personal communication with Cyrus Omar and Ravi Chugh.}, by which they
+meant a separate language in which users can define editor actions, and a
+library of predefined editor actions that the users can compose.
+
+The second part of Morehouse's question was about implementing delaboration in
+a way that the compiler could respond directly with surface-syntax terms that
+fit in the current binding context.
+Currently there is no way in Idris to write an editor action that returns a
+surface-syntax term.\footnote{ The only way around returning surface-syntax
+directly from an editor action is to return a \ty{String} that consists of the
+code, but that is inelegant and we would like to avoid that.} The way
+elaborator reflection is defined in Idris forces us to deal with core language
+terms only, and for the rest we depend on the built-in delaboration.  There is
+also no reflected Idris type that represents the surface syntax, since the
+surface syntax can change quite often, maintaining its Idris representation
+would be difficult, not to mention with every change it would likely break
+users' code that depends on it.  Therefore, adding an Idris representation of
+the surface-syntax is not planned.
+
+Apart from Idris, it is possible to design a language that lets the users
+define editor actions that return surface-syntax terms. We see two possible ways to do this:
+\begin{enumerate}
+  \item Not having a core language and surface-syntax distinction. This is not
+    ideal if you have a large programming language, then the type-checking,
+    evaluation, etc. have to be extended every time we want to add a new
+    syntax. Not to mention that lacking features like implicit arguments is bad
+    language ergonomics; elaboration is needed to resolve the implicit
+    arguments~\cite{pollack}.
+  \item Having a reflected type in your language that represents the
+    surface-syntax terms, exposing the delaboration mechanism in your
+    metaprogramming mechanism, and allowing splicing surface-syntax terms into
+    programs. We are not aware of any work that does this.
+\end{enumerate}

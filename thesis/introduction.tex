@@ -180,11 +180,15 @@ built in to the compiler, and they are written in Haskell. Our work will allow
 us to rewrite them in Idris as \Elab\ actions. This way, we can remove these
 parts from the compiler and move them into an Idris library.
 \item The abilities of the editor interaction mode are extended from the
-current built-in features to anything that can be done with tactics.
+current built-in features to anything that can be done with tactics. This
+allows library and DSL authors to provide domain-specific editor actions.
 \item Defining editor actions with a monadic interface allows us to
 compose them easily. For instance, if we had case-splitting as an
 \Elab\ action, we could define a tactic to case-split on many arguments at the
 same time.
+\item More people can extend Idris; contributing to the Idris standard library
+  or publishing a library of editor actions is much easier than extending the
+    compiler itself.
 \end{itemize}
 
 To see what an edit-time tactic would look like, let's see an actual example in Emacs.

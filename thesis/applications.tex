@@ -15,17 +15,18 @@ The Idris code we need to write is in \autoref{code:addClause}.
 \caption{Implementation of the edit-time tactic for ``add clause''.}
 \label{code:addClause}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\fn{collectTypes} : \ty{TT} -> (\bn{xs} : \ty{List} \ty{TT} \dt{**} \ty{NonEmpty} \bn{xs})
+\fn{collectTypes} : \ty{TT} -> (\ty{List} \ty{TT}, \ty{TT})
 \fn{collectTypes} (\dt{Bind} _ (\dt{Pi} \bn{ty} _) \bn{t}) =
-  (\bn{ty} \fn{::} \bn{fst} (\fn{collectTypes} \bn{t}) ** \dt{IsNonEmpty})
-\fn{collectTypes} \bn{t} = (\dt{[}\bn{t}\dt{]} ** \dt{IsNonEmpty})
+  \kw{let} (\bn{xs}, \bn{t'}) = \fn{collectTypes} \bn{t} \kw{in}
+  (\bn{ty} \fn{::} \bn{xs}, \bn{t'})
+\fn{collectTypes} \bn{t} = \dt{([]}, \bn{t})
 
 \kw{%editor}
 \fn{addClause} : \ty{TTName} -> \ty{Elab} (\ty{FunClause} \ty{TT})
 \fn{addClause} \bn{n} =
   \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
-     \kw{let} (\bn{collected} \dt{**} \bn{nonEmpty}) = \fn{collectTypes} \bn{ty}
-     \kw{let} (\bn{argTys}, \bn{retTy}) = (\fn{init} \bn{collected}, \fn{last} \bn{collected})
+     \bn{ty'} <- \fn{normalise} !\fn{getEnv} \bn{ty}
+     \kw{let} (\bn{argTys}, \bn{retTy}) = \fn{collectTypes} \bn{ty'}
      \bn{argNames} <- \fn{traverse} (\fn{const} \fn{fresh}) \bn{argTys}
      \kw{let} \bn{lhsUntyped} = \fn{foldl} \dt{RApp} (\dt{Var} \bn{n}) (\fn{map} \dt{Var} \bn{argNames})
      \bn{env} <- \fn{getEnv}
@@ -38,16 +39,14 @@ The Idris code we need to write is in \autoref{code:addClause}.
 
 The \fn{collectTypes} function we write in Idris is very similar to the one we
 defined in \autoref{code:collectTypes} for the compiler implementation.
-This one, however, also returns a proof that the resulting list is not empty.
-The function takes a list and you the same list with the last element removed,
-namely \fn{init}, requires a proof that the list is non-empty.
+This one, however returns a pair of the list of inputs and the output type.
 
 The \fn{addClause} tactic only takes one input, which is the name of the function
 we will add an initial clause for.
-Using this name, we look up the type of that function, and get its components
-using \fn{collectTypes}. We know that there is at least one member in that
-list, so we name the last element \bn{retTy}, for the return type, and we name
-the rest \bn{argTys}, since they represent types of the arguments.
+Using this name, we look up the type of that function,
+normalize the type, and get its components
+using \fn{collectTypes}.
+We name the list of input types \bn{argTys}, and the output type \bn{retTy}
 For each of member of \bn{argTys}, we generate a new name using
 \fn{fresh}.\footnote{\fn{fresh} is defined in Hezarfen, not in a standard
 library. The standard way of creating fresh names is \fn{gensym}, but we wrote
@@ -58,10 +57,10 @@ all of these names. This application is supposed to represent the left-hand
 side in our final definition. The right-hand side is a hole term that has the
 type \bn{retTy}.  This concludes our type declaration term.
 
-The Emacs Lisp code we write for this exactly the same as the existing
-add-clause editor action, so we only have to change the part that Emacs sends a
-message to the compiler. Our message now should refer to \fn{addClause} instead
-of the built-in add-clause editor action.
+The Emacs Lisp code we write for this is the same as the existing add-clause
+editor action, so we only have to change the part that Emacs sends a message to
+the compiler. Our message now should refer to \fn{addClause} instead of the
+built-in add-clause editor action.
 
 Let's see this \Elab\ action at work in \autoref{code:exampleAddClause1}.
 
@@ -224,7 +223,7 @@ fixpoint, which should be improved in future work.
 
 There is also recent work on writing code generating theorem provers that
 are more modular and efficient since they depend on an intermediate proof
-representation that is later reconstructed.\cite{theoremProverCodeGeneration}
+representation that is later reconstructed~\cite{theoremProverCodeGeneration}.
 Hezarfen directly deals with the untyped core language syntax tree, both for
 the input terms that represent types, and for the proof term it returns, and
 this causes some overhead in our tactic.

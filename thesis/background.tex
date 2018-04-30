@@ -77,7 +77,9 @@ that ensures evenness or one that ensures oddness. This corresponds to a proof t
 Unlike other dependently typed languages like Agda and Coq, Idris is not total
 by default. This is because Idris prioritizes general purpose programming
 rather than theorem proving. However, users can opt in to totality
-checking either for the entire module or for specific declarations.
+checking either for the entire module or for specific
+declarations.\footnote{Both for functions and data type definitions, since the
+latter are checked for strict positivity.}
 We did the latter for \fn{evenOrOdd} by using the keyword \kw{total}.
 Similarly, we could require the \zip\ function from the previous example to be
 total if we wanted to.\footnote{Clearly Idris cannot decide whether an arbitrary
@@ -109,21 +111,24 @@ time.
 Since the \Elab\ monad in Idris needs to work with core language terms and
 definitions, we have to use data types in Idris that represent them.
 We want to have a correspondence between the internal data type that represents
-the core language syntax in the compiler, and the ones defined in Idris.
+the core language syntax in the compiler and the ones defined in Idris.
 
-The process of converting the syntax tree representation in the compiler, into
-a term in Idris representing the same syntax tree, is called reflection.
-The other direction, converting an Idris term that represents a syntax tree,
-into the syntax tree representation of the compiler is called reification.
-This allows us to manipulate Idris syntax trees in Idris itself.
+In this thesis, we will use the term \emph{reflection} to refer to ``the
+capability of converting some piece of concrete code into an abstract syntax
+tree object that can be manipulated in the same
+system''~\cite{reflInAgda}.\footnote{Note that this is somewhat at odds with
+the usage of the term ``reflection'' in normalization by evaluation.} In other
+words, we will define Idris types that let us work with Idris syntax trees
+within Idris.  We will call these types ``reflected types'' for now. We give a
+diagram in \autoref{reflectionGraph} to explain the relationship between the
+metalanguage Haskell, the object language Idris, the core language of Idris and
+the conversions from one to another.  The diagram provides an overall look,
+which is not required to understand this section, but finishing this section is
+necessary to fully comprehend the diagram. Nevertheless, looking at the diagram
+before reading this section might be helpful to some readers.
 
-In other words, there are types in Idris itself, that match the syntax
-tree types in the compiler; we will call the ones we defined ``reflected
-types''.
-
-The most important one these types is called \TT,
-which represents the core language's typed terms, and its definition can be seen
-in \autoref{code:ttDef}.
+The most important reflected type is called \TT, which represents the core
+language's typed terms, and its definition can be seen in \autoref{code:ttDef}.
 
 \begin{figure}[ht]
 \caption{The reflected type \protect\TT\ in Idris.}
@@ -280,6 +285,8 @@ expression or variable we have in the antiquotation has to match the type of
 the quotation. In other words, only \TT\ expressions can be used in an
 antiquotation in a \TT\ quotation, and \emph{mutatis mutandis} for \ty{Raw}.
 
+For further information on Idris' quotations, see \citet{idrisQuotation}.
+
 \subsection{\protect\Elab\ monad}
 
 The elaborator reflection~\cite{elabref} feature that has been added to the
@@ -314,9 +321,9 @@ Tactics can change the proof state. Here are some examples that do that:
 \item\texttt{\IdrisFunction{claim} : \IdrisType{TTName} -> \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
   Creates a new hole with a given name and a type.
 \item\texttt{\IdrisFunction{fill} : \IdrisType{Raw} -> \IdrisType{Elab} \IdrisType{()}}\\
-Create a guess to fill the current hole with a term. Fail if the types do not unify\cite{mcbridephd}.
+Create a guess to fill the current hole with a term. Fail if the types do not unify~\cite{mcbridephd}.
 \item\texttt{\IdrisFunction{solve} : \IdrisType{Elab} \IdrisType{()}}\\
-Try to finalize the guess in the hole. Fail if there is no guess\cite{mcbridephd}.
+Try to finalize the guess in the hole. Fail if there is no guess~\cite{mcbridephd}.
 \end{itemize}
 
 \noindent There are a lot more tactics, which we will not list here. A more thorough list

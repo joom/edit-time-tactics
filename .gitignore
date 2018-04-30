@@ -1,5 +1,7 @@
 thesis.tex
 *-converted-to.pdf
+code/
+slides/
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

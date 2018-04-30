@@ -228,7 +228,10 @@ let's see how we can define an \ty{Editorable} implementation for \ty{String}.
 \kw{implementation} \ty{Editorable} \ty{String} \kw{where}
   \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{pure} \bn{s}
   \fn{fromEditor} \bn{x} =
-    \fn{fail} \dt{[}\dt{TextPart} (\dt{"Can't parse the SExp "} \fn{++} \fn{show} \bn{x} \fn{++} \dt{" as a String"})\dt{]}
+    \fn{fail} \dt{[} \dt{TextPart} \dt{"Can't parse the"}
+         , \dt{NamePart} \kw{\`{}\{}\ty{SExp}\kw{\}}
+         , \dt{TextPart} (\fn{show} \bn{x} ++ \dt{"as a"})
+         , \dt{NamePart} \kw{\`{}\{\{}\ty{String}\kw{\}\}} \dt{]}
   \fn{toEditor} = \fn{pure} \fn{.} \dt{StringAtom}
 \end{Verbatim}
 \end{figure}
@@ -248,7 +251,10 @@ see we can make \ty{List}s \ty{Editorable}.
 \kw{implementation} \ty{Editorable} \bn{a} => \ty{Editorable} (\ty{List} \bn{a}) \kw{where}
   \fn{fromEditor} (\dt{SExpList} \bn{xs}) = \fn{traverse} \fn{fromEditor} \bn{xs}
   \fn{fromEditor} \bn{x} =
-    \fn{fail} \dt{[}\dt{TextPart} (\dt{"Can't parse the SExp "} \fn{++} \fn{show} \bn{x} \fn{++} \dt{" as a List"})\dt{]}
+    \fn{fail} \dt{[} \dt{TextPart} \dt{"Can't parse the"}
+         , \dt{NamePart} \kw{\`{}\{}\ty{SExp}\kw{\}}
+         , \dt{TextPart} (\fn{show} \bn{x} ++ \dt{"as a"})
+         , \dt{NamePart} \kw{\`{}\{}\ty{List}\kw{\}} \dt{]}
   \fn{toEditor} \bn{xs} = \dt{SExpList} \fn{<$>} \fn{traverse} \fn{toEditor} \bn{xs}
 \end{Verbatim}
 \end{figure}
@@ -281,7 +287,10 @@ actions, the type of names, \ty{TTName}.
           \dt{[}\bn{x}\dt{]} => \fn{pure} (\dt{UN} \bn{x})
           (\bn{x} \dt{::} \bn{xs}) => \bn{pure} (\dt{NS} (\dt{UN} \bn{x}) \bn{xs})
   \fn{fromEditor} \bn{x} =
-    \fn{fail} \dt{[}\dt{TextPart} (\dt{"Can't parse the SExp "} \fn{++} \fn{show} \bn{x} \fn{++} \dt{" as a TTName"})\dt{]}
+    \fn{fail} \dt{[} \dt{TextPart} \dt{"Can't parse the"}
+         , \dt{NamePart} \kw{\`{}\{}\ty{SExp}\kw{\}}
+         , \dt{TextPart} (\fn{show} \bn{x} ++ \dt{"as a"})
+         , \dt{NamePart} \kw{\`{}\{}\ty{TTName}\kw{\}} \dt{]}
 
   \fn{toEditor} \bn{n} = \dt{StringAtom} \fn{<$>} \fn{stringify} \bn{n}
     \kw{where}

@@ -6,21 +6,21 @@
 
 The ability to run tactics as editor actions has a consequence
 that we have not explored much in this thesis.
-Idris programs are usually meant to be executed, unlike Coq or
-Agda programs, which are usually only meant to be type checked.\footnote{Of
-  course there are backends for these languages, such as the OCaml
-  backend for Coq and the Haskell backend for Agda.}
-This means Idris programs will be compiled more often than Agda or Coq in the
-long run, since not much code is added to proofs after its completion, but
-practical programs tend to change in time. Therefore, minimizing compile time
-is more of a priority for Idris.
-Idris tactics generate proof terms at compile time, but the
+% Idris programs are usually meant to be executed, unlike Coq or
+% Agda programs, which are usually only meant to be type checked.\footnote{Of
+%   course there are backends for these languages, such as the OCaml
+%   backend for Coq and the Haskell backend for Agda.}
+% This means Idris programs will be compiled more often than Agda or Coq in the
+% long run, since not much code is added to proofs after their completion, but
+% practical programs tend to change in time. Therefore, minimizing compile time
+% is more of a priority for Idris.
+Idris tactics generate proof terms at compile time, but their
 compilation can take a long time for complex tactics\footnote{Similar problems
 arise in Coq as well. For example, theorems that use the famous \texttt{omega}
 tactic that decides Presburger arithmetic~\cite{omega} take a long time to compile, and it
 usually generates a huge proof term.},
 not to mention that the implementation of elaborator
-reflection in Idris has significant performance issues~\cite{leanmeta}.
+reflection in Idris has significant performance issues, as shown by \citet{leanmeta}.
 Yet we still want to utilize complex tactics to generate proofs or terms.
 Using edit-time tactics, one would run a tactic once from the editor, generate
 the proof term and serialize and send that to the editor and put it back in the
@@ -36,7 +36,7 @@ often are) gigantic and hideous, especially if generating a minimal proof term
 is not a priority for the tactic we are using.
 If there was a generic mechanism to simplify and minimize the generated proof
 terms, and even write them in a way that makes use of dependent pattern
-matching, then this could have been a more usable consequence of this work.
+matching, then this could be a more usable consequence of this work.
 Ideally, we would want the artifact we are handing in to the reader of our
 proofs to look just like what it would be if we had not used this system.
 We leave that for future work.  However, even without proof simplification,

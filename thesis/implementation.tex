@@ -25,7 +25,7 @@ The way \Elab\ primitives work in Idris is that there is a constructor in the
 and then define \fn{prim\_\_fromEditor} and \fn{prim\_\_toEditor} in terms of
 them.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{New constructors for the new \Elab\ primitives, and function definitions based on them.}
   \label{code:newElabConstructors}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -59,7 +59,6 @@ We will inspect in \label{sec:primitiveEditorableImpl} how these new
 constructors will be used in the compiler, but first we have to clarify some
 terminology.
 
-\newpage
 \section{Reflection and reification in the compiler}
 
 Before we delve into further details of the implementation, we should compare
@@ -68,7 +67,7 @@ and contrast certain terminology we will use in this chapter. The graph in
 kinds of languages and representations and the spells out the specific names
 for moving from one to another.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The relationship between reflection, reification, quotation,
   unquotation, elaboration and delaboration.}
 \label{reflectionGraph}
@@ -144,7 +143,7 @@ versa.
 The conversion from the former to the latter is reflection. We write the
 function \fn{reflectSExp} in \autoref{code:reflectSExp}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The function to reflect Haskell terms of the type \ty{SExp} to the
 internal representations of Idris terms of the Idris type \ty{SExp}.}
 \label{code:reflectSExp}
@@ -173,7 +172,7 @@ an Idris term that has the Idris type \ty{SExp}, we have to write a function
 \fn{reifySExp} that reifies a given \ty{Term}, which you can see in
 \autoref{code:reifySExp}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The function to reify the internal representations of Idris terms
   of the Idris type \ty{SExp} to Haskell terms of the type \ty{SExp}.}
 \label{code:reifySExp}
@@ -219,7 +218,7 @@ correspond to a \Elab\ primitive constructor applied to arguments, i.e. when
 the \Elab\ action term is in a normal form. Then we can check which primitive
 constructor we are dealing with and behave accordingly.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The \fn{runElabAction} function in the compiler, how \Elab\ action terms are run under the hood.}
 \label{code:runElabAction}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
@@ -272,7 +271,7 @@ Now, in order to add more \Elab\ primitives, we have to implement similar cases
 for \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm}, which
 we started to do in \autoref{code:runElabAction}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Adding cases for \dt{Prim\_\_FromEditor} and \dt{Prim\_\_ToEditor} in \fn{runTacTm} in the compiler.}
 \label{code:runElabAction}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
@@ -309,7 +308,7 @@ Observe that we left most parts in here blank, let's zoom in to the \TT\ cases
 
 For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
 \begin{enumerate}
-  \item We have an Idris term \bn{arg'} representing the S-expression passed to
+  \item We have an \ty{Term} named \bn{arg'} representing the S-expression passed to
     the \dt{Prim\_\_FromEditor}, we have to reify this using \fn{reifySExp} and
     get a Haskell term with the Haskell type \ty{SExp}.
   \item Remember from \autoref{ssec:primitiveEditorableDesign} that we should
@@ -323,7 +322,7 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
     terms.  Using the current context, we write a function
     \mt{\fn{resolveNames} :: \ty{Context} -> \ty{PTerm} -> \ty{Either} \ty{Err} \ty{PTerm}}
     that traverses the the surface language abstract syntax tree using
-    Uniplate\cite{uniplate}, and then at the \dt{PRef} terms, i.e. variable
+    Uniplate~\cite{uniplate}, and then at the \dt{PRef} terms, i.e. variable
     references, we search the context to find the matching fully namespaced
     name. If there is a unique matching name, we change the name. If there are multiple
     matching names, we return an error that there is ambiguity in the name. If there are
@@ -400,7 +399,7 @@ them. For other names and terms, however, we do not have a way.
 To solve this problem, we extended the elaboration state with an interval map
 in which keys are source locations, i.e. a pair of line and column numbers, and
 values are local contexts, i.e. environments. We use the finger tree
-implementation of interval maps in Haskell.\cite{fingertrees}
+implementation of interval maps in Haskell~\cite{fingertrees}.
 
 For those who are unfamiliar, an interval map is a data structure that maps
 intervals to values. Every entry consists of the interval between two keys, and
@@ -437,7 +436,7 @@ eventually there are separate functions that deal with each editor command. We
 write the function for edit-time tactics under the name \fn{elabEditAt} in
 \autoref{code:elabEditAt}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The function \fn{elabEditAt} that runs editor actions in the compiler.}
 \label{code:elabEditAt}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]
@@ -480,7 +479,7 @@ Here are the steps \fn{elabEditAt} takes when it is called:
     For that, we can write a function \fn{collectTypes} that takes a the
     \fn{Type} \bn{ty} and gives us a list of \fn{Type}s, which are the
     components of \bn{ty}, i.e.  curried arguments and also the return type.
-    \begin{figure}[ht]
+    \begin{figure}[H]
     \caption{The function \fn{collectTypes} to dissect a type signature to its components.}
     \label{code:collectTypes}
     \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Haskell}}, labelposition=topline]

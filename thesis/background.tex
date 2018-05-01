@@ -32,7 +32,7 @@ length. Notice that the \zip\ function returns a vector of length \bn{n}.
 In other words, the input vectors and the resulting vector are guaranteed to be
 of the same length.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Example of a dependently typed Idris code: vectors}
 \label{code:vect}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -52,7 +52,7 @@ odd, and compute the number within the type at every step. Later, we give a
 function that takes a natural number and generates either a value of the type
 that ensures evenness or one that ensures oddness. This corresponds to a proof that for all $n \in \mathbb{N}$, $n$ is even or $n$ is odd.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Example of a dependently typed Idris code, parity of natural numbers}
 \label{code:evenodd}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -130,7 +130,7 @@ before reading this section might be helpful to some readers.
 The most important reflected type is called \TT, which represents the core
 language's typed terms, and its definition can be seen in \autoref{code:ttDef}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The reflected type \protect\TT\ in Idris.}
 \label{code:ttDef}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -167,7 +167,7 @@ The other important type that is used in elaborator reflection is \ty{Raw},
 which is the type of untyped core language terms, and its definition can be
 seen in \autoref{code:rawDef}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The reflected type \protect\ty{Raw} in Idris.}
 \label{code:rawDef}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -189,7 +189,7 @@ checker, and \Raw\ terms will be the input to the type checker.
 
 The \ty{TTName} type is the type of names in the core language, its full definition can be seen in \autoref{code:ttnameDef}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The reflected type \protect\ty{TTName} in Idris.}
 \label{code:ttnameDef}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -241,7 +241,7 @@ The syntax \texttt{\`{}(\fn{e})}, where \fn{e} is an Idris expression, gives
 us the typed or untyped core language syntax tree for \fn{e}. For example,
 \texttt{\`{}(\fn{not} \dt{True})} gives us the following \TT\ term:
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \caption{The \TT\ term we get when we quote \texttt{\fn{not} \dt{True}}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \IdrisData{App} (\IdrisData{P} \IdrisData{Ref}
@@ -257,7 +257,7 @@ us the typed or untyped core language syntax tree for \fn{e}. For example,
 \end{figure}
 
 The \ty{Raw} term for the same expression is a bit smaller:
-\begin{figure}[ht]
+\begin{figure}[H]
   \caption{The \Raw\ term we get when we quote \texttt{\fn{not} \dt{True}}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 (\IdrisData{RApp} (\IdrisData{Var} (\IdrisData{NS} (\IdrisData{UN} \IdrisData{"not"}) \IdrisData{[}\IdrisData{"Bool"}\IdrisData{,} \IdrisData{"Prelude"}\IdrisData{]}))
@@ -339,16 +339,15 @@ Normalizes\footnote{\fn{normalise} is spelled the British way, since most Idris 
 Looks up the type of the given name and returns the ones it finds in a list, in case the name is ambiguous.
 \end{itemize}
 
-Observe that in most of these functions, for inputs we use \ty{Raw}, the
+Observe that in some of these functions, for inputs we use \ty{Raw}, the
 untyped core language terms, and results are in \ty{TT}, the typed core
 language terms.  This is because untyped core language terms are easier to
 write for the tactic users, and type-checking them in the elaborator is easy.
 
 Now let's define a function using elaborator reflection.
-Let's define a polymorphic identity function.
+Take the polymorphic identity function, for example.
 
-
-\begin{figure}[ht]
+\begin{figure}[H]
   \caption{The identity function using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{id} : (\bn{a} : \ty{Type}) -> \bn{a} -> \bn{a}
@@ -380,7 +379,7 @@ import the Pruviloj\footnote{Pruviloj is the Idris library included in
 the Idris distribution. It contains complex tactics written with elaborator
 reflection.} library~\cite{davidphd}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \caption{A proof that $(\forall n \in \mathbb{N})\ n = n + 0$ using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{nPlusZero} : (\bn{n} : \ty{Nat}) -> \bn{n} = \fn{plus} \bn{n} \dt{0}
@@ -412,7 +411,7 @@ but if you want to fully comprehend \fn{attack} and \fn{solve}, you can refer to
 
 Finally let's do an example for a declaration with elaborator reflection:
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \caption{A type declaration and new definition for \fn{n}, using elaborator reflection in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%runElab} (\kw{do} \fn{declareType} (\dt{Declare} \kw{\`{}\{\{}n\kw{\}\}} \dt{[]} \kw{`{}(}\ty{Nat}\kw{)})

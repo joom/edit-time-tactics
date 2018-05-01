@@ -30,9 +30,11 @@ proof assistants have focused on changing the proof term indirectly.
 Inspired by these systems, others arose which
 provide a new interface and type theory that focuses on
 changing the proof terms directly by incrementally building them
-up.\footnote{Changing the proof term indirectly with tactics is also called
-backward reasoning, and incrementally building up the proof term is called
-forward reasoning.} One of the earliest such proof assistants was the ALF proof
+up.
+% \footnote{Changing the proof term indirectly with tactics is also called
+% backward reasoning, and incrementally building up the proof term is called
+% forward reasoning.} % Dan doesn't agree with this.
+One of the earliest such proof assistants was the ALF proof
 editor~\cite{ALF}, and the idea was developed further in Epigram~\cite{epigram}
 and Agda~\cite{agda}.
 The ideas that are brewed in these proof assistants continue to inspire more
@@ -156,7 +158,7 @@ Another drawback is that users would have to learn Haskell and recompile the
 entire Idris system every time they want to define a custom editor action.
 
 Therefore, we want to give users a way to write custom editor actions. Our
-solution for this is to make use of elaborator reflection~\cite{elabref} in
+solution for this is to make use of elaborator reflection~\cite{elabref,leanmeta} in
 Idris, which is a metaprogramming machinery that allows users to automate the
 construction of proofs and programs, by reflecting the elaborator
 monad~\cite{idris} in the Idris compiler. Christiansen and Brady showed that
@@ -220,8 +222,9 @@ implementations of this interface are primitives (\autoref{sec:types}).
   and typing contexts (\autoref{sec:extendIState}).
 \item The current proof search mechanism in Idris is not particularly advanced.
 We write an alternative proof search tactic called Hezarfen, a full-blown
-theorem prover for intuitionistic propositional logic, and then we show how
-to use this on holes when we are in the editor (\autoref{sec:hezarfen}).
+theorem prover for intuitionistic propositional logic, based on Dyckhoff's
+LJT~\cite{ljt}, and then we show how to use this on holes when we are in
+the editor (\autoref{sec:hezarfen}).
 \item We define an add clause tactic that can be run from the editor, which can
 replace the hard-coded add clause editor action (\autoref{sec:addClause}).
 \end{itemize}

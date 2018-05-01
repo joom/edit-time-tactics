@@ -11,7 +11,7 @@ In this section we implement this editor action for top-level type declarations
 without implicit arguments or interface constraints, using edit-time tactics.
 The Idris code we need to write is in \autoref{code:addClause}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Implementation of the edit-time tactic for ``add clause''.}
 \label{code:addClause}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -64,7 +64,7 @@ built-in add-clause editor action.
 
 Let's see this \Elab\ action at work in \autoref{code:exampleAddClause1}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Example function to run \fn{addClause} on.}
 \label{code:exampleAddClause1}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -74,7 +74,7 @@ Let's see this \Elab\ action at work in \autoref{code:exampleAddClause1}.
 
 If we put the cursor on \fn{example} and execute the Emacs Lisp code somehow, which is often done via a shortcut, we will get the result in \autoref{code:exampleAddClause2}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Result of running \fn{addClause} on the \fn{example} function.}
 \label{code:exampleAddClause2}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -120,7 +120,7 @@ Hence, we should implement both proof term generation and simplification.
 In Hezarfen, define two types \ty{Context} and \ty{Sequent} to help us
 represent the proof rules as manipulations of the goal type.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Definitions of \ty{Context} and \ty{Sequent} for Hezarfen.}
 \label{code:hezarfenTypes}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -147,7 +147,7 @@ presentation, this rule looks like:
 
 But in Hezarfen's source code, this rule is written as in \autoref{code:hezarfenTypes}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{The ``\ty{Either} implies'' case in Hezarfen}
 \label{code:hezarfenTypes}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -192,7 +192,7 @@ depend on the \Elab\ monad for fresh name generation.}
 A rudimentary implementation of this function that does not include all the
 simplification steps is given in \autoref{code:reduce}.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \caption{Rudimentary implementation of \fn{reduce} in Hezarfen.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{reduce} : \ty{Raw} -> \ty{Elab} \ty{Raw}

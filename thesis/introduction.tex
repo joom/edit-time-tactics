@@ -25,7 +25,7 @@ incrementally.\footnote{Propositions and types are distinct in these systems.}
 Users type in commands called ``tactics'' that update the proof state by
 changing the goal, or by creating subgoals.
 Unlike the ones above, there are tactic-based proof assistants like
-Coq~\cite{coq} that generate a Curry-Howard style proof term at the end; these
+Coq~\cite{coq} and Lean~\cite{lean} that generate a Curry-Howard style proof term at the end; these
 proof assistants have focused on changing the proof term indirectly.
 Inspired by these systems, others arose which
 provide a new interface and type theory that focuses on
@@ -77,7 +77,7 @@ Proof General~\cite{pg} and CoqIDE for Coq,
 the Emacs mode~\cite{agdamode} for Agda,
 the Emacs mode~\cite{idrismode} for Idris,
 jEdit~\cite{isabellejedit} for Isabelle,
-and the editor mode of Lean~\cite{lean}.\footnote{Haskell's typed holes in GHC
+and the editor mode of Lean.\footnote{Haskell's typed holes in GHC
 are exciting, their editor interaction features are not as polished as the ones
 Agda and Idris have, since GHC/Haskell does not come with a built-in editor
 interaction system.}
@@ -102,7 +102,7 @@ and see how they can help type-driven developers.
 Before we proceed to describe our work,
 it is imperative to understand what exactly an editor action is.
 Editor actions are commands in the editor that make a meaningful
-change in the our code, or ones that give us some information about our
+change in our code, or ones that give us some information about our
 code. For example, if we are trying to define a function to compute the height
 of a binary tree, we can just start by writing the type for the function.
 
@@ -117,10 +117,10 @@ type declaration.
 \vspace{1em}
 \includegraphics[scale=0.6]{edit2}
 
-Now we have a definition for \fn{height} that takes one argument \bn{t1}, and
+Now we have a definition for \fn{height} that takes one argument \bn{x}, and
 returns \hole{height\_rhs}. This is clearly incomplete; we want to change
-the return value based on what \bn{t1} is. So the next step would be to inspect
-what values \bn{t1} can take. We can place the cursor on \bn{t1} and then run
+the return value based on what \bn{x} is. So the next step would be to inspect
+what values \bn{x} can take. We can place the cursor on \bn{x} and then run
 the editor action ``Case split pattern variable.''
 
 \vspace{1em}
@@ -262,7 +262,9 @@ We discuss the design of the edit-time tactics feature in
 Before we move on the other chapters, it might be helpful to take a brief look
 at the typographic conventions we use in this thesis: when we have code
 excerpts, we will use a monospace font.  Keywords will be written in \kw{black
-boldface}, types will be \ty{blue}, constant and function names will be
+boldface}, types will be \ty{blue}\footnote{Links to URLs and different parts
+of the thesis are also in \textcolor{blue}{blue}, but not in monospace font.},
+constant and function names will be
 \fn{green}, data type constructors and primitives will be \dt{red}, bound
 variables will be \bn{purple}, holes will be
 \texttt{\IdrisMetavar{cyan}}, and comments will be

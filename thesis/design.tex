@@ -131,7 +131,11 @@ when we run this editor action. Here is the communication we want to have for th
 The editor tells the compiler that we want to run an \Elab\ action named
 \fn{prover}. But the actions we may want to run take arguments, therefore we
 pass a list S-expression \texttt{'("q")} that corresponds to the arguments
-\fn{prover} takes.
+\fn{prover} takes. The editor also tells the compiler where the cursor was when
+the user called the editor action, in this case \mt{21} is the line number and
+\mt{5} is the column number. Remember from the previous communications that the
+last number, which is \mt{22} here is the communication ID.
+
 In the response we get from the compiler, we get a piece of code that is
 supposed to replace the hole. In \hyperref[sec:types]{the next section}, we
 will discuss what determines the kind of S-expression we should send and
@@ -237,9 +241,12 @@ let's see how we can define an \ty{Editorable} implementation for \ty{String}.
 \end{figure}
 
 The definition of \fn{fromEditor} above tells us that if an S-expression is a
-string atom, then we know how to get a \ty{String} from it, otherwise we
-fail.  On the other hand, \fn{toEditor} never fails; if we have a \ty{String}
-we can always construct a \dt{StringAtom} and put it in the \Elab\ monad.
+string atom, then we know how to get a \ty{String} from it, otherwise we fail.
+On the other hand, \fn{toEditor} never fails; if we have a \ty{String} we can
+always construct a \dt{StringAtom} and put it in the
+\Elab\ monad.\footnote{Remember that \Editorable\ is a \ty{Monad}, which means
+it also has an \ty{Applicative} implementation, therefore we can use \fn{pure}
+instead of \fn{return}, and this is the preferred way in Idris.}
 
 Now, for a more complex example, let's look at \autoref{code:editorableList} to
 see we can make \ty{List}s \ty{Editorable}.

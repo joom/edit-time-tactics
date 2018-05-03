@@ -35,7 +35,7 @@ refactor Haskell programs without changing a part of the program
 unintentionally. As they put it, their library respects ``the identity
 refactoring'', which is non-trivial if your system allows many different kinds
 of transformations~\cite{ghc-exactprint-blog}.
-There is also the Haskell IDE Engine project that aims integrate many Haskell
+There is also the Haskell IDE Engine project that aims to integrate many Haskell
 tools based on the GHC API to the editor workflow, by providing a backend for
 editor modes.\footnote{The project can be found here:
 \url{http://github.com/haskell/haskell-ide-engine}, and Alan Zimmerman's talk
@@ -160,12 +160,8 @@ editor actions.
 
 \section{Others}
 
-A question we received from Edward Morehouse was ``What are the prospects for
-building editor interactions into a compiler from the start?  Is it feasible to
-implement delaboration in such a way that the compiler could respond directly
-with surface-syntax terms that fit in the current binding context?'' We believe
-we should discuss the existing work on languages that are designed
-with editor interaction in mind.
+We should also think about the prospects for building editor interactions into
+a compiler from the start, so let's take a look at the existing work on languages that are designed with a priority on editor interactions.
 
 Building editor interactions in a compiler from the start is not a new idea,
 both Idris and Agda have done this already. They did not, however, take
@@ -202,9 +198,9 @@ and also personal communication with Cyrus Omar and Ravi Chugh.}, by which they
 meant a separate language in which users can define editor actions, and a
 library of predefined editor actions that the users can compose.
 
-The second part of Morehouse's question was about implementing delaboration in
-a way that the compiler could respond directly with surface-syntax terms that
-fit in the current binding context.
+Another question we should answer is how feasible it is to implement
+delaboration in such a way that the compiler could respond directly with
+surface-syntax terms that fit in the current binding context.
 Currently there is no way in Idris to write an editor action that returns a
 surface-syntax term.\footnote{ The only way around returning surface-syntax
 directly from an editor action is to return a \ty{String} that consists of the

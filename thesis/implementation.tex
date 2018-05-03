@@ -131,7 +131,12 @@ term that is itself an internal Haskell representation of some Idris syntax.
 When you reflect that, you get the internal representation of an Idris
 representation of the Haskell representation of an Idris term.  Our previous
 usage of ``reflection'' was only a special case of the word, but in this
-section, we will use the generalized definition.
+section, we will use the generalized definition.\footnote{We should clarify
+that there is no infinite regress here. When we quote an Idris term, we still
+get an Idris term, of the type \ty{TT}, which then can be quoted again and
+again if necessary. However, all of these are still representable in Idris.
+Similarly, a Haskell term can be reflected again and again, and the \ty{Term}
+type is enough to express this.}
 
 Let's give an example and see what we mean by this.
 We defined the Idris type \ty{SExp} in \autoref{code:definitionSExp}.
@@ -170,7 +175,7 @@ write the syntax trees for untyped terms. We can always type-check them later.
 To get a Haskell term of the type \ty{SExp} from an internal representation of
 an Idris term that has the Idris type \ty{SExp}, we have to write a function
 \fn{reifySExp} that reifies a given \ty{Term}, which you can see in
-\autoref{code:reifySExp}
+\autoref{code:reifySExp}:
 
 \begin{figure}[H]
 \caption{The function to reify the internal representations of Idris terms
@@ -304,9 +309,11 @@ we started to do in \autoref{code:runElabAction}.
 Observe that we left most parts in here blank, let's zoom in to the \TT\ cases
   of \dt{Prim\_\_FromEditor} and \dt{Prim\_\_toEditor}. The actual code blocks
   for them refer to many helper functions that are difficult to follow; we will
-  instead explain what they do in detailed prose.
+  instead explain what they do in detailed prose. We will use the variable
+  names in \autoref{code:runElabAction}, so it would be helpful to look back
+  at the code excerpt when a name is unclear.
 
-For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
+For the \TT\ case of \dt{Prim\_\_FromEditor} that we left as a comment before, we have to do the following steps:
 \begin{enumerate}
   \item We have an \ty{Term} named \bn{arg'} representing the S-expression passed to
     the \dt{Prim\_\_FromEditor}, we have to reify this using \fn{reifySExp} and
@@ -348,7 +355,7 @@ For the \TT\ case of \dt{Prim\_\_FromEditor}, we have to do the following steps:
 \end{enumerate}
 % David's comment: do we always want the normal form? why?
 
-For the \TT\ case of \dt{Prim\_\_ToEditor}, we have to do the following steps:
+For the \TT\ case of \dt{Prim\_\_ToEditor} that we left as a comment before, we have to do the following steps:
 \begin{enumerate}
   \item We have an Idris term \bn{arg'} representing the \TT\ term passed to
     the \dt{Prim\_\_ToEditor}, we have to reify this using \fn{reifyTT} and
@@ -569,11 +576,8 @@ type-checking.
 If a function is declared an editor action with the \kw{\%editor} modifier, we
 want to find out during type-checking if it is viable to use them as an editor
 action, and an \Elab\ action is \emph{viable} if the components of its type have
-implementations of the \Editorable\ interface.\footnote{
-  David Christiansen notes that this process could be internalized into Idris
-  as a universe \`a la Tarski, instead of the \`a la Russell solution we
-  present in our thesis. This approach can also be a starting point for
-  dependently-typed editor actions.} We discussed this idea in the \fn{toy}
+implementations of the \Editorable\ interface.\footnote{Encoding this as a universe could be a starting point for dependently-typed editor actions.}
+We discussed this idea in the \fn{toy}
 example in \autoref{ssec:primitiveEditorableDesign}, and also have seen the
 type errors you can get in \autoref{ssec:preclude}. Now let's see how we
 implement this feature.
@@ -602,4 +606,10 @@ To the \fn{elabType'} function in the compiler, we add the following:
 \end{enumerate}
 
 This concludes the implementation of edit-time tactics in the Idris compiler.
+Remember that the part we described here is only for the compiler; it is just
+one step of how edit-time tactics work. For the communication between the
+editor and the compiler, we have to write some editor language code, i.e. Emacs
+Lisp, that would send and receive messages. We showed in
+\autoref{code:elispToy} what that would look like.
+
 In the next chapter, we will see real applications of edit-time tactics.

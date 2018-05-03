@@ -9,7 +9,7 @@ computation in terms~\cite{davidphd}. Moreover, we can use the computation
 in types to shape our definitions of computations in terms.
 
 A helpful intuition for functional programmers is to think about how the
-concept that functions are values was a initially a novel idea, and now in
+concept that functions are values was initially a novel idea, and now in
 dependently typed programming, we promote types to values as well.
 Thus a function can now take a term as an argument and return a type as a
 result~\cite{lambdacube,henk}.
@@ -26,11 +26,12 @@ cases are enough to cover all possible paths of this function. If we were to
 define a \zip\ function for lists, we would need four cases: both empty, both
 non-empty, one empty and one non-empty, and one non-empty and one empty.
 However, our \zip\ function takes two arguments that are of the same length
-\bn{n}.  Therefore, we cannot have a case with one empty and one non-empty,
-because that contradicts the fact that both vectors are of the same
-length. Notice that the \zip\ function returns a vector of length \bn{n}.
-In other words, the input vectors and the resulting vector are guaranteed to be
-of the same length.
+\bn{n}.\footnote{Both the \ty{Nat} named \bn{n} and the \ty{Type} named \bn{a} here are
+implicit quantifiers.}  Therefore, we cannot have a case with one empty and one
+non-empty, because that contradicts the fact that both vectors are of the same
+length. Notice that the \zip\ function returns a vector of length \bn{n}.  In
+other words, the input vectors and the resulting vector are guaranteed to be of
+the same length.
 
 \begin{figure}[H]
 \caption{Example of a dependently typed Idris code: vectors}
@@ -40,7 +41,7 @@ of the same length.
   \IdrisData{Nil} : \IdrisType{Vect} \IdrisData{0} \IdrisImplicit{elem}
   \IdrisData{(::)} : \IdrisImplicit{elem} -> \IdrisType{Vect} \IdrisImplicit{len} \IdrisImplicit{elem} -> \IdrisType{Vect} (\IdrisData{S} \IdrisImplicit{len}) \IdrisImplicit{elem}
 
-\IdrisFunction{zip} : \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{a} -> \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{b} -> \IdrisType{Vect} \IdrisImplicit{n} \IdrisType{(}\IdrisImplicit{a}\IdrisType{,} \IdrisImplicit{b}\IdrisType{)}
+\IdrisFunction{zip} : \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{a} -> \IdrisType{Vect} \IdrisImplicit{n} \IdrisImplicit{b} -> \IdrisType{Vect} \IdrisImplicit{n} (\ty{Pair} \bn{a} \bn{b})
 \IdrisFunction{zip} \IdrisData{[]} \IdrisData{[]} = \IdrisData{[]}
 \IdrisFunction{zip} (\IdrisBound{x} \IdrisData{::} \IdrisBound{xs}) (\IdrisBound{y} \IdrisData{::} \IdrisBound{ys}) = \IdrisData{(}\IdrisBound{x}\IdrisData{,} \IdrisBound{y}\IdrisData{)} \IdrisData{::} \IdrisFunction{zip} \IdrisBound{xs} \IdrisBound{ys}
 \end{Verbatim}
@@ -84,13 +85,13 @@ We did the latter for \fn{evenOrOdd} by using the keyword \kw{total}.
 Similarly, we could require the \zip\ function from the previous example to be
 total if we wanted to.\footnote{Clearly Idris cannot decide whether an arbitrary
 function is total, since that would solve the halting problem. Instead it
-acknowledges the ones that are obviously terminating, and for all the other
+acknowledges the ones that are obviously total, and for all the other
 ones, even if they are actually total, it throws a totality check error.}
 
 Haskell's type classes and type class instances are called \emph{interfaces} and
 \emph{implementations} in Idris, respectively. In Haskell there can only be one
-instance for the same type class and the type, but in Idris there can be
-multiple implementations for the same interface and the type. You can name
+instance for the same type class and type, but in Idris there can be
+multiple implementations for the same interface and type. You can name
 implementations and specify the implementation you want to use by its name
 when you are writing a function. For our purposes, we will not use multiple
 implementations.
@@ -148,7 +149,8 @@ language's typed terms, and its definition can be seen in \autoref{code:ttDef}.
 
 As a quick summary:
 \begin{itemize}
-\item\dt{P} creates a variable term from a name and the type of the variable.
+\item\dt{P} creates a variable term from a name, as defined in
+  \autoref{code:ttnameDef}, and the type of the variable.
 \item\dt{V} creates a de Bruijn variable.
 (given integer $n$ representing the $n$th most recently introduced local variable)
 \item\dt{Bind} creates any kind of binder (lambda, let etc.) with a term it binds on.
@@ -210,13 +212,13 @@ As a quick summary:
 \item\dt{SN} represents special names, which are used for metavariables, implementations etc. We will not deal with them in this thesis.
 \end{itemize}
 
-As a quick way to refer to Idris names, there is a syntax
+As a quick way to refer to Idris names, there is a syntactic sugar
 \texttt{\IdrisKeyword{\`{}\{\{}x\IdrisKeyword{\}\}}}
 that would give you the term \dt{UN} \dt{"x"}.
-Similarly, there is another syntax that checks whether a given name exists and
-lets you refer to an existing name without having to specify its full
-namespace: \texttt{\IdrisKeyword{\`{}\{}False\IdrisKeyword{\}}} would give you
-\texttt{\dt{NS} (\dt{UN} \dt{"False"}) \dt{["Bool", "Prelude"]}}.
+Similarly, there is another syntactic sugar that checks whether a given name
+exists and lets you refer to an existing name without having to specify its
+full namespace: \texttt{\IdrisKeyword{\`{}\{}False\IdrisKeyword{\}}} would give
+you \texttt{\dt{NS} (\dt{UN} \dt{"False"}) \dt{["Bool", "Prelude"]}}.
 
 \medskip
 
@@ -301,7 +303,7 @@ This declaration runs the \Elab\ action and adds new type declarations,
 function and data type definitions generated by the \Elab\ action generated by
 \fn{e} to the context.
 
-Elaborator reflection also adds a new expression
+Elaborator reflection also adds a new \emph{expression}
 \texttt{\IdrisKeyword{\%runElab}}\ \fn{e} to Idris,
 where \fn{e} has the type \ty{Elab}\ \ty{()}.
 The type \ty{t} of the entire expression is started as the goal of the

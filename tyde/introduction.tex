@@ -1,0 +1,133 @@
+\section{Introduction} \label{chap:introduction}
+
+\TODO{Some intro text and a summary of how elaborator reflection works, maybe even a use case}
+
+There are two different parts of an editor interaction mode. The first is a
+plugin to the editor, often written in the script language of the editor, such
+as Emacs Lisp or VimL. The second is a separate program, such as
+\texttt{agda-mode} in Agda, that does the heavy lifting of the editing features
+that work with the compiler itself. We can call these two parts the
+\emph{frontend} and \emph{backend} of the editor interaction mode,
+respectively.
+
+The features in the backend in Idris are embedded
+in the compiler. If you want to define a new action, the only way possible is
+to change the compiler source code, build your own version of the compiler,
+and then edit the source code of your editor mode to use that feature you
+added. This is far from ideal: no one should have to fork a compiler
+just to add a custom editor action. Maintaining a compiler fork and
+navigating through the compiler source code are usually not in the skill sets
+of most users.
+Another drawback is that you have to learn Haskell and recompile the
+entire Idris system every time you want to define a custom editor action.
+
+Therefore, we want to give users a way to write custom editor actions. Our
+solution for this is to make use of \mbox{\emph{elaborator reflection}~\cite{elabref}} in
+Idris, which is a metaprogramming machinery that allows users to automate the
+construction of proofs and programs, by reflecting the elaborator
+monad~\cite{idris} in the Idris compiler. \citet{elabref} showed that
+this mechanism is powerful enough to replace the old tactic
+language that existed in the previous versions of Idris, which is
+now deprecated in favor of elaborator reflection.
+
+Elaborator reflection adds a primitive monad \Elab\ to Idris itself, in which
+type-checking and normalizing terms, looking up types and definitions of
+functions are monadic actions.\footnote{These monadic actions are still called
+tactics, especially if they change the goal queue or the local context, hence the
+title of this paper. Note that whenever we use the word ``tactic'' in the
+context of Idris, we exclusively refer to the monadic \Elab\ actions, not the
+old tactic language.}
+Our paper argues that these actions provide a nice interface with which users
+can define their custom editor actions. This has the following advantages:
+
+\begin{itemize}
+\item Implementations of the existing Idris editor actions are
+built into the compiler, and they are written in Haskell. Our work will allow
+us to rewrite them in Idris as \Elab\ actions. This way, we can remove these
+parts from the compiler and move them into an Idris library.
+\item The abilities of the editor mode are extended from the
+current built-in features to anything that can be done with tactics. This
+allows library and DSL authors to provide domain-specific editor actions.
+\item Defining editor actions with a monadic interface allows us to
+compose them easily. For instance, if we had case-splitting as an
+\Elab\ action, we could define a tactic to case-split on many arguments at the
+same time.
+\item More people can extend Idris; contributing to the Idris standard library
+  or publishing a library of editor actions is easier than extending the
+    compiler itself.
+\end{itemize}
+
+
+\subsection{Motivating example}
+
+\TODO{Explain the following example. I didn't just want to do the unit case
+because then that seems too easy. Doing Refl and unit together is still
+somewhat readable (?) and it's more interesting than just doing unit.}
+
+\begin{Verbatim}
+\kw{%editor}
+\fn{trivial} : \ty{TTName} -> \ty{Elab} \ty{TT}
+\fn{trivial} \bn{n} =
+  \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
+     \kw{case} \bn{ty} \kw{of}
+       \kw{\`(}\ty{Unit}\kw{)} => \fn{pure} \kw{`(}\dt{MkUnit}\kw{)}
+       \kw{`(}(=) {A=\kw{\textasciitilde}\bn{a}} {B=\kw{\textasciitilde}\bn{b}} \kw{\textasciitilde}\bn{x} \kw{\textasciitilde}\bn{y}\kw{)} =>
+         \kw{if} \bn{a} \fn{==} \bn{b} \fn{&&} \bn{x} \fn{==} \bn{y}
+         \kw{then} \bn{pure} \kw{`(}\dt{Refl} {A=\kw{\textasciitilde}\bn{a}} {x=\kw{\textasciitilde}\bn{x}}\kw{)}
+         \kw{else} \fn{fail} \dt{[]}
+\end{Verbatim}
+
+\TODO{Explain the following examples step by step, maybe with screenshots}
+
+\begin{Verbatim}
+\fn{ex1} : \ty{Unit}
+\fn{ex1} = \dt{()}
+
+\fn{ex2} : (\fn{not} \dt{False}) = \dt{True}
+\fn{ex2} = \dt{Refl}
+\end{Verbatim}
+
+
+\subsection{Contributions}
+
+We make the following contributions in this paper:
+\begin{itemize}
+\item We extend the primitive \Elab\ monad with the necessary primitive monadic
+actions that make writing an editor action with elaborator reflection possible
+(\autoref{sec:stdlib}).
+\item We define an Idris interface (or \emph{type class} in Haskell terminology)
+called \ty{Editorable} for serializing and deserializing Idris expressions.
+For the reflected type that represents the core language terms of Idris,
+implementations of this interface are primitives (\autoref{sec:types}).
+\item We extend the Idris compiler to track the association between source code
+  and typing contexts (\autoref{sec:extendIState}).
+\item The current proof search mechanism in Idris is not particularly advanced.
+We write an alternative proof search tactic called Hezarfen, a
+theorem prover for intuitionistic propositional logic, based on Dyckhoff's
+LJT~\cite{ljt}, and then we show how to use this on holes when we are in
+the editor (\autoref{sec:hezarfen}).
+\item We define an add clause tactic that can be run from the editor, which can
+replace the hard-coded add clause editor action (\autoref{sec:addClause}).
+\end{itemize}
+
+% Some of the features we implemented in this paper have already made their way to
+% the Idris compiler, and the rest also will once they are reviewed by the
+% other Idris contributors.
+
+We envision three different audiences for this paper:
+\begin{enumerate}[(1)]
+\item Idris programmers who use editor actions in their editor, who will now
+  have access to more editor actions. For them, reading the applications of
+edit-time tactics in \autoref{chap:applications} would be the most helpful.
+\item Advanced Idris programmers who want to write simple editor actions, using
+  the common Idris types and reflected types. More advanced Idris programmers
+    may want to write more complex editor actions that involve data types
+    that they define.
+    They may want to read \autoref{chap:design} in order to understand the
+    design of our feature and what should be taken into account when defining
+    such data types.
+\item Compiler developers and contributors for Idris and other
+  dependently-typed languages.  They may want to read
+    \autoref{chap:implementation} in order to observe what we needed to change
+    in the compiler, and how they can add this feature to a different language.
+\end{enumerate}

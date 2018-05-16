@@ -1,11 +1,11 @@
-\chapter{Conclusion}\label{chap:conclusion}
+\section{Conclusion}\label{chap:conclusion}
 
-\section{Future work}
+\subsection{Future work}
 
-\subsection{Proof simplification}
+\subsubsection{Proof simplification}
 
 The ability to run tactics as editor actions has a consequence
-that we have not explored much in this thesis.
+that we have not explored much in this paper.
 Idris tactics generate proof terms at compile time, but their
 compilation can take a long time for complex tactics\footnote{Similar problems
 arise in Coq as well. For example, theorems that use the famous \texttt{omega}
@@ -35,9 +35,9 @@ We leave that for future work.  However, even without proof simplification,
 edit-time tactics still could be a last resort solution to long compile times
 for tactics.
 
-\subsection{Writing an editor action frontend in Idris}
+\subsubsection{Writing an editor action frontend in Idris}
 
-We explained in \autoref{chap:introduction} that this thesis focuses on writing
+We explained in \autoref{chap:introduction} that this paper focuses on writing
 the backend of an editor action in Idris, and that we still had to write some
 Emacs Lisp (if we are using Emacs). However, Idris supports many different
 code generation targets~\cite{idriscodegen} seamlessly.
@@ -56,9 +56,14 @@ mature enough yet, but we believe they have the potential to inspire different
 applications of metaprogramming, especially if the Idris modes of these editors
 are written in Idris via their respective code generation targets.
 
-\section{Final words}
+\subsubsection{Universe encoding}
 
-In this thesis, we extended the capabilities of the editor interaction mode of
+\TODO{David's comment on my thesis margins about universe encoding, which
+enables dependently typed editor actions}
+
+\subsection{Final words}
+
+In this paper, we extended the capabilities of the editor interaction mode of
 Idris by allowing users to define new editor actions in Idris itself. We did
 so through a metaprogramming technique that was introduced to Idris recently by
 Christiansen and Brady~\cite{elabref}.

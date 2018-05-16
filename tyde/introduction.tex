@@ -70,11 +70,16 @@ somewhat readable (?) and it's more interesting than just doing unit.}
 \fn{trivial} \bn{n} =
   \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
      \kw{case} \bn{ty} \kw{of}
-       \kw{\`(}\ty{Unit}\kw{)} => \fn{pure} \kw{`(}\dt{MkUnit}\kw{)}
-       \kw{`(}(=) {A=\kw{\textasciitilde}\bn{a}} {B=\kw{\textasciitilde}\bn{b}} \kw{\textasciitilde}\bn{x} \kw{\textasciitilde}\bn{y}\kw{)} =>
+       \kw{`(}\ty{Unit}\kw{)} =>
+         \fn{pure} \kw{`(}\dt{MkUnit}\kw{)}
+       \kw{`(}(\dt{=}) \{A=\kw{\textasciitilde}\bn{a}\} \{B=\kw{\textasciitilde}\bn{b}\} \kw{\textasciitilde}\bn{x} \kw{\textasciitilde}\bn{y}\kw{)} =>
          \kw{if} \bn{a} \fn{==} \bn{b} \fn{&&} \bn{x} \fn{==} \bn{y}
-         \kw{then} \bn{pure} \kw{`(}\dt{Refl} {A=\kw{\textasciitilde}\bn{a}} {x=\kw{\textasciitilde}\bn{x}}\kw{)}
-         \kw{else} \fn{fail} \dt{[]}
+         \kw{then} \fn{pure} \kw{`(}\dt{Refl} \{A=\kw{\textasciitilde}\bn{a}\} \{x=\kw{\textasciitilde}\bn{x}\}\kw{)}
+         \kw{else} \fn{fail} \dt{[TextPart "Not equal"]}
+       _ =>
+         \fn{fail} \dt{[TextPart "Cannot solve"]}
+
+
 \end{Verbatim}
 
 \TODO{Explain the following examples step by step, maybe with screenshots}

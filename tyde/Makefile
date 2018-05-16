@@ -31,4 +31,4 @@ clean:
 	@rm $(FILENAME).*
 
 preview: compile open clean
-normal: compile open clean
+normal: compile clean

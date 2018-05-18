@@ -93,19 +93,7 @@
 \renewcommand{\shortauthors}{Joomy Korkut and David Thrane Christiansen}
 
 \begin{abstract}
-  In dependently-typed languages such as Idris, recent work on
-  \mbox{\emph{elaborator reflection}~\cite{elabref}} paved the way for new
-  applications of metaprogramming by showing that a tactic-based proof language
-  can be substituted with a monadic interface that exposes the internal
-  elaborator. The goal of our work is to use elaborator reflection to write
-  editor interaction actions in Idris.
-
-  Currently in Idris modes of editors such as Emacs, users can perform actions
-  like type-checking holes, case-splitting, and lemma extraction.
-  Implementations of all of these Idris editor actions are hard-coded in the
-  compiler, and they are written in Haskell. Our work will allow us to rewrite
-  them in Idris as metaprograms and to move them into an Idris library,
-  instead of having them embedded into the compiler.
+  Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that make use of informative types to assist users with the construction of programs. However, these interactive environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.
 \end{abstract}
 
 %

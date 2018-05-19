@@ -2,59 +2,75 @@
 
 \TODO{Some intro text and a summary of how elaborator reflection works, maybe even a use case}
 
-There are two different parts of an editor interaction mode. The first is a
-plugin to the editor, often written in the script language of the editor, such
-as Emacs Lisp or VimL. The second is a separate program, such as
-\texttt{agda-mode} in Agda, that does the heavy lifting of the editing features
-that work with the compiler itself. We can call these two parts the
-\emph{frontend} and \emph{backend} of the editor interaction mode,
-respectively.
+Rich type systems give programmers a way to express their intentions
+as types, statically ruling out many incorrect programs. But rich
+types are useful for much more than preventing mistakes: the static
+information provided by informative types can be used by interactive
+programming environments to guide the construction of programs,
+automating away tedious details and freeing the programmer to
+concentrate on the parts of their problem that require creativity.
 
-The features in the backend in Idris are embedded
-in the compiler. If you want to define a new action, the only way possible is
-to change the compiler source code, build your own version of the compiler,
-and then edit the source code of your editor mode to use that feature you
-added. This is far from ideal: no one should have to fork a compiler
-just to add a custom editor action. Maintaining a compiler fork and
-navigating through the compiler source code are usually not in the skill sets
-of most users.
-Another drawback is that you have to learn Haskell and recompile the
-entire Idris system every time you want to define a custom editor action.
+Type-driven interactive programming environments necessarily embody
+their developers' assumptions about how programmers will use
+them. These assumptions, however, can never hold for all members of a
+diverse community of programmers working on a variety of
+problems. Rather than continuing to pound nails with screwdrivers,
+extensible languages demand extensible programming environments.
+Unfortunately, interactive features are presently part of the
+compiler, and facility in dependently typed programming does not imply
+the ability to extend the implementation of dependently typed
+languages. Maintaining these changes over time as the underlying
+language is improved is an additional practical difficulty.
 
-Therefore, we want to give users a way to write custom editor actions. Our
-solution for this is to make use of \mbox{\emph{elaborator reflection}~\cite{elabref}} in
-Idris, which is a metaprogramming machinery that allows users to automate the
-construction of proofs and programs, by reflecting the elaborator
-monad~\cite{idris} in the Idris compiler. \citet{elabref} showed that
-this mechanism is powerful enough to replace the old tactic
-language that existed in the previous versions of Idris, which is
-now deprecated in favor of elaborator reflection.
+The Idris elaborator~\citep{idris} is built from a collection of
+powerful, general-purpose tools for constructing programs in a simpler
+core type theory. The high-level Idris language is extensible using
+\emph{elaborator reflection}~\citep{davidphd, elabref}, which directly
+exposes these tools to Idris programs, so that Idris can be extended
+in itself. Concretely, elaborator reflection extends Idris with a
+primitive monad \Elab{}. Just as values in \IO{} describe effectful
+programs to be executed by the run-time system, \Elab{} actions
+describe effectful programs to be run during type checking and
+elaboration. Effects in \Elab{} include checking the type of an
+expression, looking up the definition of a datatype or program,
+failing with an informative error message, and constructing new
+expressions that may or may not contain holes to be filled in by
+future metaprograms. Elaborator reflection has since been adopted in
+Agda and Lean; the Lean developers have made substantial improvements
+to its practicality~\citep{leanmeta}.
 
-Elaborator reflection adds a primitive monad \Elab\ to Idris itself, in which
-type-checking and normalizing terms, looking up types and definitions of
-functions are monadic actions.\footnote{These monadic actions are still called
-tactics, especially if they change the goal queue or the local context, hence the
-title of this paper. Note that whenever we use the word ``tactic'' in the
-context of Idris, we exclusively refer to the monadic \Elab\ actions, not the
-old tactic language.}
-Our paper argues that these actions provide a nice interface with which users
-can define their custom editor actions. This has the following advantages:
 
+We have extended Idris's implementation of elaborator reflection with
+new primitives that enable it to be used to construct \emph{editor
+  actions}. These editor actions have access to the full power of
+\Elab{}, but instead of running in the course of elaboration, they are
+manually invoked by programmers to modify already-elaborated programs.
+With these new primitives, it becomes possible to write
+domain-specific editor actions for embedded domain-specfic
+languages~\citep{dsel} and to replace parts of the compiler with
+customizable library code written in Idris. Even more importantly,
+users who were previously stuck with whatever the developers provided
+are now empowered to make not only their language, but also their
+environment, their own.
+
+\subsection*{Contributions}
+
+We make the following contributions in this paper:
 \begin{itemize}
-\item Implementations of the existing Idris editor actions are
-built into the compiler, and they are written in Haskell. Our work will allow
-us to rewrite them in Idris as \Elab\ actions. This way, we can remove these
-parts from the compiler and move them into an Idris library.
-\item The abilities of the editor mode are extended from the
-current built-in features to anything that can be done with tactics. This
-allows library and DSL authors to provide domain-specific editor actions.
-\item Defining editor actions with a monadic interface allows us to
-compose them easily. For instance, if we had case-splitting as an
-\Elab\ action, we could define a tactic to case-split on many arguments at the
-same time.
-\item More people can extend Idris; contributing to the Idris standard library
-  or publishing a library of editor actions is easier than extending the
-    compiler itself.
+\item We explore the additional features that are necessary to use
+  elaborator reflection to implement editor actions~(\autoref{sec:design}).
+\item We describe a concrete realization of this design, and the
+  communication protocol that allows it to work in multiple
+  interactive environments~(\autoref{sec:types}).
+\item We describe a non-trivial editor action that invokes Hezarfen, a
+  theorem prover for intuitionistic propositional logic based on
+  Dyckhoff's LJT~\cite{ljt}, and we show how to use it to
+  interactively fill the holes found in incomplete
+  programs~(\autoref{sec:hezarfen}).
+\item We demonstrate the replacement of part of Idris's implementation
+  with Idris library code by demonstrating an editor action that
+  constructs an initial implementation of a function, given its
+  signature~(\autoref{sec:addClause}).
 \end{itemize}
 
 
@@ -93,27 +109,6 @@ somewhat readable (?) and it's more interesting than just doing unit.}
 \end{Verbatim}
 
 
-\subsection{Contributions}
-
-We make the following contributions in this paper:
-\begin{itemize}
-\item We extend the primitive \Elab\ monad with the necessary primitive monadic
-actions that make writing an editor action with elaborator reflection possible
-(\autoref{sec:stdlib}).
-\item We define an Idris interface (or \emph{type class} in Haskell terminology)
-called \ty{Editorable} for serializing and deserializing Idris expressions.
-For the reflected type that represents the core language terms of Idris,
-implementations of this interface are primitives (\autoref{sec:types}).
-\item We extend the Idris compiler to track the association between source code
-  and typing contexts (\autoref{sec:extendIState}).
-\item The current proof search mechanism in Idris is not particularly advanced.
-We write an alternative proof search tactic called Hezarfen, a
-theorem prover for intuitionistic propositional logic, based on Dyckhoff's
-LJT~\cite{ljt}, and then we show how to use this on holes when we are in
-the editor (\autoref{sec:hezarfen}).
-\item We define an add clause tactic that can be run from the editor, which can
-replace the hard-coded add clause editor action (\autoref{sec:addClause}).
-\end{itemize}
 
 % Some of the features we implemented in this paper have already made their way to
 % the Idris compiler, and the rest also will once they are reviewed by the

@@ -49,6 +49,7 @@
 \newcommand{\cm}[1]{\textcolor{darkgray}{\texttt{#1}}}
 \newcommand{\hole}[1]{\IdrisMetavar{\texttt{?}\IdrisMetavar{\texttt{#1}}}}
 \newcommand{\Elab}{\ty{Elab}}
+\newcommand{\IO}{\ty{IO}}
 \newcommand{\String}{\ty{String}}
 \newcommand{\TT}{\ty{TT}}
 \newcommand{\Raw}{\ty{Raw}}
@@ -67,7 +68,7 @@
 
 
 \begin{document}
-\title[Edit-Time Tactics in Idris]{Edit-Time Tactics in Idris}
+\title[Extensible Type-Directed Editing]{Extensible Type-Directed Editing}
 
 \author{Joomy Korkut}
 \orcid{0000-0001-6784-7108}
@@ -90,7 +91,7 @@
 
 
 % The default list of authors is too long for headers.
-\renewcommand{\shortauthors}{Joomy Korkut and David Thrane Christiansen}
+\renewcommand{\shortauthors}{Joomy Korkut and David Christiansen}
 
 \begin{abstract}
   Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that make use of informative types to assist users with the construction of programs. However, these interactive environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.

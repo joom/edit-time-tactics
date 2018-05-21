@@ -1,44 +1,35 @@
 \section{Introduction} \label{chap:introduction}
 
-\TODO{Some intro text and a summary of how elaborator reflection works, maybe even a use case}
-
 Rich type systems give programmers a way to express their intentions
 as types, statically ruling out many incorrect programs. But rich
-types are useful for much more than preventing mistakes: the static
-information provided by informative types can be used by interactive
-programming environments to guide the construction of programs,
-automating away tedious details and freeing the programmer to
-concentrate on the parts of their problem that require creativity.
+types are useful for much more than preventing mistakes: the
+information provided by informative types can be used by programming
+tools to guide program construction, automating away tedious details
+and freeing programmers to concentrate on the parts of their
+problem that require human creativity.
 
-Type-driven interactive programming environments necessarily embody
-their developers' assumptions about how programmers will use
+Type-driven programming environments are necessarily built according
+to language developers' assumptions about how programmers will use
 them. These assumptions, however, can never hold for all members of a
-diverse community of programmers working on a variety of
-problems. Rather than continuing to pound nails with screwdrivers,
-extensible languages demand extensible programming environments.
-Unfortunately, interactive features are presently part of the
-compiler, and facility in dependently typed programming does not imply
-the ability to extend the implementation of dependently typed
-languages. Maintaining these changes over time as the underlying
-language is improved is an additional practical difficulty.
+diverse community working on a variety of problems. Unfortunately, the
+interactive features of Idris and Agda are presently built in to their
+respective compilers, and skill in dependently typed programming does
+not imply the ability to extend the implementation of dependently
+typed languages and maintain those extensions so that they continue to
+work as compilers are improved.
 
-The Idris elaborator~\citep{idris} is built from a collection of
-powerful, general-purpose tools for constructing programs in a simpler
-core type theory. The high-level Idris language is extensible using
-\emph{elaborator reflection}~\citep{davidphd, elabref}, which directly
-exposes these tools to Idris programs, so that Idris can be extended
-in itself. Concretely, elaborator reflection extends Idris with a
-primitive monad \Elab{}. Just as values in \IO{} describe effectful
-programs to be executed by the run-time system, \Elab{} actions
-describe effectful programs to be run during type checking and
-elaboration. Effects in \Elab{} include checking the type of an
-expression, looking up the definition of a datatype or program,
-failing with an informative error message, and constructing new
-expressions that may or may not contain holes to be filled in by
-future metaprograms. Elaborator reflection has since been adopted in
-Agda and Lean; the Lean developers have made substantial improvements
-to its practicality~\citep{leanmeta}.
-
+The Idris elaborator~\citep{idris} translates programs written in
+Idris into a much smaller core type theory. The elaborator is written
+in Haskell, making use of an elaboration monad to track the
+complicated state that is involved. The high-level Idris language is
+extensible using \emph{elaborator reflection}~\citep{davidphd,
+  elabref}, which directly exposes the elaboration monad to Idris
+programs, so that Idris can be extended in itself. Concretely,
+elaborator reflection extends Idris with a primitive monad
+\Elab{}. Just as values in \IO{} describe effectful programs to be
+executed by the run-time system, \Elab{} actions describe effectful
+programs to be run during elaboration.
+\todo{insert ref to lean paper elsewhere}
 
 We have extended Idris's implementation of elaborator reflection with
 new primitives that enable it to be used to construct \emph{editor
@@ -55,9 +46,9 @@ environment, their own.
 
 \subsection*{Contributions}
 
-We make the following contributions in this paper:
+We make the following contributions in this paper:\todo{Shorten to fit on page 1}
 \begin{itemize}
-\item We explore the additional features that are necessary to use
+\item We explore the features that are necessary to use
   elaborator reflection to implement editor actions~(\autoref{sec:design}).
 \item We describe a concrete realization of this design, and the
   communication protocol that allows it to work in multiple
@@ -131,3 +122,8 @@ edit-time tactics in \autoref{chap:applications} would be the most helpful.
     \autoref{chap:implementation} in order to observe what we needed to change
     in the compiler, and how they can add this feature to a different language.
 \end{enumerate}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "source"
+%%% End:

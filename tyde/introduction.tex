@@ -49,19 +49,18 @@ environment, their own.
 We make the following contributions in this paper:\todo{Shorten to fit on page 1}
 \begin{itemize}
 \item We explore the features that are necessary to use
-  elaborator reflection to implement editor actions~(\autoref{sec:design}).
+  elaborator reflection to implement editor actions.
 \item We describe a concrete realization of this design, and the
   communication protocol that allows it to work in multiple
-  interactive environments~(\autoref{sec:types}).
-\item We describe a non-trivial editor action that invokes Hezarfen, a
-  theorem prover for intuitionistic propositional logic based on
-  Dyckhoff's LJT~\cite{ljt}, and we show how to use it to
-  interactively fill the holes found in incomplete
-  programs~(\autoref{sec:hezarfen}).
-\item We demonstrate the replacement of part of Idris's implementation
-  with Idris library code by demonstrating an editor action that
-  constructs an initial implementation of a function, given its
-  signature~(\autoref{sec:addClause}).
+  interactive environments.
+\item We describe a non-trivial editor action that invokes a
+  theorem prover for intuitionistic propositional logic to
+  interactively fill a hole in an incomplete
+  program.
+\item We demonstrate that editor actions written in Idris are
+  sufficently powerful to replace parts of implementation by
+  reimplementing a feature that constructs an initial implementation
+  of a function, based on its signature.
 \end{itemize}
 
 

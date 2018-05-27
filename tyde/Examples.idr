@@ -5,8 +5,8 @@ import Language.Reflection.Editor
 %language ElabReflection
 
 %editor
-trivial : TTName -> Elab TT
-trivial n =
+easy : TTName -> Elab TT
+easy n =
   do (_, _, ty) <- lookupTyExact n
      case ty of
        `(Unit) =>
@@ -19,3 +19,13 @@ trivial n =
          fail [TextPart "Cannot solve"]
 
 
+foo : ()
+foo = ?lskdaf
+
+
+bar : 2 + 2 = 4
+bar = ?laskdjr
+
+
+wat : 2 + 2 = 5
+wat = ?lkj

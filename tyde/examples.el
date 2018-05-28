@@ -30,4 +30,5 @@ An error is signaled if there is no name at WHERE."
 (defun idris-easy ()
   "Solve an easy hole"
   (interactive)
-  (idris-elab-hole-arg "Examples.easy" `(,(idris-name-at-point))))
+  (idris-elab-hole-arg "Examples.easy"
+                       (list (idris-name-at-point))))

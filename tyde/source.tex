@@ -65,6 +65,13 @@
 \newcommand{\FYI}[1]{{\color{green}{[FYI: #1]}}}
 \newcommand{\forceindent}{\hspace{\parindent}}
 
+\usepackage[normalem]{ulem}
+\makeatletter
+\newcommand\colorwave[1][blue]{\bgroup \markoverwith{\lower3.5\p@\hbox{\sixly \textcolor{#1}{\char58}}}\ULon}
+\font\sixly=lasy6 % does not re-load if already loaded, so no memory problem.
+\makeatother
+\newcommand{\IdrisError}[1]{\colorwave[red]{#1}}
+
 \sloppy
 
 

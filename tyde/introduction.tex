@@ -64,41 +64,123 @@ We make the following contributions in this paper:\todo{Shorten to fit on page 1
 \end{itemize}
 
 
-\subsection{Motivating example}
+\subsection{Motivating Example}
 
-\TODO{Explain the following example. I didn't just want to do the unit case
-because then that seems too easy. Doing Refl and unit together is still
-somewhat readable (?) and it's more interesting than just doing unit.}
+Dependently typed languages typically both allow programs to be
+incomplete and provide support for making them more complete. A
+limited version of this support could be a facility that substitutes
+the unit constructor (written \dt{()}, as in Haskell) for a hole of
+the unit type (also written \ty{()}, as in Haskell), and the
+reflexivity constructor \dt{Refl} when the goal is a reflexive case of
+the equality type.
 
+\begin{figure}[b]
 \begin{Verbatim}
 \kw{%editor}
-\fn{trivial} : \ty{TTName} -> \ty{Elab} \ty{TT}
-\fn{trivial} \bn{n} =
-  \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
+\fn{easy} : \ty{TTName} -> \ty{Elab} \ty{TT}
+\fn{easy} \bn{n} =
+  \kw{do} \dt{(}_\dt{,} _\dt{,} \bn{ty}\dt{)} <- \fn{lookupTyExact} \bn{n}
      \kw{case} \bn{ty} \kw{of}
-       \kw{`(}\ty{Unit}\kw{)} =>
-         \fn{pure} \kw{`(}\dt{MkUnit}\kw{)}
-       \kw{`(}(\dt{=}) \{A=\kw{\textasciitilde}\bn{a}\} \{B=\kw{\textasciitilde}\bn{b}\} \kw{\textasciitilde}\bn{x} \kw{\textasciitilde}\bn{y}\kw{)} =>
-         \kw{if} \bn{a} \fn{==} \bn{b} \fn{&&} \bn{x} \fn{==} \bn{y}
-           \kw{then} \fn{pure} \kw{`(}\dt{Refl} \{A=\kw{\textasciitilde}\bn{a}\} \{x=\kw{\textasciitilde}\bn{x}\}\kw{)}
-           \kw{else} \fn{fail} \dt{[TextPart "Not equal"]}
-       _ =>
-         \fn{fail} \dt{[TextPart "Cannot solve"]}
-
-
+       \kw{`(}\ty{()} \kw{:} \ty{Type}\kw{)} \kw{=>}
+         \fn{pure} \kw{`(}\dt{()} \kw{:} \ty{()}\kw{)}
+       \kw{`(}\ty{(=)} \{A=\textasciitilde{}\bn{a}\} \{B=\textasciitilde{}\bn{b}\} \textasciitilde{}\bn{x} \textasciitilde{}\bn{y}\kw{)} \kw{=>}
+         \kw{do} \fn{converts} \bn{a} \bn{b}
+            \fn{converts} \bn{x} \bn{y}
+            \fn{pure} \kw{`(}\dt{Refl} \{A=\textasciitilde{}\bn{a}\} \{x=\textasciitilde{}\bn{x}\}\kw{)}
+       _ \kw{=>}
+         \fn{fail} \dt{[}\dt{TextPart} \dt{"Cannot solve"}\dt{]}
 \end{Verbatim}
-
-\TODO{Explain the following examples step by step, maybe with screenshots}
 
 \begin{Verbatim}
-\fn{ex1} : \ty{Unit}
+(defun idris-easy ()
+  "Invoke the first example action."
+  (interactive)
+  (idris-elab-hole-arg
+   "easy" (list (idris-name-at-point))))
+\end{Verbatim}
+  \caption{A simple editor action and its Emacs Lisp support code}
+  \label{fig:motivating-example}
+\end{figure}
+
+Figure~\ref{fig:motivating-example} presents an implementation of this
+editor action. The \kw{\%editor} keyword registers the declaration as
+an editor action. Its type states that, when passed a representation
+of a name from Idris's core language, it will produce a representation
+of a term in Idris's core language, potentially having
+elaboration-time side effects. It is passed a name because Idris holes
+are identified by name.
+
+The first step is to look up the type of the hole to be replaced,
+using \fn{lookupTyExact}, which returns a triple consisting of the
+fully-qualified version of the name, whether it is a local variable,
+top-level reference, data constructor, or type constructor, and the
+name's type. If the name is ambiguous, \fn{lookupTyExact} fails.
+Having discovered the name's type, it then pattern-matches on said
+type, using Idris's quasiquotation syntax~\citep{idrisQuotation}.
+
+The first case to be considered is the unit type. In this pattern, a
+type annotation is needed due to the Haskell-style overloading of the
+double-parentheses. If the case is the unit type, the quoted form of
+the unit constructor is returned with \fn{pure}, which is analogous to
+Haskell's \fn{return}.
+
+The second case to be considered is the equality type, which is
+heterogeneous~\citep{mcbridephd} in the Idris standard library.  The
+equality type requires two implicit arguments~\citep{pollack}, called
+\bn{A} and \bn{B}, as well as explicit arguments \bn{x} and \bn{y}.
+When \bn{A} and \bn{B} are the same type, and \bn{x} and \bn{y} are
+judgmentally equal according to that type, \dt{Refl} proves the
+equality. The \fn{converts} action checks whether two quoted terms are
+judgmentally equal, and fails if they are not. Having checked that the
+types and their inhabitants are equal, the second case returns \dt{Refl}.
+
+The third and final case matches any other goal, and it
+fails. Additional cases could be added on an \emph{ad hoc} basis, or a
+more automatic approach could be taken. See \citet{davidphd} or
+\citet{elabref} for a description of how to increase the level of
+automation; this example is chosen to be easier to understand.
+
+Each of Idris's editor actions requires a small amount of
+editor-specific code to provide a user interface, and editor actions
+written in Idris are no exception. With a suitable library, most
+editing actions can be accommodated with fewer than five lines of
+Emacs Lisp, and we expect the burden to be similar for other
+extensible editors. Including in-editor documentation, this example
+requires five lines of Emacs Lisp.
+
+\begin{figure}[h]
+
+\begin{BVerbatim}
+\fn{ex1} : \ty{()}
+\fn{ex1} = \hole{ex1_impl}
+
+\fn{ex2} : \fn{not} \dt{False} = \dt{True}
+\fn{ex2} = \hole{ex2_impl}
+
+\fn{ex3} : \dt{False} = \dt{True}
+\fn{ex3} = \hole{ex3_impl}
+\end{BVerbatim}
+\hspace{1em}
+\begin{BVerbatim}
+\fn{ex1} : \ty{()}
 \fn{ex1} = \dt{()}
 
-\fn{ex2} : (\fn{not} \dt{False}) = \dt{True}
+\fn{ex2} : \fn{not} \dt{False} = \dt{True}
 \fn{ex2} = \dt{Refl}
-\end{Verbatim}
 
+\fn{ex3} : \dt{False} = \dt{True}
+\fn{ex3} = \IdrisError{\hole{ex3_impl}}
+\end{BVerbatim}    
 
+  \caption{Before and after invoking \fn{easy}}
+  \label{fig:motivating-example-exec}
+\end{figure}
+
+Figure~\ref{fig:motivating-example-exec} displays the results of
+executing this editor action on three holes. In the first two
+examples, the program is completed automatically. In the third
+example, however, an error is indicated because the underlying
+\ty{Elab} action fails.
 
 % Some of the features we implemented in this paper have already made their way to
 % the Idris compiler, and the rest also will once they are reviewed by the

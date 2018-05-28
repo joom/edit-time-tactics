@@ -9,11 +9,11 @@ easy : TTName -> Elab TT
 easy n =
   do (_, _, ty) <- lookupTyExact n
      case ty of
-       `(Unit) =>
-         pure `(MkUnit)
+       `(() : Type) =>
+         pure `(() : ())
        `((=) {A=~a} {B=~b} ~x ~y) =>
-         do converts a b <|> fail [TextPart "Not equal"]
-            converts x y <|> fail [TextPart "Not equal"]
+         do converts a b
+            converts x y
             pure `(Refl {A=~a} {x=~x})
        _ =>
          fail [TextPart "Cannot solve"]

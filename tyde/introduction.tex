@@ -37,7 +37,7 @@ new primitives that enable it to be used to construct \emph{editor
 \Elab{}, but instead of running in the course of elaboration, they are
 manually invoked by programmers to modify already-elaborated programs.
 With these new primitives, it becomes possible to write
-domain-specific editor actions for embedded domain-specfic
+domain-specific editor actions for embedded domain-specific
 languages~\citep{dsel} and to replace parts of the compiler with
 customizable library code written in Idris. Even more importantly,
 users who were previously stuck with whatever the developers provided
@@ -46,10 +46,10 @@ environment, their own.
 
 \subsection*{Contributions}
 
-We make the following contributions in this paper:\todo{Shorten to fit on page 1}
+We make the following contributions in this paper:
 \begin{itemize}
 \item We explore the features that are necessary to use
-  elaborator reflection to implement editor actions.
+  \mbox{elaborator reflection} to implement editor actions.
 \item We describe a concrete realization of this design, and the
   communication protocol that allows it to work in multiple
   interactive environments.
@@ -90,13 +90,13 @@ the equality type.
        _ \kw{=>}
          \fn{fail} \dt{[}\dt{TextPart} \dt{"Cannot solve"}\dt{]}
 \end{Verbatim}
-
+\hrulefill
 \begin{Verbatim}
-(defun idris-easy ()
-  "Invoke the first example action."
-  (interactive)
-  (idris-elab-hole-arg
-   "easy" (list (idris-name-at-point))))
+(\kw{defun} \fn{idris-easy} ()
+  \dt{"Invoke the first example action."}
+  (\fn{interactive})
+  (\fn{idris-elab-hole-arg}
+   \dt{"easy"} (\fn{list} (\fn{idris-name-at-point}))))
 \end{Verbatim}
   \caption{A simple editor action and its Emacs Lisp support code}
   \label{fig:motivating-example}
@@ -149,7 +149,6 @@ extensible editors. Including in-editor documentation, this example
 requires five lines of Emacs Lisp.
 
 \begin{figure}[h]
-
 \begin{BVerbatim}
 \fn{ex1} : \ty{()}
 \fn{ex1} = \hole{ex1_impl}
@@ -170,7 +169,7 @@ requires five lines of Emacs Lisp.
 
 \fn{ex3} : \dt{False} = \dt{True}
 \fn{ex3} = \IdrisError{\hole{ex3_impl}}
-\end{BVerbatim}    
+\end{BVerbatim}
 
   \caption{Before and after invoking \fn{easy}}
   \label{fig:motivating-example-exec}

@@ -1,7 +1,4 @@
 \section{Design}\label{sec:design}
-\TODO{This section needs to be simplified quite a bit more. Some parts of it
-can be moved to the implementation section. Also there must be a better way to
-motivate for \ty{Editorable} without showing all the S-expressions. (?)}
 
 Our goal is to allow users to write custom editor actions using
 elaborator reflection.
@@ -123,8 +120,6 @@ Since communication is done via S-expressions, we need to reflect the type of
 \mbox{S-expressions} to Idris.
 
 \begin{figure}[H]
-  \caption{The reflected type \ty{SExp} in Idris.}
-  \label{code:definitionSExp}
 \begin{Verbatim}
 \kw{data} \ty{SExp} : \ty{Type} \kw{where}
   \dt{SExpList} : \ty{List} \ty{SExp} -> \ty{SExp}
@@ -133,6 +128,8 @@ Since communication is done via S-expressions, we need to reflect the type of
   \dt{IntegerAtom} : \ty{Integer} -> \ty{SExp}
   \dt{SymbolAtom} : \ty{String} -> \ty{SExp}
 \end{Verbatim}
+\caption{The reflected type \ty{SExp} in Idris.}
+\label{code:definitionSExp}
 \end{figure}
 
 An S-expression is either an atom of string, boolean, integer, or symbol (such
@@ -152,13 +149,13 @@ the \ty{Editorable} interface will be used by the compiler during the
 communication between the editor and the compiler.
 
 \begin{figure}[H]
-\caption{Definition of the \ty{Editorable} interface.}
-\label{code:editorable}
 \begin{Verbatim}
 \kw{interface} \ty{Editorable} \bn{a} \kw{where}
   \fn{fromEditor} : \ty{SExp} -> \ty{Elab} \bn{a}
   \fn{toEditor} : \bn{a} -> \ty{Elab} \ty{SExp}
 \end{Verbatim}
+\caption{Definition of the \ty{Editorable} interface.}
+\label{code:editorable}
 \end{figure}
 
 We have two functions \fn{fromEditor} and \fn{toEditor} that must be defined
@@ -194,13 +191,13 @@ in the \Elab\ monad is necessary,
 let's see how we can define an \ty{Editorable} implementation for \ty{String}.
 
 \begin{figure}[H]
-\caption{\ty{Editorable} implementation for the type \ty{String}.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{implementation} \ty{Editorable} \ty{String} \kw{where}
   \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{pure} \bn{s}
   \fn{fromEditor} \bn{x} = \fn{fail} \dt{[]}
   \fn{toEditor} \bn{x} = \fn{pure} (\dt{StringAtom} \bn{x})
 \end{Verbatim}
+\caption{\ty{Editorable} implementation for the type \ty{String}.}
 \end{figure}
 
 The definition of \fn{fromEditor} above tells us that if an S-expression is a
@@ -215,8 +212,6 @@ Now, for a more complex example, let's look at \autoref{code:editorableList} to
 see we can make \ty{List}s \ty{Editorable}.
 
 \begin{figure}[ht]
-  \caption{\ty{Editorable} implementation for the \ty{List} type.}
-  \label{code:editorableList}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{implementation} \ty{Editorable} \bn{a}
             => \ty{Editorable} (\ty{List} \bn{a}) \kw{where}
@@ -226,6 +221,8 @@ see we can make \ty{List}s \ty{Editorable}.
   \fn{toEditor} \bn{xs} =
     \dt{SExpList} \fn{<$>} \fn{traverse} \fn{toEditor} \bn{xs}
 \end{Verbatim}
+\caption{\ty{Editorable} implementation for the \ty{List} type.}
+\label{code:editorableList}
 \end{figure}
 
 The definition of \fn{fromEditor} for lists tells us that if we have a list
@@ -245,8 +242,6 @@ actions, the type of names, \ty{TTName}.
 \TODO{I'm not sure if we need to give this implementation definition}
 
 \begin{figure}[ht]
-\caption{\ty{Editorable} implementation for the type \ty{TTName}.}
-\label{code:ttnameEditorable}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{implementation} \ty{Editorable} \ty{TTName} \kw{where}
   \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{namify} \bn{s}
@@ -271,6 +266,8 @@ actions, the type of names, \ty{TTName}.
                 \fn{++} !(\fn{stringify} \bn{x}))
       \fn{stringify} _ = \fn{fail} \dt{[]}
 \end{Verbatim}
+\caption{\ty{Editorable} implementation for the type \ty{TTName}.}
+\label{code:ttnameEditorable}
 \end{figure}
 
 This is a long code excerpt, and you do not have to follow the code entirely.
@@ -374,7 +371,6 @@ i.e. a \ty{Type}-indexed type family that describes which types can be used in
 the primitives for \fn{fromEditor} and \fn{toEditor} we are about to define.
 
 \begin{figure}[H]
-\caption{Definition of the \ty{HasEditorPrim} predicate in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{data} \ty{HasEditorPrim} : \ty{Type} -> \ty{Type} \kw{where}
   \dt{HasTT}        : \ty{HasEditorPrim} \ty{TT}
@@ -383,20 +379,21 @@ the primitives for \fn{fromEditor} and \fn{toEditor} we are about to define.
   \dt{HasFunDefn}   : \ty{HasEditorPrim} (\ty{FunDefn} \ty{TT})
   \dt{HasFunClause} : \ty{HasEditorPrim} (\ty{FunClause} \ty{TT})
 \end{Verbatim}
+\caption{Definition of the \ty{HasEditorPrim} predicate in Idris.}
 \end{figure}
 
 Now we can use the predicate \ty{HasEditorPrim} to define our two new
 \Elab\ primitives:
 
 \begin{figure}[H]
-\caption{New \Elab\ primitives for serialization and deserialization that depend on \ty{HasEditorPrim}.}
-\label{code:newElabPrims}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{prim__fromEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\}
                  -> \ty{SExp} -> \ty{Elab} \bn{a}
 \fn{prim__toEditor}   : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\}
                  -> \bn{a} -> \ty{Elab} \ty{SExp}
 \end{Verbatim}
+\caption{New \Elab\ primitives for serialization and deserialization that depend on \ty{HasEditorPrim}.}
+\label{code:newElabPrims}
 \end{figure}
 
 Notice that their first argument is the predicate \ty{HasEditorPrim} applied to
@@ -409,12 +406,12 @@ Using these two primitives, the \ty{Editorable} implementation definitions for
 the core language types all look alike:
 
 \begin{figure}[H]
-\caption{\ty{Editorable} implementation for \TT, that depends on the new \Elab\ primitives.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{implementation} \ty{Editorable} \ty{TT} \kw{where}
   \fn{fromEditor} \bn{x} = \fn{prim__fromEditor} \bn{x}
   \fn{toEditor} \bn{x} = \fn{prim__toEditor} \bn{x}
 \end{Verbatim}
+\caption{\ty{Editorable} implementation for \TT, that depends on the new \Elab\ primitives.}
 \end{figure}
 
 We now know what primitive we want to have and we know what we want it to do.
@@ -445,11 +442,11 @@ checks it during type-checking.  We explain its implementation in
 \autoref{sec:extCheck}.
 
 \begin{figure}[H]
-\caption{Type declaration for the \fn{toy} editor action we want to define.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%editor}
 \fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}
 \end{Verbatim}
+\caption{Type declaration for the \fn{toy} editor action we want to define.}
 \end{figure}
 
 When used before the type declaration of a function, Idris makes sure during
@@ -506,7 +503,6 @@ To illustrate how it works in reality, let's finish the \fn{toy} editor action
 we started above.
 
 \begin{figure}[H]
-\caption{Implementation of the \fn{toy} action in Idris.}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \kw{%editor}
 \fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}
@@ -516,6 +512,7 @@ we started above.
     \kw{`(}\ty{Nat}\kw{)} => \fn{pure} \bn{t}
     _ => \fn{fail} \dt{[]}
 \end{Verbatim}
+\caption{Implementation of the \fn{toy} action in Idris.}
 \end{figure}
 
 Here is what we expect from this \Elab\ action: we will pass it two arguments:
@@ -527,8 +524,6 @@ To be able to call this editor action from Emacs, we will have to write a bit
 of Emacs Lisp, which can be seen in \autoref{code:elispToy}
 
 \begin{figure}[ht]
-\caption{Necessary Emacs Lisp code to run the \fn{toy} action.}
-\label{code:elispToy}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Emacs Lisp}}, labelposition=topline]
 (\kw{defun} \fn{idris-elab-hole-arg} (\bn{action} \bn{args})
   \dt{"Run and replace the hole with the result"}
@@ -550,6 +545,8 @@ of Emacs Lisp, which can be seen in \autoref{code:elispToy}
     (\fn{idris-elab-hole-arg} \dt{"toy"}
       `(,(\fn{idris-name-at-point}) ,\bn{term}))))
 \end{Verbatim}
+\caption{Necessary Emacs Lisp code to run the \fn{toy} action.}
+\label{code:elispToy}
 \end{figure}
 
 The first function, \fn{idris-elab-hole-arg}, is a general function that can be
@@ -615,14 +612,14 @@ there is an implicit argument in the beginning that has the type
 \texttt{*} in Haskell and \texttt{Set} in Agda, but with a caveat:
 Haskell's \texttt{*} has the type \texttt{*}~\cite{eisenberg}, while Agda has universe
 polymorphism and Idris has cumulativity. This means Agda and Idris manage to
-avoid Girard's paradox, but Haskell does not even attempt that.}
+avoid Girard's paradox, but Haskell chooses not to attempt that.}
 
 The problem with this is that, the editor has to tell the compiler what type of
 result we want to get at the end. We do not yet have a way to communicate a
 value of the type \ty{Type} between the editor and the compiler, i.e. we cannot
 define an \Editorable\ implementation for \ty{Type} in Idris itself, because
 Idris does not allow us to pattern match on types, since that breaks
-parametricity and creates problems with type erasure~\cite{universePat}.
+parametricity and creates problems with type erasure~\cite{powerOfPi, genericDep}.
 We will not explore adding such an \Editorable\ implementation as a primitive.
 We will instead disallow polymorphic editor actions.\footnote{We leave
 polymorphic editor actions to future work. We argue that monomorphic editor

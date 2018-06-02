@@ -29,7 +29,7 @@ elaborator reflection extends Idris with a primitive monad
 \Elab{}. Just as values in \IO{} describe effectful programs to be
 executed by the run-time system, \Elab{} actions describe effectful
 programs to be run during elaboration.
-\todo{insert ref to lean paper elsewhere}
+% \todo{insert ref to lean paper elsewhere}
 
 We have extended Idris's implementation of elaborator reflection with
 new primitives that enable it to be used to construct \emph{editor
@@ -44,10 +44,11 @@ users who were previously stuck with whatever the developers provided
 are now empowered to make not only their language, but also their
 environment, their own.
 
-\subsection*{Contributions}
+% \subsection*{Contributions}
 
 We make the following contributions in this paper:
-\begin{itemize}
+
+\begin{itemize}[topsep=0pt, leftmargin=*]
 \item We explore the features that are necessary to use
   \mbox{elaborator reflection} to implement editor actions.
 \item We describe a concrete realization of this design, and the
@@ -59,9 +60,10 @@ We make the following contributions in this paper:
   program.
 \item We demonstrate that editor actions written in Idris are
   sufficently powerful to replace parts of implementation by
-  reimplementing a feature that constructs an initial implementation
-  of a function, based on its signature.
+  reimplementing a feature that constructs initial implementations of
+  functions, based on their type signatures.
 \end{itemize}
+%there's space for two more lines on the first page
 
 
 \subsection{Motivating Example}

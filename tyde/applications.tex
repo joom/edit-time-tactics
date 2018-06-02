@@ -12,8 +12,6 @@ without implicit arguments or interface constraints, using edit-time tactics.
 The Idris code we need to write is in \autoref{code:addClause}.
 
 \begin{figure}[ht]
-\caption{Implementation of the edit-time tactic for ``add clause''.}
-\label{code:addClause}
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{collectTypes} : \ty{TT} -> (\ty{List} \ty{TT}, \ty{TT})
 \fn{collectTypes} (\dt{Bind} _ (\dt{Pi} \bn{ty} _) \bn{t}) =
@@ -36,6 +34,8 @@ The Idris code we need to write is in \autoref{code:addClause}.
      \kw{let} \bn{rhs} = \dt{Bind} \bn{holeName} (\dt{GHole} \bn{retTy}) (\dt{V} \dt{0})
      \fn{pure} (\bn{MkFunClause} \bn{lhsTyped} \bn{rhs})
 \end{Verbatim}
+\caption{Implementation of the editor action for ``add clause''.}
+\label{code:addClause}
 \end{figure}
 
 The \fn{collectTypes} function we write in Idris is very similar to the one we
@@ -49,10 +49,7 @@ normalize the type, and get its components
 using \fn{collectTypes}.
 We name the list of input types \bn{argTys}, and the output type \bn{retTy}
 For each of member of \bn{argTys}, we generate a new name using
-\fn{fresh}.\footnote{\fn{fresh} is defined in Hezarfen, not in a standard
-library. The standard way of creating fresh names is \fn{gensym}, but we wrote
-wrapper function \fn{fresh} that does not generate \dt{MN}, and gives variables
-readable names, usually one-letter.} We later use these names and make them
+\fn{fresh}. We later use these names and make them
 into variable terms, using \dt{Var}, and create a function application using
 all of these names. This application is supposed to represent the left-hand
 side in our final definition. The right-hand side is a hole term that has the
@@ -117,12 +114,12 @@ helps us when the built-in proof search mechanism does not suffice.
 % represent the proof rules as manipulations of the goal type.
 
 % \begin{figure}[H]
-% \caption{Definitions of \ty{Context} and \ty{Sequent} for Hezarfen.}
-% \label{code:hezarfenTypes}
 % \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 % \kw{data} \ty{Context} = \dt{Ctx} (\ty{List} (\ty{TTName}, \ty{Raw})) (\ty{List} (\ty{TTName}, \ty{Raw}))
 % \kw{data} \ty{Sequent} = \dt{Seq} \ty{Context} \ty{Raw}
 % \end{Verbatim}
+% \caption{Definitions of \ty{Context} and \ty{Sequent} for Hezarfen.}
+% \label{code:hezarfenTypes}
 % \end{figure}
 
 % A context is two lists of pairs that consist of names mapped to \Raw\ terms
@@ -144,8 +141,6 @@ helps us when the built-in proof search mechanism does not suffice.
 % But in Hezarfen's source code, this rule is written as in \autoref{code:hezarfenTypes}.
 
 % \begin{figure}[H]
-% \caption{The ``\ty{Either} implies'' case in Hezarfen}
-% \label{code:hezarfenTypes}
 % \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 % \fn{breakdown'} : \ty{Sequent} -> \ty{Elab} \ty{Tm}
 % \fn{breakdown'} \bn{goal} = \kw{case} \bn{goal} \kw{of}
@@ -161,6 +156,8 @@ helps us when the built-in proof search mechanism does not suffice.
 %                         \kw{\`{}(}\dt{Right} {\bn{a}=~\bn{d}} {\bn{b}=~\bn{e}} ~(\dt{Var} \bn{l2})\kw{)})))
 %             !(\fn{breakdown} \dt{False} \bn{newgoal})
 % \end{Verbatim}
+% \caption{The ``\ty{Either} implies'' case in Hezarfen}
+% \label{code:hezarfenTypes}
 % \end{figure}
 
 % Understanding this code fully is not necessary; our goal is to give the greater
@@ -189,7 +186,6 @@ helps us when the built-in proof search mechanism does not suffice.
 % simplification steps is given in \autoref{code:reduce}.
 
 % \begin{figure}[H]
-% \caption{Rudimentary implementation of \fn{reduce} in Hezarfen.}
 % \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 % \fn{reduce} : \ty{Raw} -> \ty{Elab} \ty{Raw}
 % \fn{reduce} \fn{t} = \kw{case} \bn{t} \kw{of}
@@ -206,6 +202,7 @@ helps us when the built-in proof search mechanism does not suffice.
 %   \dt{RApp} \bn{t1} \bn{t2} => \fn{pure} \fn{$} \dt{RApp} !(\fn{reduce} \bn{t1}) !(\fn{reduce} \bn{t2})
 %   _ => \fn{pure} \bn{t}
 % \end{Verbatim}
+% \caption{Rudimentary implementation of \fn{reduce} in Hezarfen.}
 % \end{figure}
 
 % In the full implementation, we do more complex simplifications, such as

@@ -35,26 +35,26 @@ We leave that for future work.  However, even without proof simplification,
 edit-time tactics still could be a last resort solution to long compile times
 for tactics.
 
-\subsubsection{Writing an editor action frontend in Idris}
+% \subsubsection{Writing an editor action frontend in Idris}
 
-We explained in \autoref{sec:introduction} that this paper focuses on writing
-the backend of an editor action in Idris, and that we still had to write some
-Emacs Lisp (if we are using Emacs). However, Idris supports many different
-code generation targets~\cite{idriscodegen} seamlessly.
+% We explained in \autoref{sec:introduction} that this paper focuses on writing
+% the backend of an editor action in Idris, and that we still had to write some
+% Emacs Lisp (if we are using Emacs). However, Idris supports many different
+% code generation targets~\cite{idriscodegen} seamlessly.
 
-For example, since compiling to JavaScript is built-in, we can use JavaScript
-code generation to write the editor interaction frontend for Visual Studio Code
-and Atom.
+% For example, since compiling to JavaScript is built-in, we can use JavaScript
+% code generation to write the editor interaction frontend for Visual Studio Code
+% and Atom.
 
-There are also experimental projects on compiling Idris to Emacs
-Lisp\footnote{Steven Shaw's work on compiling Idris to Emacs Lisp:
-\url{http://github.com/steshaw/idris-elisp}} and VimL
-(Vimscript)\footnote{Oskar Wickstr\"om and Soham Chowdhury's work on
-compiling Idris to VimL:
-\url{https://github.com/owickstrom/idris-vimscript}}. These projects are not
-mature enough yet, but we believe they have the potential to inspire different
-applications of metaprogramming, especially if the Idris modes of these editors
-are written in Idris via their respective code generation targets.
+% There are also experimental projects on compiling Idris to Emacs
+% Lisp\footnote{Steven Shaw's work on compiling Idris to Emacs Lisp:
+% \url{http://github.com/steshaw/idris-elisp}} and VimL
+% (Vimscript)\footnote{Oskar Wickstr\"om and Soham Chowdhury's work on
+% compiling Idris to VimL:
+% \url{https://github.com/owickstrom/idris-vimscript}}. These projects are not
+% mature enough yet, but we believe they have the potential to inspire different
+% applications of metaprogramming, especially if the Idris modes of these editors
+% are written in Idris via their respective code generation targets.
 
 \subsubsection{Universe encoding}
 

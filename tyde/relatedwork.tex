@@ -11,9 +11,7 @@ among the capabilities of the \Elab\ monad in Idris.
 However, there are significant differences;
 quotations in Template Haskell return values in the \ty{Q} monad, and Template
 Haskell does not try to reflect the elaboration infrastructure of
-Haskell.\footnote{However, Haskell metaprogramming using the GHC core language
-has been discussed in the GHC developers mail list, with credit to Idris:
-\url{http://mail.haskell.org/pipermail/ghc-devs/2015-November/010402.html}}
+Haskell.
 Neither does it hold an internal proof state that can be changed by monadic
 actions, nor it does try to provide an alternative way to implement tactics in
 Haskell.\footnote{That being said, Siva Somayyajula has a rudimentary

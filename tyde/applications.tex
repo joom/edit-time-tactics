@@ -1,6 +1,6 @@
 \section{Applications} \label{sec:applications}
 
-\subsection{A tactic to replace the built-in ``add clause'' action}\label{sec:addClause}
+\subsection{Reimplementing the built-in ``add clause'' action}\label{sec:addClause}
 
 We have seen in \autoref{sec:introduction} how the ``Add initial match clause
 to type declaration'' editor action works. When the cursor is on the type
@@ -85,7 +85,7 @@ In this section, we describe the tactic Hezarfen\footnote{ The name is
   pronounced like ``has are fan'', and it means
     polymath in Turkish.  Tactic source code is available at
     \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
-propositional logic theorems.\footnote{Similar to Coq's \texttt{tauto} tactic.}
+propositional logic theorems, similar to Coq's \texttt{tauto} tactic.
 This tactic will be based on Dyckhoff's LJT~\cite{ljt} and its Haskell
 implementation Djinn~\cite{djinn}, which generates Haskell expressions
 that have a given type.

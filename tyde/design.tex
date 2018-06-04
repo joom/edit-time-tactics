@@ -1,152 +1,40 @@
 \section{Design}\label{sec:design}
 
-Our goal is to allow users to write custom editor actions using
-elaborator reflection.
-The editor and the compiler have to communicate to do that; the editor must
-send the name of the action and the necessary information, and the
-compiler should then send the result back.
-In this chapter, we will look at how the built-in editor actions work, and then
-see what kind of restrictions this brings, and how this shapes the design of
-edit-time tactics.
+When the user invokes an editor action, the editor has to tell the Idris
+compiler what to run. The editor and the compiler run in different processes,
+hence for every interaction, the editor has to send a message to the compiler,
+and the compiler has to send a message back to the editor.
+These messages are formatted in Lisp-style \sexp{}s \cite{mccarthy}.
 
-\subsection{Communication}\label{sec:communication}
+The \Elab{} monad in Idris primitively keeps track of a special kind of state
+involving a term satisfying a goal and new declarations generated as
+side effects during elaboration.
+These elaborator reflection scripts have the type \mbox{\ty{Elab ()}}, since the
+desired metaprogramming effects are captured by the special state, there is
+nothing interesting to return.
+However, when \Elab{} scripts are used as editor actions, they should be able
+to return any kind of data depending on what the editor action needs to send
+back to the editor.
+If an editor action needs to send back an expression to the editor, then the
+action should have the return type \mbox{\ty{Elab TT}}, where \ty{TT} is the type of
+terms in Idris's core language.
+Similarly if a user needs to define an action that creates a function definition,
+then the action that does that should have the return type \mbox{\ty{Elab FunDefn}},
+where \ty{FunDefn} is the type of function definitions in the core language.
+Alternatively, for a simple editor action that only needs to send some number back
+to the editor, the return type should be \mbox{\ty{Elab Nat}}, where \ty{Nat} is the
+type of natural numbers.
 
-The current Idris implementation\footnote{This paper is using Idris 1.2.0.} of
-the editor interaction mode is a part of the Idris compiler, and is written in
-Haskell. The editor runs an instance of the \texttt{idris} executable with and
-communicates with it via S-expressions~\cite{mccarthy}.
-
-Let's see how exactly this communication happens for existing editor actions.
-Suppose we have the following piece of code, which we will complete to the
-height function on binary trees.
-
-\begin{Verbatim}
-\IdrisFunction{height} : \IdrisType{Tree} \bn{a} -> \IdrisType{Nat}
-\end{Verbatim}
-
-The next step is to add the initial function clause.
-When we place the cursor on \fn{height} and run the action to add the initial
-function clause, the editor sends the message \mt{((:add-clause 4 "height") 8)}
-to the compiler, after doing the necessary
-computation, the compiler responds with the message \mt{(:return (:ok "height t1 = ?height\_rhs") 8)}
-
-Let's look at how these messages are formed. The built-in add clause command
-needs to know the line number after which we are adding a clause, which is
-\texttt{4}, and the name of the function we are adding a clause for, which is
-\fn{height}.
-Also, for communication purposes, we require that messages have unique IDs,
-which is what the number \texttt{8} we have at the end of the message is.
-Observe that the response also carries the same number.
-
-The response contains \texttt{:ok}, which means the clause adding succeeded,
-and then a string that contains a line of code.
-When the editor receives that, it adds this new code to the next
-line. Note that that last step is done by the front-end of the editor
-interaction mode, i.e. in Emacs Lisp if we are in Emacs. Now we have
-
-\begin{Verbatim}
-\IdrisFunction{height} : \IdrisType{Tree} \bn{a} -> \IdrisType{Nat}
-\IdrisFunction{height} \IdrisBound{t1} = \hole{height_rhs}
-\end{Verbatim}
-
-The next step is to look at the possible cases of the tree, i.e. a
-case-splitting action.  When we place the cursor on \bn{t1} and run the
-case-splitting action, the compiler sends \mt{((:case-split 5 "t1") 11)} and receives
-\begin{Verbatim}
-(:return (:ok
-  "height Empty = ?height_rhs_1{\textbackslash}n
-   height (Node x t1 t2) = ?height_rhs_2{\textbackslash}n") 11)
-\end{Verbatim}
-
-The built-in case-split command needs to know the line number on which we are
-case-splitting, which is \texttt{5}, and the name of the pattern variable we are
-splitting, which is \bn{t1}.  The response contains \texttt{:ok}, which means
-the case-splitting succeeded, and then a string that contains two lines split
-by the new line character. When the editor receives this information, it
-replaces the line the cursor was on before with the new code it received.
-
-We have now seen how exactly the current editor action communication between
-the editor and the compiler works through S-expressions.
-Now we want to introduce an S-expression format that can capture \emph{any} of
-these commands: we want to generalize the ones we have seen so far, so that we
-can use that generalization when we call \Elab\ actions from the editor.
-
-Suppose we have an \Elab\ action \mt{\fn{prover} : \ty{TTName} -> \ty{Elab}
-\ty{TT}}, which takes a hole name, and gives back a \TT\ term in the \Elab\
-monad. As you can tell from the name \fn{prover}, we intend this action to
-inquire the type of the hole and then give a proof term.
-We will see in detail in \autoref{sec:hezarfen} how this tactic is
-implemented. For now let's only look at how it is used.
-Let's try to prove a simple proposition with this tactic.
-
-\begin{Verbatim}
-\fn{f} : \ty{Either} \ty{Unit} \ty{Void}
-\fn{f} = \hole{q}
-\end{Verbatim}
-
-When we place the cursor on \hole{q} and tell the editor to run the \fn{prover}
-tactic, we have to convey a couple things to the compiler: We have to tell that
-we want to run an \Elab\ action named \fn{prover}, and we are running this on
-the hole \hole{q}, and where exactly the cursor is (in line and column numbers)
-when we run this editor action.
-We can achieve this by sending \mt{((:elab-edit "prover" '("q") 21 5) 22)}.
-Then we expect to receive a response like \mt{(:return (:ok "Left ()") 22)}.
-
-The editor tells the compiler that we want to run an \Elab\ action named
-\fn{prover}. But the actions we may want to run take arguments, therefore we
-pass a list S-expression \texttt{'("q")} that corresponds to the arguments
-\fn{prover} takes. The editor also tells the compiler where the cursor was when
-the user called the editor action, in this case \mt{21} is the line number and
-\mt{5} is the column number. Remember from the previous communications that the
-last number, which is \mt{22} here is the communication ID.
-
-In the response we get from the compiler, we get a piece of code that is
-supposed to replace the hole. In \hyperref[sec:types]{the next subsection}, we
-will discuss what determines the kind of S-expression we should send and
-receive for a given type.
-
-\subsubsection{Types of editor actions}\label{sec:types}
-
-Users of our work will write \Elab\ actions that will then be called from the
-editor via S-expressions that are sent to the compiler. We outlined above that
-in the S-expression, we need to pass the arguments of the specific
-\Elab\ action we want to call. Since we have to be able to send the arguments
-in an S-expression and also send the result back in another S-expression, we
-have limits on what kind of arguments an S-expression can take.
-In other words, all arguments and the result of an \Elab\ editor action
-have to serializable and deserializable.
-
-Since communication is done via S-expressions, we need to reflect the type of
-\mbox{S-expressions} to Idris.
-
-\begin{figure}[H]
-\begin{Verbatim}
-\kw{data} \ty{SExp} : \ty{Type} \kw{where}
-  \dt{SExpList} : \ty{List} \ty{SExp} -> \ty{SExp}
-  \dt{StringAtom} : \ty{String} -> \ty{SExp}
-  \dt{BoolAtom} : \ty{Bool} -> \ty{SExp}
-  \dt{IntegerAtom} : \ty{Integer} -> \ty{SExp}
-  \dt{SymbolAtom} : \ty{String} -> \ty{SExp}
-\end{Verbatim}
-\caption{The reflected type \ty{SExp} in Idris.}
-\label{code:definitionSExp}
-\end{figure}
-
-An S-expression is either an atom of string, boolean, integer, or symbol (such
-as \texttt{:example-symbol}), or a list of S-expressions.
-For example, the S-expression \texttt{'("q")} will be represented in Idris as
-\mbox{\dt{SExpList [StringAtom "q"]}}.
-
-Going back to the serialization problem, for the argument and return types or
-our \Elab\ editor actions, we should specify how they should be converted to
-\ty{SExp}s.  Defining certain functions for a given type sounds like the
-perfect task for Idris interfaces.
-
-Therefore, we define the interface \ty{Editorable} in Idris, which tells us
-how to serialize a given type into an \ty{SExp} and how to deserialize it.
-In \autoref{ssec:usingEditorable}, we will describe how implementations for
-the \ty{Editorable} interface will be used by the compiler during the
-communication between the editor and the compiler.
+The problem with allowing any return type within \Elab{} is that the compiler
+does not know how to represent values of arbitrary types as \sexp{}s.
+In order to give users the power to define how values of a given types should
+be represented as \sexp{}s, we define a type class called
+\Editorable{},\footnote{Haskell's type classes and type class instances are
+respectively called \emph{interface}s and \emph{implementation}s in Idris. We
+will use the Haskell terminology in this paper.}
+which requires specifying how an \sexp{} should be deserialized into a
+value of a specific type, and how values of that specific type should be
+serialized into \sexp{}s.
 
 \begin{figure}[H]
 \begin{Verbatim}
@@ -154,224 +42,121 @@ communication between the editor and the compiler.
   \fn{fromEditor} : \ty{SExp} -> \ty{Elab} \bn{a}
   \fn{toEditor} : \bn{a} -> \ty{Elab} \ty{SExp}
 \end{Verbatim}
-\caption{Definition of the \ty{Editorable} interface.}
+\caption{Definition of the \Editorable{} type class.}
 \label{code:editorable}
 \end{figure}
 
-We have two functions \fn{fromEditor} and \fn{toEditor} that must be defined
-for a type that we want to make serializable.
-\fn{fromEditor} allows us to deserialize a given S-expression into a value of the type \bn{a}.
-\fn{toEditor} allows us to serialize a value of the type \bn{a} into an S-expression.
-Notice that both of these functions return a value in the \Elab\ monad.
-There are a few reasons for this:
-\begin{enumerate}
-  \item The \Elab\ monad captures failure. The \fn{fromEditor}
-    function, which parses S-expressions, should fail if we are
-    given an S-expression that is ill-formed for the type \bn{a}.
-  \item The \Elab\ monad has an implementation for the \ty{Alternative}
-    interface, which allows us to recover from failure if we need to.
-  \item When an \Elab\ action fails with an explicit use of
-    \mt{\fn{fail} : \ty{List ErrorReporPart} -> \ty{Elab} \bn{a}},
-    the user can give a detailed account of why it failed through the pretty
-    printed errors. This is useful for giving graceful error messages to the
-    user when a custom editor action fails.
-  \item Users may want to limit both serialization and deserialization
-    to some of the constructors of a type. Being able to fail for certain
-    constructors gives the users flexibility.
-  \item The reason that we specifically need \Elab\ instead of any other monad that can
-    fail, is that users may want to type check or normalize terms, or look up
-    information about existing types and functions during serialization and
-    deserialization. This is only available in the \Elab\ monad.
-\end{enumerate}
-
-\subsubsection{\ty{Editorable} implementations in Idris}
-
-Now that we have justified why putting \fn{fromEditor} and \fn{toEditor}
-in the \Elab\ monad is necessary,
-let's see how we can define an \ty{Editorable} implementation for \ty{String}.
+Then whenever users want to inform the compiler about the \sexp{}
+representation of values of a type, they have to define an instance of the
+\Editorable{} type class.
+For instance, values of primitive types such as \ty{String} can be represented
+as atom \sexp{}s.
 
 \begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\begin{Verbatim}
 \kw{implementation} \ty{Editorable} \ty{String} \kw{where}
   \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{pure} \bn{s}
-  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[]}
+  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
   \fn{toEditor} \bn{x} = \fn{pure} (\dt{StringAtom} \bn{x})
 \end{Verbatim}
-\caption{\ty{Editorable} implementation for the type \ty{String}.}
+\caption{\ty{String} instance of the \ty{Editorable} type class.}
+\label{code:editorableString}
 \end{figure}
 
-The definition of \fn{fromEditor} above tells us that if an S-expression is a
-string atom, then we know how to get a \ty{String} from it, otherwise we fail.
-On the other hand, \fn{toEditor} never fails; if we have a \ty{String} we can
-always construct a \dt{StringAtom} and put it in the
-\Elab\ monad.\footnote{Remember that \Editorable\ is a \ty{Monad}, which means
-it also has an \ty{Applicative} implementation, therefore we can use \fn{pure}
-instead of \fn{return}, and this is the preferred way in Idris.}
-
-Now, for a more complex example, let's look at \autoref{code:editorableList} to
-see we can make \ty{List}s \ty{Editorable}.
-
-\begin{figure}[ht]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\kw{implementation} \ty{Editorable} \bn{a}
-            => \ty{Editorable} (\ty{List} \bn{a}) \kw{where}
-  \fn{fromEditor} (\dt{SExpList} \bn{xs}) =
-    \fn{traverse} \fn{fromEditor} \bn{xs}
-  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[]}
-  \fn{toEditor} \bn{xs} =
-    \dt{SExpList} \fn{<$>} \fn{traverse} \fn{toEditor} \bn{xs}
-\end{Verbatim}
-\caption{\ty{Editorable} implementation for the \ty{List} type.}
-\label{code:editorableList}
-\end{figure}
-
-The definition of \fn{fromEditor} for lists tells us that if we have a list
-S-expression, which holds an Idris list \bn{xs} of
-S-expressions inside, we can apply \fn{fromEditor} to each of the S-expressions
-in \bn{xs} and deserialize them all, and if they all succeed we can make a list
-from their results and return that.
-Similarly, the definition of \fn{toEditor} for lists tells us that if we have an
-actual list \bn{xs}, we can \fn{traverse} the list to serialize them all, and
-if they all succeed, we can make an S-expression out of the serialized
-elements.
-
-Now, let's look at \autoref{code:ttnameEditorable} to see how we can serialize and
-deserialize one of the types that we expect to use the most in our editor
-actions, the type of names, \ty{TTName}.
-
-\TODO{I'm not sure if we need to give this implementation definition}
-
-\begin{figure}[ht]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\kw{implementation} \ty{Editorable} \ty{TTName} \kw{where}
-  \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{namify} \bn{s}
-    \kw{where}
-      \fn{namify} : \ty{String} -> \ty{Elab} \ty{TTName}
-      \fn{namify} \bn{s} =
-        \kw{case} \fn{reverse} (\fn{map} \fn{pack}
-               (\fn{splitOn} \dt{'.'} (\fn{unpack} \bn{s}))) \kw{of}
-          \dt{[]} => \fn{fail} \dt{[]}
-          \dt{[}\bn{x}\dt{]} => \fn{pure} (\dt{UN} \bn{x})
-          (\bn{x} \dt{::} \bn{xs}) => \bn{pure} (\dt{NS} (\dt{UN} \bn{x}) \bn{xs})
-  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[]}
-
-  \fn{toEditor} \bn{n} = \dt{StringAtom} \fn{<$>} \fn{stringify} \bn{n}
-    \kw{where}
-      \fn{stringify} : \ty{TTName} -> \ty{Elab} \ty{String}
-      \fn{stringify} (\dt{UN} \bn{x}) = \fn{pure} \bn{x}
-      \fn{stringify} (\dt{NS} \bn{x} \dt{[]}) = \fn{stringify} \bn{x}
-      \fn{stringify} (\dt{NS} \bn{x} \bn{xs}) =
-        \fn{pure} (\fn{concat} (\fn{intersperse} \dt{"."}
-               (\fn{reverse} (\dt{""} \fn{::} \bn{xs})))
-                \fn{++} !(\fn{stringify} \bn{x}))
-      \fn{stringify} _ = \fn{fail} \dt{[]}
-\end{Verbatim}
-\caption{\ty{Editorable} implementation for the type \ty{TTName}.}
-\label{code:ttnameEditorable}
-\end{figure}
-
-This is a long code excerpt, and you do not have to follow the code entirely.
-We will summarize the code below, but this excerpt should demonstrate that
-we can define one of the most pivotal parts of serialization in Idris itself,
-without writing any Haskell code.
-
-Here is an overview of what the code in \autoref{code:ttnameEditorable} does:
-when we want to deserialize a name, we require it to be a \dt{StringAtom}, and
-then we split the string \bn{s} on the dots it contains. If there is no dot
-inside, we make it a \ty{TTName} without a namespace using \dt{UN}, if there
-are dots inside, we make it a \ty{TTName} with a namespace using \dt{NS}.
-Similarly, if we have a \ty{TTName}, we check if we are given a namespace by
-looking at the constructors of \ty{TTName}. If we are, then we make a
-\ty{String} the name with dots in between, if we are not, then we merely make
-\ty{String} from what we have.
-For machine generated names and special names, we just fail.
-
-Before we move on to the primitive \ty{Editorable} implementations,
-we should point out that we have not made any function type \ty{Editorable}.
-One can easily come up with a way to serialize pure and total functions with
-finite domains by listing the results of the function for each of the inputs.
-Alternatively, since editor actions are run interactively, we do have access to
-the source code of functions, so one could explore serialization of functions
-more seriously, but we will not entertain this thought in this paper.
-Remember that there are no \ty{Show} implementations for functions either, for
-the same reason.
-
-\subsubsection{Primitive \ty{Editorable} implementations}\label{ssec:primitiveEditorableDesign}
-
-The existing elaborator reflection system is enough to define \ty{Editorable}
-implementations for some of the most common types in Idris.
-However, communication of Idris terms between the editor and the compiler is
-not straightforward. The main reason for that there is a colossal gap between
-the type of terms that our custom editor actions use, and the Idris terms we
-write in our editor.
-This gap is because Idris terms are written using the high-level surface
-language, and \Elab\ actions deal with the core language terms. Therefore when
-we send the code for a term from the editor to the compiler, we will send a
-code in the surface syntax. Similarly, when the editor receives a piece of code
-from the compiler, that also has to be in the surface syntax. This is because
-when the editor takes some code from the file, or puts some code back to the
-file, it does not know how to turn that into a core language term.
-This conversion, also called elaboration, can only be done in the Idris compiler.
-
-If the editor can only deal with surface-syntax terms, and the \Elab\ actions
-can only work with core language terms, the system we are designing must take
-care of the conversion between the two.
-Specifically, the \ty{Editorable} interface that we
-\hyperref[code:editorable]{defined above} can be made responsible for this.
-
-When the S-expression received by the compiler contains a string that is
-supposed to be a piece of Idris code, \fn{fromEditor} should parse the string
-into a surface-syntax code, and then elaborate that into a core language term.
-Only after that can we run the \Elab\ editor action that we want to execute.
-
-Similarly, when we finish running the \Elab\ action, \fn{toEditor} should
-delaborate\footnote{\emph{Delaboration} is the name in the Idris compiler for
-converting core language code to surface syntax code. It is meant to be the
-opposite of elaboration.} the core language code to surface-syntax code, and
-then it should pretty print it as a string. The resulting string can be sent
-back from the compiler to the editor in an S-expression.
-
-% In \autoref{ssec:reflectedTypes}, we talked about the core language types that
-% are reflected in Idris.  We have already seen the definitions of the types
-% \ty{TT} and \ty{TTName}, and we have touched upon \ty{TyDecl}, \ty{DataDefn},
-% \ty{FunDefn}, and \ty{FunClause}.
-% We will not concern ourselves with \ty{Raw} right now, since solving the
-% problem for typed core language terms suffices to solve the same problem with
-% untyped one; we can always type-check a \Raw\ term into a \TT, or forget the
-% type of a \TT\ term into a \Raw\ one.
-
-Notice that we have already given an \ty{Editorable} implementation of
-\ty{TTName} \hyperref[code:ttnameEditorable]{above}, since names in the
-surface syntax and core language are the same. Elaboration can take care of
-namespace resolution, but that can be achieved with \Elab\ tactics as well.
-
-However, for the other core language types, we should define \ty{Editorable}
-implementations. As we discussed above, the editor can only send and receive
-pieces of code in the surface syntax, which means we have to do parsing,
-elaboration, delaboration and pretty printing in our \ty{Editorable}
-implementation.
-It is not possible to write this implementation in Idris,
-because Idris does not reflect the surface syntax, or parsing or pretty
-printing with it.
-Therefore, we will hard-code the implementations of \ty{TT}, \ty{TyDecl},
-\ty{DataDefn}, \ty{FunDefn}, and \ty{FunClause} into the compiler,
-which allows us to do \emph{direct reflection}~\cite{barzilayphd} by making use
-of the already existing compiler implementations of the steps we listed above.
-
-To achieve this, we will have to extend the existing \Elab\ monad with
-primitives that go through the steps we mentioned above. We will have to define
-two primitives for each other those types, one for \fn{fromEditor} and one for
-\fn{toEditor}. Instead of adding two primitives for each of those types, we can
-only add two primitives and make them polymorphic, and add a constraint on what
-types it can be used for. This would save us from adding new primitives to
-\Elab\ every time we want to add a primitive \ty{Editorable} implementation.
-
-What we mean by a constraint here is a predicate on types,
-i.e. a \ty{Type}-indexed type family that describes which types can be used in
-the primitives for \fn{fromEditor} and \fn{toEditor} we are about to define.
+For values of types such as \mbox{\ty{Maybe String}},
+\mt{\dt{Just "abc"}} can be represented as \mt{(\dt{:Just "abc"})}, a list
+\sexp{} with a symbol atom as the first element and then the \sexp{}
+representation of a string, and \dt{Nothing} can be represented as
+\dt{:Nothing}. This can be generalized into all \ty{Maybe} types as follows:
 
 \begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\begin{Verbatim}
+\kw{implementation} \ty{Editorable} \bn{a}
+            => \ty{Editorable} (\ty{Maybe} \bn{a}) \kw{where}
+  \fn{fromEditor} (\dt{SExpList [SymbolAtom "Nothing"]}) =
+    \fn{pure} \dt{Nothing}
+  \fn{fromEditor} (\dt{SExpList [SymbolAtom "Just"}, \bn{x}\dt{]}) =
+    \kw{do} \bn{x}' <- \fn{fromEditor} \bn{x}
+       \fn{pure} (\dt{Just} \bn{x}')
+  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
+  \fn{toEditor} (\dt{Just} \bn{x}) =
+    \kw{do} \bn{x'} <- \fn{toEditor} \bn{x}
+       \fn{pure} (\dt{SExpList} \dt{[}\dt{SymbolAtom} \dt{"Just"}, \bn{x'}\dt{]})
+  \fn{toEditor} \dt{Nothing} =
+    \fn{pure} (\dt{SExpList [SymbolAtom "Nothing"]})
+\end{Verbatim}
+\label{code:editorableMaybe}
+\caption{\ty{Maybe} instance of the \ty{Editorable} type class.}
+\end{figure}
+
+The idea that is introduced here can be used to define an \Editorable{}
+instance for any data type that has exported constructors. Constructors that do
+not take any argument are represented as symbol atoms, and the ones that do
+take arguments are represented as a list \sexp{}, in which the first element is
+a symbol atom and the other elements represent the arguments that the
+constructor takes. We will call this the \emph{constructor-based \sexp{}
+representation} of a type.
+
+For function types like \mbox{\ty{Nat -> Nat}}, however, the \sexp{}
+representation of functions is not as clear. The same problems with
+defining a \ty{Show} instance for function types apply here \cite{showfunction},
+hence disqualifing arbitrary function types from being \sexp{} representable
+works around those issues. In other words, there is no \ty{Editorable} instance
+for arbitrary functions.
+
+The \sexp{} representations of Idris's core language types, such as \TT{} and
+\TyDecl{}, are the most interesting ones. These types mirror the internal
+representation of Idris's core language, but they are merely algebraic data
+types defined in Idris, which means one has the option to choose the
+constructor-based representation to define an \Editorable{} instance.
+Nevertheless, that representation would not be helpful to modify the code in
+the editor, since the constructor representation would just be a syntax tree of
+the core language representation of an expression. Yet users work with the
+concrete syntax, i.e.\ the actual text file that represents the code, when they
+are in the editor; when they use editor actions they expect to see concrete
+syntax put back into the file. Therefore, the editor should send and receive
+concrete syntax, not the constructor-based representation of \TT{}, which is the type
+representing the abstract syntax tree of Idris's core language, or not the
+high-level syntax tree of Idris, or anything else.
+
+On the other hand, if the compiler receives concrete syntax and needs to run \Elab{}
+actions on that, there are many missing steps in between, most important of
+which is elaboration from a high-level language to the core language.
+Similarly, if the compiler needs to send back concrete syntax after
+running \Elab{} actions, then it needs to reverse all those steps.
+In other words, there is a colossal gap between concrete syntax and the core
+language that needs to be bridged and this task can be delegated to the
+\Editorable{} type class.
+
+When the S-expression received by the compiler contains a string that is a
+piece of Idris code, i.e.\ concrete syntax, \fn{fromEditor} should parse the
+string into a high-level language term, and then elaborate that into a core
+language term. Only after that can the compiler run the \Elab\ editor action.
+Similarly, when the \Elab\ action finishes, \fn{toEditor} should convert core
+language terms into the high-level language terms, which is called
+\emph{delaboration} in Idris. Then the compiler should invoke the pretty
+printer to get concrete syntax that represents that term. The resulting string
+can be sent back from the compiler to the editor in an S-expression.
+
+Bridging this gap requires an \Editorable{} instance for \TT{} that does parsing,
+elaboration, delaboration and pretty printing. Defining such an instance in
+Idris itself is not possible with the current implementation of \Elab{}, since
+the elaborator monad in Idris does not expose these features.
+The way to work around this is to define primitive instances of \Editorable{}
+for the core language types like \TT{}, \TyDecl{} and \FunDefn{}.
+Hard-coding the \Editorable{} instances of \ty{TT}, \ty{TyDecl},
+\ty{DataDefn}, \ty{FunDefn}, and \ty{FunClause} into the compiler
+allows \emph{direct reflection}~\cite{barzilayphd} by making use
+of the already existing compiler implementations of the steps listed above.
+
+To achieve this, the existing \Elab{} monad needs to be extended with
+primitives that go through the steps mentioned above.  One \Elab{} primitive
+for \fn{fromEditor} and one for \fn{toEditor} would suffice; polymorphic
+primitives constrained by a \ty{Type}-indexed family would provide a principled
+way to manage the primitive instances of \Editorable{}.
+
+\begin{figure}[H]
+\begin{Verbatim}
 \kw{data} \ty{HasEditorPrim} : \ty{Type} -> \ty{Type} \kw{where}
   \dt{HasTT}        : \ty{HasEditorPrim} \ty{TT}
   \dt{HasTyDecl}    : \ty{HasEditorPrim} \ty{TyDecl}
@@ -382,268 +167,34 @@ the primitives for \fn{fromEditor} and \fn{toEditor} we are about to define.
 \caption{Definition of the \ty{HasEditorPrim} predicate in Idris.}
 \end{figure}
 
-Now we can use the predicate \ty{HasEditorPrim} to define our two new
-\Elab\ primitives:
+The \ty{HasEditorPrim} predicate is used to define the new \Elab{} primitives:
 
 \begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\fn{prim__fromEditor} : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\}
-                 -> \ty{SExp} -> \ty{Elab} \bn{a}
-\fn{prim__toEditor}   : \{\kw{auto} \bn{has} : \ty{HasEditorPrim} \bn{a}\}
-                 -> \bn{a} -> \ty{Elab} \ty{SExp}
+\begin{Verbatim}
+\fn{prim__fromEditor} : \ty{HasEditorPrim} \bn{a} -> \ty{SExp} -> \ty{Elab} \bn{a}
+\fn{prim__toEditor} : \ty{HasEditorPrim} \bn{a} -> \bn{a} -> \ty{Elab} \ty{SExp}
 \end{Verbatim}
-\caption{New \Elab\ primitives for serialization and deserialization that depend on \ty{HasEditorPrim}.}
+  \caption{The new \Elab\ primitives.}
 \label{code:newElabPrims}
 \end{figure}
 
-Notice that their first argument is the predicate \ty{HasEditorPrim} applied to
-the type \bn{a}, and it is an implicit argument that Idris should try to
-automatically solve. This saves us from having to pass around a constructor
-every time we want to use the primitive.
-% David's comment: why not an interface? that'd be more familiar to Haskellers
-
-Using these two primitives, the \ty{Editorable} implementation definitions for
-the core language types all look alike:
+Using these two primitives, the \Editorable{} instances for the core language
+types all look alike:
 
 \begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
+\begin{Verbatim}
 \kw{implementation} \ty{Editorable} \ty{TT} \kw{where}
-  \fn{fromEditor} \bn{x} = \fn{prim__fromEditor} \bn{x}
-  \fn{toEditor} \bn{x} = \fn{prim__toEditor} \bn{x}
+  \fn{fromEditor} \bn{x} = \fn{prim__fromEditor} \dt{HasTT} \bn{x}
+  \fn{toEditor} \bn{x} = \fn{prim__toEditor} \dt{HasTT} \bn{x}
 \end{Verbatim}
-\caption{\ty{Editorable} implementation for \TT, that depends on the new \Elab\ primitives.}
+  \caption{An \Editorable{} instance depending on the new primitives.}
 \end{figure}
 
-We now know what primitive we want to have and we know what we want it to do.
-We will discuss the implementation of the \Elab\ actions for \fn{fromEditor}
-and \fn{toEditor} in the compiler in \autoref{sec:primitiveEditorableImpl}.
 
-\subsubsection{Using \ty{Editorable} in the compiler and the \kw{\%editor} modifier}\label{ssec:usingEditorable}
-
-The motivation behind the \ty{Editorable} interface is twofold:
-\begin{enumerate}
-\item to check whether a given \Elab\ action is suitable to be used as an
-  editor action.
-\item to use the \fn{fromEditor} and \fn{toEditor} definitions to serialize
-  and deserialize data when the action is run.
-\end{enumerate}
-
-\TODO{We might want to find a more compelling \fn{toy} example. I picked the one I have below because it has more than one argument, but it doesn't do anything interesting. What example can we give that is simple enough to be implemented in a few lines, has multiple arguments, and does something interesting. Maybe we can tweak the \fn{trivial} example we have in the beginning somehow? }
-
-The first motivation means all argument and return types should have an
-\ty{Editorable} implementation. If we want to write a toy editor action
-\mt{\fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}},
-then the compiler must check if \ty{TTName}, \TT\ (from the second argument)
-and \TT\ (from the return type) are all \Editorable. If any of the argument of
-return types do not have an \Editorable\ implementation, then we should not be
-able to run the given action from the editor. In fact, to make the distinction
-clearer, we add a new function modifier syntax \kw{\%editor} to Idris, that
-checks it during type-checking.  We explain its implementation in
-\autoref{sec:extCheck}.
-
-\begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\kw{%editor}
-\fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}
-\end{Verbatim}
-\caption{Type declaration for the \fn{toy} editor action we want to define.}
-\end{figure}
-
-When used before the type declaration of a function, Idris makes sure during
-type-checking that this function's argument and return types all have an
-\Editorable\ implementation. If they do not, then the user gets a type-error
-that tells them that since they declared that \Elab\ action an editor action,
-they must provide an \Editorable\ implementation for all argument and return
-types, and the error tells them which one is missing.
-
-The second motivation for \Editorable\ allows the compiler to communicate with
-the editor via S-expressions. When the editor sends an S-expression like
-\mt{((:elab-edit "toy" '("q" "S Z") 35 5) 20)} to the
-compiler with the intent of running an \Elab\ action,
-the following steps should happen:
-\begin{enumerate}
-  \item The S-expression we are given contains the name of the \Elab\ action,
-    namely \fn{toy}. We must lookup the name in order to resolve its namespace
-    and also learn the type of the action.
-  \item We check if \fn{toy} has been marked as an editor action using
-    \kw{\%editor}. If not, we fail the editor action.
-  \item We ``collect'' the components of the type of the \Elab\ action. For
-    \fn{toy}, from the type signature
-    \mt{\ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}}
-    we obtain the component list with three members: \ty{TTName}, \TT, and
-    \Elab\ \TT.
-    Since the last one is the return type for the action, we check the number
-    of arguments we are given by the S-expression, and \mt{'("q" "S Z")}
-    has two elements, has exactly one fewer element than the component list we
-    collected above.
-  \item Observe that the argument members of the component list match the
-    arguments list S-expression one to one. The argument components for
-    \fn{toy} are \ty{TTName} and \TT, and we are given the S-expressions
-    \texttt{"q"} and \texttt{"S Z"}. If we zip these lists, we get pairs of
-    S-expressions and what type they will have when they are parsed.
-    Then, Idris parses them using the \fn{fromEditor} function for their respective
-    \Editorable\ implementations.
-  \item Then we will have a list of terms in the compiler that correspond to a
-    \ty{TTName} and a \TT.  All we have done so far was to check if \fn{toy}
-    was a valid editor action, and then to parse the inputs just so that we can
-    run \fn{toy}. The next step is to run \fn{toy}.
-  \item When we are done with that, we know we will get a term of the type \TT,
-    because \fn{toy}'s type signature ends with \texttt{\Elab\ \TT}. That means
-    we can use \fn{toEditor} from the \Editorable\ implementation of \TT, which
-    gives us an S-expression.
-  \item We can now send that S-expression back to the editor.
-\end{enumerate}
-
-\subsection{Examples in action}\label{sec:designExample}
-
-\subsubsection{Successful example}
-
-We now know how the compiler should work with the \Editorable\ interface.
-To illustrate how it works in reality, let's finish the \fn{toy} editor action
-we started above.
-
-\begin{figure}[H]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-\kw{%editor}
-\fn{toy} : \ty{TTName} -> \ty{TT} -> \ty{Elab} \ty{TT}
-\fn{toy} \bn{n} \bn{t} =
-  \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
-  \kw{case} \bn{ty} \kw{of}
-    \kw{`(}\ty{Nat}\kw{)} => \fn{pure} \bn{t}
-    _ => \fn{fail} \dt{[]}
-\end{Verbatim}
-\caption{Implementation of the \fn{toy} action in Idris.}
-\end{figure}
-
-Here is what we expect from this \Elab\ action: we will pass it two arguments:
-the first one is a name of a hole, and the second one is a core language term.
-If the type of the hole is \ty{Nat}, then we will return the term that we are
-given, otherwise we will fail.
-
-To be able to call this editor action from Emacs, we will have to write a bit
-of Emacs Lisp, which can be seen in \autoref{code:elispToy}
-
-\begin{figure}[ht]
-\begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Emacs Lisp}}, labelposition=topline]
-(\kw{defun} \fn{idris-elab-hole-arg} (\bn{action} \bn{args})
-  \dt{"Run and replace the hole with the result"}
-  (\fn{interactive})
-  (\kw{let} ((\bn{result} (\fn{car}
-    (\fn{idris-eval}
-      `(\dt{:elab-edit} ,\bn{action} ,\bn{args}
-        ,(\fn{idris-get-line-num})
-        ,(\fn{current-column}))))))
-    (\fn{save-excursion}
-      (\fn{apply} '\fn{delete-region}
-        (\fn{idris-hole-start-end}))
-      (\fn{insert} \bn{result}))))
-
-(\kw{defun} \fn{idris-toy} ()
-  \dt{"Run the toy action in editor"}
-  (\fn{interactive})
-  (\kw{let} ((\bn{term} (\fn{read-string} \dt{"Enter a term:"})))
-    (\fn{idris-elab-hole-arg} \dt{"toy"}
-      `(,(\fn{idris-name-at-point}) ,\bn{term}))))
-\end{Verbatim}
-\caption{Necessary Emacs Lisp code to run the \fn{toy} action.}
-\label{code:elispToy}
-\end{figure}
-
-The first function, \fn{idris-elab-hole-arg}, is a general function that can be
-reused by other hole-based editor actions. It takes a name of an action and a
-list, and sends them to the Idris executable, also adding the line and column
-numbers. When it gets a response, it deletes the hole that the cursor is on,
-and replaces it with the string/code that was just received from the compiler.
-
-The second function, \fn{idris-toy}, is the little piece of code that runs the
-\fn{toy} editor action we defined above. It asks the user to enter some code,
-and when they do, it uses \fn{idris-elab-hole-arg} to send to Idris a message
-that consists of the name under the cursor and that term the user just typed
-in. Notice that the name under the cursor will be parsed as a \ty{TTName}, type
-of the first argument of \fn{toy}, and the term we typed in will correspond to
-\TT, type of the second argument of \fn{toy}.
-
-Suppose we want to use this new editor action now.
-
-\begin{Verbatim}
-\fn{n} : \ty{Nat}
-\fn{n} = \hole{q}
-\end{Verbatim}
-
-We can place the cursor on \hole{q} and then run the \fn{idris-toy} function in
-Emacs, possibly through a keyboard shortcut we assign to it.
-By definition of \fn{idris-toy}, Emacs asks us to enter a term, suppose we
-write \texttt{S Z} and press enter.
-The following communication happens in the background with the compiler: In the
-background, the editor sends \mt{((:elab-edit "toy" ("q" "S Z") 35 5) 20)} to
-the compiler and receives \mt{(:return (:ok "1" nil) 20)} as a response.
-
-We send the \Elab\ action name \fn{toy} and the list of arguments as an
-S-expression. Idris sends back the result of the \Elab\ action when run with
-the arguments \hole{q} as the name, and the core language term for \dt{S Z},
-which is \mt{\dt{Prelude.Nat.S Prelude.Nat.Z}}. Since the type of our hole is
-\ty{Nat} here, \fn{toy} just returns the same term we give it, but it pretty
-prints it as \dt{1}.
-
-By the definition of \fn{idris-elab-hole-arg}, the result \dt{1} replaces the hole
-\hole{q} in the file. The resulting code is this:
-
-\begin{Verbatim}
-\fn{n} : \ty{Nat}
-\fn{n} = \dt{1}
-\end{Verbatim}
-
-% David's comment: screenshots would increase the dramatic effect here
-
-\subsubsection{What \Editorable\ precludes}\label{ssec:preclude}
-
-Suppose we wanted to write a polymorphic editor action, that merely returned its argument back.
-
-\begin{Verbatim}
-\kw{%editor}
-\fn{poly} : \bn{a} -> \ty{Elab} \bn{a}
-\fn{poly} \bn{x} = \fn{pure} \bn{x}
-\end{Verbatim}
-
-First of all, observe that the type declaration above actually is
-\mt{\{\bn{a} : \ty{Type}\} -> \bn{a} -> \ty{Elab} \bn{a}}, which means
-there is an implicit argument in the beginning that has the type
-\ty{Type}.\footnote{\ty{Type} is the type of types in Idris, similar to
-\texttt{*} in Haskell and \texttt{Set} in Agda, but with a caveat:
-Haskell's \texttt{*} has the type \texttt{*}~\cite{eisenberg}, while Agda has universe
-polymorphism and Idris has cumulativity. This means Agda and Idris manage to
-avoid Girard's paradox, but Haskell chooses not to attempt that.}
-
-The problem with this is that, the editor has to tell the compiler what type of
-result we want to get at the end. We do not yet have a way to communicate a
-value of the type \ty{Type} between the editor and the compiler, i.e. we cannot
-define an \Editorable\ implementation for \ty{Type} in Idris itself, because
-Idris does not allow us to pattern match on types, since that breaks
-parametricity and creates problems with type erasure~\cite{powerOfPi, genericDep}.
-We will not explore adding such an \Editorable\ implementation as a primitive.
-We will instead disallow polymorphic editor actions.\footnote{We leave
-polymorphic editor actions to future work. We argue that monomorphic editor
-actions suffice in almost all use cases in the editor.}
-When we try to compile \fn{poly}, we get an error that says there is no \ty{Editorable} implementation for \ty{Type}.
-
-Here is another custom editor action we want to preclude:
-
-\begin{Verbatim}
-\kw{%editor}
-\fn{funAction} : (\ty{Nat} -> \ty{Nat}) -> \ty{Elab} \dt{()}
-\fn{funAction} \bn{x} = \fn{pure} \dt{()}
-\end{Verbatim}
-
-We do not have a way to serialize and deserialize functions of the type
-\texttt{\ty{Nat} -> \ty{Nat}}, so therefore we should not allow \fn{funAction}
-to be declared an editor action.\footnote{Remember that we cannot inspect a
-function's body; we can only apply arguments to a function.}
-When we try to compile \fn{funAction}, we get an error message that says there
-is no \ty{Editorable} implementation for \mt{\ty{Nat} -> \ty{Nat}}.
-
-We have now seen the motivations behind the \Editorable\ interface and
-why we defined it this way. We have also demonstrated that this definition
-is useful for serialization and deserialization of the data used in editor
-actions, and that for the unserializable kinds of data, such as functions,
-\Editorable\ acts as a gatekeeper. In the next chapter, we will look at how
-this design is implemented in the Idris compiler in Haskell.
+% The motivation behind the \ty{Editorable} type class is twofold:
+% \begin{enumerate}
+% \item to use the \fn{fromEditor} and \fn{toEditor} definitions to serialize
+%   and deserialize data before and after the action is run.
+% \item to check whether a given \Elab\ action is suitable to be used as an
+%   editor action.
+% \end{enumerate}

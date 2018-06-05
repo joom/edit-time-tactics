@@ -110,7 +110,7 @@ constructor takes. We will call this the \emph{constructor-based \sexp{}
 representation} of a type.
 
 It is not, however, possible to use the constructor-based representation for every type.
-In particular, functions and infinite coinductive datatypes do not, in general, admit finite serializations. 
+In particular, functions and infinite coinductive datatypes do not, in general, admit finite serializations.
 
 In other cases, the constructor-based representation requires too much work to encode and decode in editors.
 For instance, Idris names have a rich structure, but users know them by their syntax rather than by their internal representation.
@@ -206,25 +206,45 @@ types all look alike; an example can be seen in figure~\ref{fig:editorablePrim}.
   \fn{fromEditor} \bn{x} = \fn{prim__fromEditor} \dt{HasTT} \bn{x}
   \fn{toEditor} \bn{x} = \fn{prim__toEditor} \dt{HasTT} \bn{x}
 \end{Verbatim}
-  \caption{An \Editorable{} instance depending on the new primitives.}\label{fig:editorablePrim}
+\caption{An \Editorable{} instance depending on the new primitives.}
+\label{fig:editorablePrim}
 \end{figure}
 
 \subsection{How the compiler uses \Editorable{} for communication}
 \label{ssec:communication}
 
-We have extended Idris's IDE protocol to support an additional message that represents an invocation of a custom editor action.
-This message includes the name of the custom action and a list of arguments, and its reply contains Idris's response.
+We have extended Idris's IDE protocol to support an additional message that
+represents an invocation of a custom editor action.
+This message includes the name of the custom action and a list of arguments,
+and its reply contains Idris's response.
 
-When a custom editor action message is received, \todo{What happens? Idris looks it up in a table of \%editor actions, maps fromEditor over the arguments, checks the arity, then calls it in Elab, then serializes the answer with toEditor, and sends it back?}
+When the editor fires up Idris in IDE mode and loads the file, then it can send
+a custom action message to Idris. If the compiler receives such a message from
+the editor, it looks up the name and type of the editor action from the
+context. From types of the arguments of the \Elab{} action, it can find the
+necessary \Editorable{} instances and use the \fn{fromEditor} definitions in them
+to parse the \sexp{}s into an Idris values. If the number of arguments in the
+action type and the argument list match, and all arguments can be parsed
+without any errors, then the compiler can run the \Elab{} action, and use
+\fn{toEditor} to serialize the output, and send it back to the editor.
 
-
-
-As an example, the editor action \fn{easy} from figures \ref{fig:motivating-example} and \ref{fig:motivating-example-exec},\todo{Connect me to the prior discussion}
-presented a simple editor action \fn{easy}, its supporting Emacs Lisp code,
-and examples that show how they work. When the user puts the cursor on
-\hole{ex1\_impl} and invokes \fn{idris-easy} in their Emacs session, Emacs sends a message to the compiler that specifies that it wants to run \fn{easy}, and provides a list of arguments, \mt{(\fn{list} \dt{"ex1\_impl"})}, which is a singleton list containing a string atom.
-\fn{easy} only takes a single argument of the type \ty{TTName}. \TODO{this is hard to write without shifting to the tutorial style - DC: I added a prototype for you!}
-
+The compiler can use \Elab{} actions whose arguments and return type has
+\Editorable{} instances as custom editor actions. The \fn{easy} action from
+figure \ref{fig:motivating-example} is an example of this, and its usage can be
+seen in figure \ref{fig:motivating-example-exec}.
+When the user puts the cursor on \hole{ex1\_impl} and invokes
+\fn{idris-easy} in their Emacs session, Emacs sends a message to the compiler
+that specifies that it wants to run \fn{easy}, and provides a list of
+arguments, \mt{(\fn{list} \dt{"ex1\_impl"})}, which is a singleton list
+containing a string atom. When Idris receives this message, it looks up the
+name \fn{easy} from the context and finds out that it has the type
+\mt{\ty{TTName} -> \ty{Elab TT}}. Therefore it looks up the \Editorable{}
+instance of \ty{TTName} and runs \fn{fromEditor} from it on \dt{"ex1\_impl"}, which
+results in the Idris name for \hole{ex1\_impl}. Then the compiler can run
+\fn{easy} and get a core language term \dt{()} as a result. Since core
+language terms are represented by the \TT{} type, Idris has to find the
+\Editorable{} instance of \TT{} and run \fn{toEditor} from it on that term,
+which produces an \sexp{} to be sent back to the editor.
 
 \subsection{Using \Editorable{} in type-checking}
 \label{ssec:typechecking}
@@ -238,11 +258,15 @@ The motivation behind the \ty{Editorable} type class is twofold:
 \end{enumerate}
 
 The first motivation is already covered by the previous subsections.
-When Idris encounters a definition that is tagged as an editor action, it first elaborates the type.
+When Idris encounters a definition that is tagged with the \kw{\%editor}
+keyword as an editor action, it first elaborates the type.
 The next step is to check whether this type is suitable as an editor action.
-It does this by ensuring that each argument type is Editorable, that the return type has \Elab{} at its head, and that the argument to \Elab{} is also Editorable.
-Note that this rules out dependent types for editor actions---section~\todo{refer to future work} discusses a potential way to lift this restriction in the future.
-\TODO{explain "components of a type" and how they all have \Editorable{} instances}
+It does this by ensuring that each argument type has an \Editorable{} instance,
+that the return type has \Elab{} at its head, and that the argument to \Elab{}
+is also \Editorable{}.
+Note that this rules out dependent types for editor
+actions---\autoref{sssec:universeEncoding} discusses a potential way to lift
+this restriction in the future.
 
 %%% Local Variables:
 %%% mode: latex

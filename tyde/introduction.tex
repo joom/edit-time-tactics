@@ -19,7 +19,8 @@ typed languages and maintain those extensions so that they continue to
 work as compilers are improved.
 
 The Idris elaborator~\citep{idris} translates programs written in
-Idris into a much smaller core type theory. The elaborator is written
+Idris into a much smaller core type theory, called \textsf{TT}.
+The elaborator is written
 in Haskell, making use of an elaboration monad to track the
 complicated state that is involved. The high-level Idris language is
 extensible using \emph{elaborator reflection}~\citep{davidphd,
@@ -66,7 +67,7 @@ We make the following contributions in this paper:
 %there's space for two more lines on the first page
 
 
-\subsection{Motivating Example}
+\subsection{Extending An Editor in Idris}
 
 Dependently typed languages typically both allow programs to be
 incomplete and provide support for making them more complete. A
@@ -131,7 +132,7 @@ heterogeneous~\citep{mcbridephd} in the Idris standard library.  The
 equality type requires two implicit arguments~\citep{pollack}, called
 \bn{A} and \bn{B}, as well as explicit arguments \bn{x} and \bn{y}.
 When \bn{A} and \bn{B} are the same type, and \bn{x} and \bn{y} are
-judgmentally equal according to that type, \dt{Refl} proves the
+can be judged to be equal according to that type, \dt{Refl} proves the
 equality. The \fn{converts} action checks whether two quoted terms are
 judgmentally equal, and fails if they are not. Having checked that the
 types and their inhabitants are equal, the second case returns \dt{Refl}.

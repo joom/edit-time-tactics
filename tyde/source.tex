@@ -76,6 +76,12 @@
 \newcommand{\qt}[1]{\kw{\`{}(}{#1}\kw{)}} %quotation `(...)
 \newcommand{\antiqt}{\kw{\textasciitilde}} %antiquotation ~
 
+% Replicating selecting regions in the editor:
+\newcommand{\select}[1]{\colorbox{yellow}{#1}}
+% A version of select without any space around the box.
+% Hard to see in black & white so I chose the one with the space
+% \newcommand{\select}[1]{{\setlength{\fboxsep}{0pt}\colorbox{yellow}{#1}}}
+
 \newcommand{\Red}[1]{{\color{red} #1}}
 \newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}
 \newcommand{\FYI}[1]{{\color{green}{[FYI: #1]}}}

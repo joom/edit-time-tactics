@@ -5,7 +5,8 @@
 One of the most promising benefits of our work is that it allows authors of
 embedded domain-specific languages (hereinafter eDSL) to write domain-specific
 custom editor actions that assist eDSL users.
-An eDSL that most programmers are already familiar with is regular expressions.
+One such language that most programmers are already familiar with is regular
+expressions.
 
 \begin{figure}[H]
 \begin{Verbatim}
@@ -21,8 +22,8 @@ An eDSL that most programmers are already familiar with is regular expressions.
 \end{figure}
 
 Mirroring the formal definition of regular expressions, the Idris definition of
-regexes has constructors for $\varnothing$, $\varepsilon$, a literal
-character, concatenation ($\cdot$), alternation ($+$) and the Kleene star ($*$),
+regexes has constructors for $\varnothing$, $\varepsilon$, literal
+characters, concatenation ($\cdot$), alternation ($+$) and the Kleene star ($*$),
 as seen in \autoref{code:regex}.
 
 The most common usage of regular expressions is to match them against a string,
@@ -40,24 +41,39 @@ It would be useful to have a custom editor action that does the simplification
 automatically for the user, since users would want to such redundancies.
 
 We will not explain the actual regular simplification process, since there are
-many external sources such as \citet{regexSimplification} that do, and it is
-not essential to understand how the custom editor action works.
+many external sources such as \citet{regexSimplification}\todo{any other,
+better sources?}\ that do, and it is not essential to understand how the custom
+editor action works.
 We will take the function \mt{\fn{simplify} : \ty{Regex} -> \ty{Regex}} as a
-given, and proceed to explain how it can be used to construct an editor
+given, and proceed to describe how it can be used to construct an editor
 action.\footnote{Full source code is available at
 \url{http://github.com/joom/edit-time-tactics/tree/master/code/regex}.}
 
+The custom editor action to simplify regexes should act on a regex and return a
+simpler regex back. However, when the editor sends expressions to the compiler,
+it sends them as string containing pieces of code, which is then parsed and
+elaborated in the compiler. This means the editor will send a string that
+consists of code, and also receive a string that consists of code.  Based on
+the discussion in \autoref{sssec:primitiveEditorable}, this means the \Elab{}
+action would have the type \mt{\TT{} -> \Elab{} \TT{}}, so the input and output
+would be core language representations of regular expressions.
+
+Note that there is a gap between a core
+language representation of a regular expression, which would be an Idris term
+of the type \TT{}, and an Idris term representing the regular expression, which
+would be of the type \ty{Regex}.
+The custom editor action would need to convert these to one another, but
+currently there is no mechanism that does that.
+\autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
+that converts \TT{} and canonical forms of \ty{Regex} to one another. The
+conversion from \ty{Regex} to \ty{TT} in the \fn{quote} function cannot fail,
+since all regexes must have a core language representation. However, the
+conversion from \TT{} to \ty{Regex} can fail in the \fn{unquote} function,
+since if \fn{unquote} can be given any core language term, including ones that
+represent ill-typed Idris terms or ones that have types other than \ty{Regex}.
+
 \begin{figure}
 \begin{Verbatim}
-\fn{quote} : \ty{Regex} -> \ty{TT}
-\fn{quote} \dt{Empty} = \qt{\dt{Empty}}
-\fn{quote} \dt{Epsilon} = \qt{\dt{Epsilon}}
-\fn{quote} (\dt{Lit} \bn{c}) = \qt{\dt{Lit} \antiqt(\fn{quote} \bn{c})}
-\fn{quote} (\dt{Concat} \bn{x} \bn{y}) =
-  \qt{\dt{Concat} \antiqt(\dt{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
-\fn{quote} (\dt{Or} \bn{x} \bn{y}) = \qt{\dt{Or} \antiqt(\fn{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
-\fn{quote} (\dt{Many} \bn{x}) = \qt{\dt{Many} \antiqt(\fn{quote} \bn{x})}
-
 \fn{unquote} : \ty{TT} -> \ty{Elab} \ty{Regex}
 \fn{unquote} \qt{\dt{Empty}} = \fn{pure} \dt{Empty}
 \fn{unquote} \qt{\dt{Epsilon}} = \fn{pure} \dt{Epsilon}
@@ -72,11 +88,60 @@ action.\footnote{Full source code is available at
 \fn{unquote} \qt{\dt{Many} \antiqt\bn{x}} = \kw{do} \bn{x'} <- \fn{unquote} \bn{x}
                         \fn{pure} (\dt{Many} \bn{x'})
 \fn{unquote} \bn{t} = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
+
+\fn{quote} : \ty{Regex} -> \ty{TT}
+\fn{quote} \dt{Empty} = \qt{\dt{Empty}}
+\fn{quote} \dt{Epsilon} = \qt{\dt{Epsilon}}
+\fn{quote} (\dt{Lit} \bn{c}) = \qt{\dt{Lit} \antiqt(\fn{quote} \bn{c})}
+\fn{quote} (\dt{Concat} \bn{x} \bn{y}) =
+  \qt{\dt{Concat} \antiqt(\dt{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
+\fn{quote} (\dt{Or} \bn{x} \bn{y}) = \qt{\dt{Or} \antiqt(\fn{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
+\fn{quote} (\dt{Many} \bn{x}) = \qt{\dt{Many} \antiqt(\fn{quote} \bn{x})}
 \end{Verbatim}
 \caption{Functions to convert between values of the \ty{Regex} type and their representation in the core language.}
 \label{code:regexQuote}
 \end{figure}
 
+The functions \fn{unquote}, \fn{quote}, and \fn{simplify} provide all the
+building blocks needed to define the custom editor action, which are combined in
+\autoref{code:regexElab} to make up the necessary \Elab{} action.
+
+\begin{figure}[H]
+\begin{Verbatim}
+\kw{\%editor}
+\fn{simplifyInEditor} : \ty{TT} -> \ty{Elab} \ty{TT}
+\fn{simplifyInEditor} \bn{t} =
+  \kw{do} \bn{r} <- \fn{unquote} \bn{t}
+     \fn{pure} (\fn{quote} (\fn{simplify} \bn{r}))
+\end{Verbatim}
+\caption{Definition of the \Elab{} action for regex simplification.}
+\label{code:regexElab}
+\end{figure}
+
+The Emacs Lisp support code required to run the custom editor action gets the
+region selected in the editor by the user, sends it as the first argument for
+the \fn{simplifyInEditor} editor action, receives a response from the compiler,
+and replaces the code in the response with the selected region.
+We elide to code for simplicity.
+
+\begin{figure}[h]
+\begin{Verbatim}
+\kw{if} \fn{match} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))})
+  \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
+\end{Verbatim}
+  \vspace{1em}
+\begin{Verbatim}
+\kw{if} \fn{match} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))
+  \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
+\end{Verbatim}
+\caption{Before and after invoking regular expression simplification}
+  \label{fig:regex-example}
+\end{figure}
+
+\autoref{fig:regex-example} shows an example editor session using the regex
+simplification editor action. The user selects a region containing an
+expression and executes the Emacs Lisp function, which replaces the selected
+expression with the simplified version of the same regex.
 
 \subsection{Reimplementing the Built-In ``Add Clause'' Action}\label{sec:addClause}
 

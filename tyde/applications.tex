@@ -1,15 +1,19 @@
 \section{Applications} \label{sec:applications}
 
+\subsection{Regular Expression Simplification}
+
+\TODO{should I?}
+
 \subsection{Reimplementing the Built-In ``Add Clause'' Action}\label{sec:addClause}
 
-We have seen in \autoref{sec:introduction} how the ``Add initial match clause
-to type declaration'' editor action works. When the cursor is on the type
-signature of a function that does not have any clauses, we can run this editor
-action and get an initial clause for the function.
+Idris's Emacs mode supports a built-in editor action called ``Add initial match
+clause to type declaration.'' When the cursor is on the type signature of a
+function that does not have any clauses, the user can run this editor action
+and get an initial clause for the function.
 
 In this section we implement an editor action for top-level type declarations
 without implicit arguments or interface constraints, using custom editor actions.
-The Idris code we need to write is in \autoref{code:addClause}.
+The Idris code necessary for it is in \autoref{code:addClause}.
 
 \begin{figure}[ht]
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -38,36 +42,38 @@ The Idris code we need to write is in \autoref{code:addClause}.
 \label{code:addClause}
 \end{figure}
 
-The \fn{collectTypes} function we write in Idris is very similar to the one we
-defined in \autoref{code:collectTypes} for the compiler implementation. \TODO{should be resolved}
-This one, however returns a pair of the list of inputs and the output type.
+The \fn{collectTypes} function takes a type and dissects it into components, and returns
+a pair of the list of inputs and the output type. For instance,
+\mt{\fn{collectTypes} \kw{\`{}(}\ty{Nat} -> \ty{Bool} -> \ty{String}\kw{)}}
+will return \mt{(\dt{[}\kw{\`{}(}\ty{Nat}\kw{)},
+\kw{\`{}(}\ty{Bool}\kw{)}\dt{]},\kw{\`{}(}\ty{String}\kw{)})}.
 
-The \fn{addClause} tactic only takes one input, which is the name of the function
-we will add an initial clause for.
-Using this name, we look up the type of that function,
-normalize the type, and get its components
+The \fn{addClause} action only takes one input, which is the name of the function
+it will add an initial clause for.
+Using this name, it looks up the type of that function,
+normalizes the type, and gets its components
 using \fn{collectTypes}.
-We name the list of input types \bn{argTys}, and the output type \bn{retTy}
-For each of member of \bn{argTys}, we generate a new name using
-\fn{fresh}. We later use these names and make them
-into variable terms, using \dt{Var}, and create a function application using
+It names the list of input types \bn{argTys}, and the output type \bn{retTy}
+For each of member of \bn{argTys}, it generates a new name using
+\fn{fresh}. It later uses these names and makes them
+into variable terms, using \dt{Var}, and creates a function application using
 all of these names. This application is supposed to represent the left-hand
-side in our final definition. The right-hand side is a hole term that has the
-type \bn{retTy}.  This concludes our type declaration term.
+side in the final definition. The right-hand side is a hole term that has the
+type \bn{retTy}. This concludes the type declaration term.
 
-The Emacs Lisp code we write for this is the same as the existing add-clause
-editor action, so we only have to change the part that Emacs sends a message to
-the compiler. Our message now should refer to \fn{addClause} instead of the
-built-in add-clause editor action.
+The Emacs Lisp code necessary to run \fn{addClause} as a custom editor action
+is the same as the existing add-clause editor action, except the part that
+Emacs sends a message to the compiler; the message now should refer to
+\fn{addClause} instead of the built-in add-clause editor action.
 
-Let's see this \Elab\ action at work.
+To use this editor action, the user would write a type signature.
 
 \begin{Verbatim}
 \fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
 \end{Verbatim}
 
-If we put the cursor on \fn{example} and execute the Emacs Lisp code somehow,
-which is often done via a shortcut, we will get the following result.
+If the user puts the cursor on the name \fn{example} and executes the Emacs
+Lisp code they will get the following result:
 
 \begin{Verbatim}
 \fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
@@ -76,147 +82,56 @@ which is often done via a shortcut, we will get the following result.
 
 This concludes the rudimentary replacement the the existing add-clause section.
 For simplicity purposes, we have not covered the type signatures with implicit
-arguments or interface constraints. One can write a tactic to handle
-those cases as well.
+arguments or interface constraints. One can write a custom editor action to
+handle those cases as well.
 
 \subsection{A Theorem Prover for Intuitionistic Propositional Logic}\label{sec:hezarfen}
 
-In this section, we describe the tactic Hezarfen\footnote{ The name is
-  pronounced like ``has are fan'', and it means
-    polymath in Turkish.  Tactic source code is available at
+In this section, we describe the procedure Hezarfen\footnote{The name is
+  pronounced ``has are fan'', and it means
+    polymath in Turkish. Source code is available at
     \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
 propositional logic theorems, similar to Coq's \texttt{tauto} tactic.
-This tactic will be based on Dyckhoff's LJT~\cite{ljt} and its Haskell
+This procedure will be based on Dyckhoff's LJT~\cite{ljt} and its Haskell
 implementation Djinn~\cite{djinn}, which generates Haskell expressions
-that have a given type.
-
+for a given type.
 Djinn is a standalone program that takes commands
 interactively, and when it generates an expression it prints it on the screen.
-Instead, we want to design Hezarfen as a library that provides an \Elab\ action
-that can be used as a tactic in proofs, and also as a custom editor action that
-helps us when the built-in proof search mechanism does not suffice.
+Instead, Hezarfen is a library that provides an \Elab\ action
+that can be used as a tactic in proofs, and a custom editor action to be run
+when the built-in proof search mechanism does not suffice.
 
-\TODO{Revise the implementation details, currently commented out}
+The prover consists of a couple mutually recursive functions that try to break
+the goal type down into components, recursively finds terms that satisfy the
+components, and then glues them together based on the initial matched goal
+type.
 
-% As a part of this library, we want to define the \Elab\ action we used in
-% \autoref{sec:communication}, with the type
-% \texttt{\fn{prover} : \ty{TTName} -> \ty{Elab} \ty{TT}}.
-% This tactic takes the name of the hole it is supposed to fill, and gives back a
-% \TT\ term in the \Elab\ monad.
+Later in the prover there is also a term simplifier, similar to Haskell's
+pointfree style
+converter.\footnote{\url{http://hackage.haskell.org/package/pointfree}} It does
+eta reduction, removes unused \kw{let} bindings, and applies similar
+simplification steps repeatedly.
+However, this simplifier is tailored for Hezarfen's proof terms; it is not
+general purpose.  The necessity of further work on a general purpose one is
+discussed in \autoref{sssec:simplification}.
 
-% Since Hezarfen's proof terms are sent back to the editor and put back into the
-% source code, we should aim to make our proof terms as simple as possible.
-% Hence, we should implement both proof term generation and simplification.
+\begin{figure}[h]
+\begin{Verbatim}
+\fn{comm} : (\bn{a}, \bn{b} : \ty{Type}) -> \ty{Either} \bn{a} \bn{b} -> \ty{Either} \bn{b} \bn{a}
+\fn{comm} = \hole{comm_impl}
+\end{Verbatim}
+  \vspace{1em}
+\begin{Verbatim}
+\fn{comm} : (\bn{a}, \bn{b} : \ty{Type}) -> \ty{Either} \bn{a} \bn{b} -> \ty{Either} \bn{b} \bn{a}
+\fn{comm} = \fn{either} \dt{Right} \dt{Left}
+\end{Verbatim}
+\caption{Before and after invoking Hezarfen}
+  \label{fig:hezarfen-example}
+\end{figure}
 
-% \subsubsection{Proof term generation}
-
-% In Hezarfen, define two types \ty{Context} and \ty{Sequent} to help us
-% represent the proof rules as manipulations of the goal type.
-
-% \begin{figure}[H]
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \kw{data} \ty{Context} = \dt{Ctx} (\ty{List} (\ty{TTName}, \ty{Raw})) (\ty{List} (\ty{TTName}, \ty{Raw}))
-% \kw{data} \ty{Sequent} = \dt{Seq} \ty{Context} \ty{Raw}
-% \end{Verbatim}
-% \caption{Definitions of \ty{Context} and \ty{Sequent} for Hezarfen.}
-% \label{code:hezarfenTypes}
-% \end{figure}
-
-% A context is two lists of pairs that consist of names mapped to \Raw\ terms
-% that represent the type of the term that the name refers to.
-% The reason we want to have two lists is that we want to distinguish between the
-% \emph{consumed} and \emph{unconsumed} bindings. Once we use up an entry in the second list,
-% we delete it from the second list. But we may want to add new bindings, which
-% we do on the first list. Suppose we have $(C \vee D) \supset B$ in our context.
-% When we are checking the premises we want to remove it from the second list
-% and add $C \supset B$ and $D \supset B$ to the first list. In Dyckhoff's
-% presentation, this rule looks like:
-
-% \begin{prooftree}
-%   \AxiomC{$C \supset B,\ D \supset B,\ \Gamma \Longrightarrow G$}
-%   \UnaryInfC{$(C \vee D) \supset B,\ \Gamma \Longrightarrow G$}
-% \end{prooftree}
-% \vspace{\baselineskip}
-
-% But in Hezarfen's source code, this rule is written as in \autoref{code:hezarfenTypes}.
-
-% \begin{figure}[H]
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \fn{breakdown'} : \ty{Sequent} -> \ty{Elab} \ty{Tm}
-% \fn{breakdown'} \bn{goal} = \kw{case} \bn{goal} \kw{of}
-%   \cm{-- numerous previous cases}
-%   \dt{Seq} (\dt{Ctx} \bn{g} ((\bn{n}, \kw{\`{}(}(\dt{Either} ~\bn{d} ~\bn{e}) -> ~\bn{b}\kw{)}) :: \bn{o})) \bn{c} =>
-%     \kw{let} (\bn{n1}, \bn{n2}, \bn{newgoal}) = !(\fn{appDisjImplL} (\dt{Ctx} \bn{g} \bn{o}) (\bn{d}, \bn{e}, \bn{b}, \bn{c})) \kw{in}
-%     \kw{let} (\bn{l1}, \bn{l2}) = (!\fn{fresh}, !\fn{fresh}) \kw{in}
-%     \fn{pure} \fn{$} \dt{RBind} \bn{n1} (\dt{Let} \kw{\`{}(}~\bn{d} -> ~\bn{b}\kw{)}
-%                       (\dt{RBind} \bn{l1} (\dt{Lam} \bn{d}) (\dt{RApp} (\dt{Var} \bn{n})
-%                         \kw{\`{}(}\dt{Left} {\bn{a}=~\bn{d}} {\bn{b}=~\bn{e}} ~(\dt{Var} \bn{l1})\kw{)})))
-%           \fn{$} \dt{RBind} \bn{n2} (\dt{Let} \kw{\`{}(}~\bn{e} -> ~\bn{b}\kw{)}
-%                       (\dt{RBind} \bn{l2} (\dt{Lam} \bn{e}) (\dt{RApp} (\dt{Var} \bn{n})
-%                         \kw{\`{}(}\dt{Right} {\bn{a}=~\bn{d}} {\bn{b}=~\bn{e}} ~(\dt{Var} \bn{l2})\kw{)})))
-%             !(\fn{breakdown} \dt{False} \bn{newgoal})
-% \end{Verbatim}
-% \caption{The ``\ty{Either} implies'' case in Hezarfen}
-% \label{code:hezarfenTypes}
-% \end{figure}
-
-% Understanding this code fully is not necessary; our goal is to give the greater
-% picture. This piece of code checks our second list in the context to see if
-% there is a name with the type \texttt{(\ty{Either} \bn{d} \bn{e}) -> \bn{b}},
-% for some \bn{d}, \bn{e} and \bn{b}. If there is, using this name \bn{n}, we can
-% create two functions, one with the type \texttt{\bn{d} -> \bn{b}} and the other
-% with the type \texttt{\bn{e} -> \bn{b}}. We generate two fresh names so we can
-% name these functions, and then we create a proof term, in which we generate
-% lambda bindings for these two functions we define in terms of \bn{n}. The rest
-% of the proof proceeds recursively.
-
-% The remaining rules of proof term generation proceed similarly. For more detail
-% on what the generated proof terms are, see Dyckhoff's paper or Hezarfen's
-% source code.
-
-% % explain the nested impl rule in depth ???
-% % and possibly one or two more, to show what they look like in general
-
-% \subsubsection{Simplification}
-
-% In \texttt{Hezarfen.Simplify}, we define a function \fn{reduce} that simplifies
-% a given \Raw\ term into another \Raw\ term in the \Elab\ monad.\footnote{We
-% depend on the \Elab\ monad for fresh name generation.}
-% A rudimentary implementation of this function that does not include all the
-% simplification steps is given in \autoref{code:reduce}.
-
-% \begin{figure}[H]
-% \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
-% \fn{reduce} : \ty{Raw} -> \ty{Elab} \ty{Raw}
-% \fn{reduce} \fn{t} = \kw{case} \bn{t} \kw{of}
-%   \cm{-- Eta reduction:  (\textbackslash{}x => f x) becomes f}
-%   \dt{RBind} \bn{n} (\dt{Lam} \bn{b}) (\dt{RApp} \bn{t'} (\dt{Var} \bn{n'})) =>
-%     \kw{if} \bn{n} \fn{==} \bn{n'}
-%       \kw{then} \fn{reduce} \bn{t'}
-%       \kw{else} \fn{pure} \fn{$} \dt{RBind} \bn{n} (\dt{Lam} \bn{b}) !(\fn{reduce} (\dt{RApp} !(\fn{reduce} \bn{t'}) (\dt{Var} \bn{n'})))
-
-%   \cm{-- (id x) becomes x}
-%   \dt{RApp} (\dt{RApp} (\dt{Var} \kw{\`{}\{}\fn{id}\kw{\}}) \bn{c}) \bn{x} => \fn{reduce} \bn{x}
-
-%   \dt{RBind} \bn{n} \bn{b} \bn{t'} => \fn{pure} \fn{$} \dt{RBind} \bn{n} \bn{b} !(\fn{reduce} \bn{t'})
-%   \dt{RApp} \bn{t1} \bn{t2} => \fn{pure} \fn{$} \dt{RApp} !(\fn{reduce} \bn{t1}) !(\fn{reduce} \bn{t2})
-%   _ => \fn{pure} \bn{t}
-% \end{Verbatim}
-% \caption{Rudimentary implementation of \fn{reduce} in Hezarfen.}
-% \end{figure}
-
-% In the full implementation, we do more complex simplifications, such as
-% simplifying \texttt{(\textbackslash{}\bn{x} => \fn{g} (\fn{f} \bn{x}))} into
-% \texttt{(\fn{g} \fn{.} \fn{f})}, removing unused \kw{let} bindings,
-% substituting a \kw{let} binding in the body if the binding is only used once,
-% etc.
-
-% To fully simplify a \Raw\ term, we repeatedly apply it to \fn{reduce} until
-% fixpoint, which should be improved in future work.
-
-% There is also recent work on writing code generating theorem provers that
-% are more modular and efficient since they depend on an intermediate proof
-% representation that is later reconstructed~\cite{theoremProverCodeGeneration}.
-% Hezarfen directly deals with the untyped core language syntax tree, both for
-% the input terms that represent types, and for the proof term it returns, and
-% this causes some overhead in our tactic.
+Figure~\ref{fig:hezarfen-example} displays the results of
+executing this editor action on a hole.
+Hezarfen finds a term that satisfies that the type of the hole.
+Observe that the type of \fn{comm} corresponds to the logical proposition
+$(a \lor b) \to (b \lor a)$, and by finding a term of the type Hezarfen proves
+that proposition.

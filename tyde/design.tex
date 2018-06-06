@@ -153,9 +153,11 @@ piece of Idris code, i.e.\ concrete syntax, \fn{fromEditor} should parse that
 string into a high-level language term, and then elaborate that into a core
 language term. Only after that can the compiler run the \Elab\ editor action.
 Similarly, when the \Elab\ action finishes, \fn{toEditor} should convert core
-language terms into the high-level language terms. Then, the compiler should invoke the pretty
-printer to get concrete syntax that represents that term. The resulting string
-can be sent back from the compiler to the editor as a string atom \sexp{}.
+language terms into the high-level language terms, a process called
+\emph{delaboration} in the Idris compiler.
+Then, the compiler should invoke the pretty printer to get concrete syntax that
+represents that term. The resulting string can be sent back from the compiler
+to the editor as a string atom \sexp{}.
 
 Bridging this gap requires an \Editorable{} instance for \TT{} that does parsing,
 elaboration, conversion from the core language to the surface language, and pretty printing.

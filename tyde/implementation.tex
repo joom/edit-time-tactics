@@ -1,5 +1,119 @@
 \section{Implementation}\label{sec:implementation}
 
-\TODO{This section probably won't resemble the one in the thesis, since it should be maximum 1 page for readability}
-
 \TODO{The main goal of this section will be to provide enough information about the implementation so that someone else can add this feature to their dependently typed language. What were the big challenges? Think of things like the need for the local context to be preserved and how that gets associated with commands, as well as document the interesting challenges that arose.}
+
+\subsection{Local contexts}
+
+Consider the case that the editor sends an expression like \mt{\fn{not} \bn{a}}
+to the compiler, where \bn{a} is supposed to be a bound variable and not a
+definition.
+The compiler can parse this expression but it cannot elaborate it afterwards;
+it will complain that \bn{a} is an unbound variable. This is because in a
+call to custom editor action, expressions stand alone; they do not come with a
+context. It can deal with \fn{not} since that is is the global context, but
+when it comes to the local context, e.g.  if the code snippet the compiler
+receives uses a variable whose binding is introduced by \kw{let}, \kw{case}, or
+a lambda, then elaboration is doomed to fail.
+To circumvent this problem the editor has to inform the compiler about the
+local context of that expression. However, the editor does not know the local
+context to begin with.
+
+Nevertheless, the compiler has access to the entire file when it gets loaded
+in the IDE mode. If the editor told the compiler where the cursor is (in line
+and column numbers) when the user runs a custom editor action, then the
+compiler should be able to navigate in the file and figure out what the local
+context is at the given cursor position. Then the compiler can use that information
+in the elaboration of terms depending on the local context, such as
+\mt{\fn{not} \bn{a}}.
+
+However, there was no mechanism in the compiler to look up the local context is
+at a given source position.
+To solve this problem, we extended the elaboration state with an interval map
+in which keys are source locations, i.e. a pair of line and column numbers, and
+values are local contexts, i.e. environments. We used the finger tree
+implementation of interval maps in Haskell~\cite{fingertrees}.
+
+An interval map is a data structure that maps
+intervals to values. Every entry consists of the interval between two keys, and
+a value associated with the interval. One can query the map with a single
+key, and get the values in the map which are mapped by the intervals that
+the key is in.  Since the surface-language syntax tree in Idris contains source
+positions, those positions are available during elaboration.  Therefore the
+intervals between the start and end locations of terms in the source code can
+be registered, and then mapped to the local contexts.  Following the
+terminology used in the compiler source, we will call this map the
+\emph{source map}.
+
+This task required significant refactoring, since the source map
+needs to be preserved during elaboration of different parts, and also after
+elaboration. Elaboration itself cannot change the internal Idris state;
+however, it has its own state.  When elaboration finishes, it then updates the
+internal Idris state with the additions to the elaboration state.
+
+\subsection{Hard-coding \Editorable{} instances}
+
+\begin{figure*}
+\newcommand\mlnode[1]{
+  \begin{minipage}{3.3cm}
+    \linespread{1}\selectfont \begin{center}\small #1 \end{center}
+  \end{minipage}}
+\begin{tikzcd}
+  \mlnode{
+    Haskell terms\\ \medskip \footnotesize such as the \ty{()} term\\
+    \dt{()}
+  }
+  \arrow[rrr, "\text{\small reflection}" description, bend right=10]
+  &  &  &
+  \mlnode{
+    Haskell representation of Idris core language terms\\ \medskip \scriptsize
+    such as the \ty{Term} term\\
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0} \dt{False}) (\dt{UN} \dt{"MkUnit"}) (\dt{P} (\dt{TCon} \dt{0} \dt{0 \dt{False}}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[lll, "\text{\small reification}" description, bend right=10] \\
+  &  &  &\\
+  \mlnode{
+    Idris terms\\ \medskip \footnotesize such as the \ty{()} term\\
+    \dt{()}
+  }
+  \arrow[r, "\text{\small elaboration}" description, bend right=50]
+  &
+  \mlnode{
+    Idris core terms\\ \medskip \footnotesize such as the \ty{Unit} term\\
+    \dt{MkUnit}
+  }
+  \arrow[l, "\text{\small delaboration}" description, bend right=50]
+  \arrow[rr, "\text{\small quotation}" description, bend right=35]
+  \arrow[uurr, "\text{\small \emph{internally represented as}}" description, dashed, bend left=25]
+  & &
+  \mlnode{
+    Idris representation of the Haskell representation of Idris core language terms\\
+    \medskip \scriptsize such as the \TT\ term\\
+    \texttt{\dt{P} (\dt{DCon} \dt{0} \dt{0}) (\dt{UN} \dt{"MkUnit"})\\
+    (\dt{P} (\dt{TCon} \dt{0} \dt{0}) (\dt{UN} \dt{"Unit"}) \dt{Erased})}
+  }
+  \arrow[ll, "\text{\small unquotation}" description, bend right=35]
+  \arrow[uu, leftrightarrow, "\text{\small \emph{correspondence}}" description, dashed]
+\end{tikzcd}
+\caption{The relationship between reflection, reification, quotation,
+  unquotation, elaboration and delaboration.}
+\label{reflectionGraph}
+\end{figure*}
+
+Implementing hard-coded instances of the \Editorable{} type class in the
+compiler is challenging to describe since there are many languages involved in
+different ways. Idris's compiler is written in Haskell, hence there is a
+Haskell data type that represents Idris syntax trees. Idris's
+elaborator~\citep{idris} describes a core language that is smaller than Idris's
+high-level language, there is also a Haskell data type that represents Idris
+core syntax trees.
+
+However, elaborator reflection~\citep{davidphd, elabref} provides new Idris
+data types that correspond to the Haskell data types to represent Idris core
+language terms.
+Outlining how a metaprogramming feature is implemented is one level more meta,
+therefore it becomes difficult to use precise terminology.
+\autoref{reflectionGraph} describes the relationship between the different
+languages and representations and the spells out the specific names for moving
+from one to another.
+
+\TODO{steps}

@@ -91,38 +91,53 @@ have a single type, as opposed to our system, which allows any kind of
 \Editorable\ implementation. Our system lets users write more expressive custom
 editor actions.
 
-\subsection{Others}
+\subsection{Other Languages}
 
-We should also think about the prospects for building editor interactions into
-a compiler from the start, so let's take a look at the existing work on
-languages that are designed with a priority on editor interactions.
+Not every new language is conceived of as primarily a mapping from the
+set of strings to the disjoint union of machine code and error
+messages, with its users and tooling as an afterthought. Some are
+designed from the start with a customizable interactive environment in
+mind. This tradition dates back to early work on Lisp, particularly
+the Lisp machines and Interlisp-D~\citep{LispHist}, as well as
+Smalltalk~\citep{Goldberg1984SmalltalkEnv}. These environments are
+highly customizable, but they do not allow users to continue to use
+their preferred editors. Idris now occupies a space between the total
+freedom of Smalltalk and a language such as Haskell for which editor
+support is an afterthought.
 
-Building editor interactions in a compiler from the start is not a new idea,
-both Idris and Agda have done this already. They did not, however, take
-metaprogrammable editor interactions into account, and that is what our work
-brings to Idris. We believe a path through Racket, a language-oriented
-programming~\cite{racketManifesto, feltey2016languages} language would be an
-interesting take on building a language around its editor interactions.
-DrRacket~\cite{drracket}, Racket's IDE, makes writing editor interaction easy
-for the languages defined in Racket. This not only eliminates a lot of
-boilerplate code, but it also allows using Racket itself to define new editor
-actions. There are already dependently-typed languages defined in Racket: one
-example is Cur\footnote{\url{http://github.com/wilbowma/cur}}~\cite{cur}, a proof assistant with
-powerful metaprogramming tools.
-There is also Pie\footnote{\url{http://github.com/the-little-typer/pie}}~\cite{theLittleTyper}, a
-minimal language used for educational purposes.
-We believe there is potential
-for stronger editor interaction for these languages through metaprogramming.
+Racket is a language that focuses on the paradigm of
+\emph{language-oriented programming}~\citep{racketManifesto}, in which
+problems are solved by first constructing the most appropriate
+language to solve them. One part of this process is extensible,
+metaprogrammable tooling, especially the DrRacket~\cite{revenge}
+IDE. For instance, \citet{feltey2016languages} demonstrate a
+surprisingly concise Java-like language, including refactoring tools.
+It is certainly possible to implement dependently typed languages in
+the Racket ecosystem: both Cur~\cite{cur} and
+Pie~\cite{theLittleTyper} already exist, and the latter includes a
+simple editor action system that is presently extensible only in
+Racket but could support other languages as well.
 
-Another path that is worth exploring more is structure editors. In the proof
-assistant world, The Alfa proof editor~\cite{alfa} has established a proof
-interface based on a structure editor manipulating proof trees. More recently
-the Hazel project~\cite{hazelnut,hazelEditor} explored for a simpler type
-theory what a language designed around its editor would look like.
-Specifically, they designed a structure editor and a type theory to deal with
-incomplete programs in this setting.
+Structured editors are an alternative means of interacting with a
+programming language.  Alfa is a structural proof editor~\cite{alfa},
+descended from an earlier system called Alf~\citep{ALF, ALFthesis}.
+These structure editors are not, however, customizable using programs
+written in their type theories. Likewise, while
+Epigram~\citep{epigram} supported type-driven structured editing, it
+was not extensible in itself. The ongoing Hazel
+project~\cite{hazelnut,hazelEditor} employs the tools of programming
+language theory to describe interactions with a type-aware structured
+editor; however, they have not yet reflected this language of
+interactions back into their object language.
+
 % They also coined the term ``edit-time'' to
 % mean when the user is writing a program in the editor, and suggested
 % ``edit-time tactics'' as future work, by which they
 % meant a separate language in which users can define editor actions, and a
 % library of predefined editor actions that the users can compose.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "source"
+%%% End:

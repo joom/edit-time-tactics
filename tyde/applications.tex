@@ -3,17 +3,31 @@
 \subsection{Regular Expression Simplification}
 
 \TODO{should I?}
+\TODO{Yes, but make it a lower priority than the other things. We have space, and it's a cool demo!}
 
 \subsection{Reimplementing the Built-In ``Add Clause'' Action}\label{sec:addClause}
 
-Idris's Emacs mode supports a built-in editor action called ``Add initial match
+Idris's editor modes support a built-in editor action called ``Add initial match
 clause to type declaration.'' When the cursor is on the type signature of a
 function that does not have any clauses, the user can run this editor action
-and get an initial clause for the function.
+and get an initial pattern clause for the function.
+For instance, invoking the command on the declaration
+\begin{Verbatim}
+\fn{copy} : (\bn{n} : \ty{Nat}) -> \bn{a} -> \ty{Vect} \bn{n} \bn{a}
+\end{Verbatim}
+results in the clause
+\begin{Verbatim}
+\fn{copy} \bn{n} \bn{x} = \hole{copy_rhs}
+\end{Verbatim}
+which has a bound variable for each explicit argument in \fn{copy}'s type.
 
-In this section we implement an editor action for top-level type declarations
-without implicit arguments or interface constraints, using custom editor actions.
-The Idris code necessary for it is in \autoref{code:addClause}.
+There is no longer any need to implement this feature in Haskell as
+part of the compiler. This section describes the implementation of an
+editor action in Idris itself that generates initial clauses for top-level
+type declarations without implicit arguments or interface
+constraints. A version that handles these additional features is
+longer, but involves no additional concepts. The complete Idris code that
+implements this editor action can be seen in \autoref{code:addClause}.
 
 \begin{figure}[ht]
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
@@ -45,45 +59,49 @@ The Idris code necessary for it is in \autoref{code:addClause}.
 The \fn{collectTypes} function takes a type and dissects it into components, and returns
 a pair of the list of inputs and the output type. For instance,
 \mt{\fn{collectTypes} \kw{\`{}(}\ty{Nat} -> \ty{Bool} -> \ty{String}\kw{)}}
-will return \mt{(\dt{[}\kw{\`{}(}\ty{Nat}\kw{)},
-\kw{\`{}(}\ty{Bool}\kw{)}\dt{]},\kw{\`{}(}\ty{String}\kw{)})}.
+returns \mt{\dt{(}\dt{[}\kw{\`{}(}\ty{Nat}\kw{)}\dt{,}
+\kw{\`{}(}\ty{Bool}\kw{)}\dt{]}\dt{,}\kw{\`{}(}\ty{String}\kw{)}\dt{)}}.
 
-The \fn{addClause} action only takes one input, which is the name of the function
-it will add an initial clause for.
-Using this name, it looks up the type of that function,
-normalizes the type, and gets its components
-using \fn{collectTypes}.
-It names the list of input types \bn{argTys}, and the output type \bn{retTy}
-For each of member of \bn{argTys}, it generates a new name using
-\fn{fresh}. It later uses these names and makes them
-into variable terms, using \dt{Var}, and creates a function application using
-all of these names. This application is supposed to represent the left-hand
-side in the final definition. The right-hand side is a hole term that has the
-type \bn{retTy}. This concludes the type declaration term.
+The \fn{addClause} action only takes one input, which is the name of
+the function declaration for which an initial clause has been
+requested.  Using this name, it looks up the type of that function,
+normalizes the type, and gets its components using \fn{collectTypes}.
+The list of input types is named \bn{argTys}, and the output type is
+named \bn{retTy}. For each of member of \bn{argTys}, it generates a
+new user-accessible name using \fn{fresh}. A more featureful
+implementation would attempt to preserve names from the type
+signature, only generating fresh names when the user had not provided
+a name or in the presence of shadowing.
 
-The Emacs Lisp code necessary to run \fn{addClause} as a custom editor action
-is the same as the existing add-clause editor action, except the part that
-Emacs sends a message to the compiler; the message now should refer to
-\fn{addClause} instead of the built-in add-clause editor action.
+A pattern match clause consists of a left-hand side, which is an
+application of the function being defined to either constructors or
+pattern variables, and a right-hand side, which is the expression that
+results when the pattern on the left-hand side matches.  Having found
+names for each pattern variable, the left hand side of the initial
+clause is constructed by applying the function being defined, using
+\dt{RApp}.  The \dt{Var} constructor injects names into terms.  The
+right hand side of the initial clause should consist only of a hole
+for the user to fill in, indicated by the \dt{GHole} term constructor.
+Because Idris holes are binding forms, the de~Bruijn index \dt{0}
+refers back to this new hole.
 
-To use this editor action, the user would write a type signature.
 
+The Emacs Lisp code necessary to run \fn{addClause} as a custom editor
+action is the almost identical to the existing add-clause editor
+action.  The only difference is that the call to the primitive
+add-clause editor action in the IDE protocol is replaced by a call to
+\fn{addClause}.
+
+Using this editor action on the declaration
 \begin{Verbatim}
 \fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
 \end{Verbatim}
-
-If the user puts the cursor on the name \fn{example} and executes the Emacs
-Lisp code they will get the following result:
-
+results in an initial match clause
 \begin{Verbatim}
-\fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
 \fn{example} \bn{a} \bn{b} = \hole{c}
 \end{Verbatim}
-
-This concludes the rudimentary replacement the the existing add-clause section.
-For simplicity purposes, we have not covered the type signatures with implicit
-arguments or interface constraints. One can write a custom editor action to
-handle those cases as well.
+which was just as expected. However, this new version is much more
+readily extensible by users.
 
 \subsection{A Theorem Prover for Intuitionistic Propositional Logic}\label{sec:hezarfen}
 
@@ -135,3 +153,8 @@ Hezarfen finds a term that satisfies that the type of the hole.
 Observe that the type of \fn{comm} corresponds to the logical proposition
 $(a \lor b) \to (b \lor a)$, and by finding a term of the type Hezarfen proves
 that proposition.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "source"
+%%% End:

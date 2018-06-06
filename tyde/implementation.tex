@@ -1,54 +1,64 @@
-\section{Implementation}\label{sec:implementation}
+\section{Implementation Concerns}\label{sec:implementation}
 
 \TODO{The main goal of this section will be to provide enough information about the implementation so that someone else can add this feature to their dependently typed language. What were the big challenges? Think of things like the need for the local context to be preserved and how that gets associated with commands, as well as document the interesting challenges that arose.}
 
+The overall design described in section~\ref{sec:design} is not
+completely sufficient to implement extensible type-directed
+editing. Some additional machinery proves to be necessary in practice.
+
 \subsection{Local Contexts}
 
-Consider the case that the editor sends an expression like \mt{\fn{not} \bn{a}}
-to the compiler, where \bn{a} is supposed to be a bound variable and not a
-definition.
-The compiler can parse this expression but it cannot elaborate it afterwards;
-it will complain that \bn{a} is an unbound variable. This is because in a
-call to custom editor action, expressions stand alone; they do not come with a
-context. It can deal with \fn{not} since that is is the global context, but
-when it comes to the local context, e.g.  if the code snippet the compiler
-receives uses a variable whose binding is introduced by \kw{let}, \kw{case}, or
-a lambda, then elaboration is doomed to fail.
-To circumvent this problem the editor has to inform the compiler about the
-local context of that expression. However, the editor does not know the local
-context to begin with.
+Expressions can be understood only in their local context that
+explains the types, and sometimes the values, of their free
+variables. Editor actions should have access to the local context of
+bound variables in addition to the global definition context. The
+design in section~\ref{sec:design}, however, has no means of providing
+them with this local context.
 
-Nevertheless, the compiler has access to the entire file when it gets loaded
-in the IDE mode. If the editor told the compiler where the cursor is (in line
-and column numbers) when the user runs a custom editor action, then the
-compiler should be able to navigate in the file and figure out what the local
-context is at the given cursor position. Then the compiler can use that information
-in the elaboration of terms depending on the local context, such as
-\mt{\fn{not} \bn{a}}.
+For example, the editor might send an expression like \mt{\fn{not}
+  \bn{a}} to the compiler, where \bn{a} is bound in the local context.
+The compiler can parse this expression, but it cannot elaborate it,
+because without the local context, \bn{a} is meaningless. In a call to
+a custom editor action, expressions stand alone; they do not come with
+a context. It can deal with \fn{not}, which is defined in the global
+context, but when it comes to the local context, elaboration is doomed
+to fail.
 
-However, there was no mechanism in the compiler to look up the local context is
-at a given source position.
-To solve this problem, we extended the elaboration state with an interval map
-in which keys are source locations, i.e. a pair of line and column numbers, and
-values are local contexts, i.e. environments. We used the finger tree
-implementation of interval maps in Haskell~\cite{fingertrees}.
+Editor actions have, thus far, been provided with their arguments
+explicitly. However, local contexts do not have a concrete
+representation in Idris's syntax, so they cannot be selected directly.
 
-An interval map is a data structure that maps
-intervals to values. Every entry consists of the interval between two keys, and
-a value associated with the interval. One can query the map with a single
-key, and get the values in the map which are mapped by the intervals that
-the key is in.  Since the surface-language syntax tree in Idris contains source
-positions, those positions are available during elaboration.  Therefore the
-intervals between the start and end locations of terms in the source code can
-be registered, and then mapped to the local contexts.  Following the
-terminology used in the compiler source, we will call this map the
-\emph{source map}.
+To solve this problem, we take advantage of the fact that lexical
+contexts correspond closely to source spans. Each local binding form
+has a defined scope; this scope corresponds to a production of the
+abstract syntax tree that originates from a specific range of
+positions in the editor buffer. We extended the protocol for custom
+editor actions so that the editor sends a source position along with
+the action name and its arguments.
 
-This task required significant refactoring, since the source map
-needs to be preserved during elaboration of different parts, and also after
-elaboration. Elaboration itself cannot change the internal Idris state;
-however, it has its own state.  When elaboration finishes, it then updates the
-internal Idris state with the additions to the elaboration state.
+The next step was to extend the internal compiler state with an
+interval map that connects ranges of source positions to the local
+context that corresponds to the process of elaborating the expression
+found in that range. We used the standard Haskell finger tree
+implementation of interval maps~\cite{fingertrees}.
+
+When initializing the reflected elaboration monad prior to executing
+an editor action, the local context is initialized with the one that
+corresponds to the cursor location sent by the editor. The compiler
+can use that information in the elaboration of terms depending on the
+local context, such as \mt{\fn{not} \bn{a}}. Note that this constrains
+editor actions to have a single privileged source position. This
+constraint has not proven difficult in practice, but it could be
+lifted by making source positions \ty{Editorable} and providing any
+number of them as ordinary arguments. Editor actions could then have a
+primitive to enter the lexical scope corresponding to a source
+position, and to check whether a source span is contained within a
+particular scope.
+
+We expect that the remembered association between source spans and
+contexts will enable additional editor features, such as displaying
+the local context as the user navigates a source file, but we have not
+yet implemented these features.
 
 \subsection{Hard-Coding \Editorable{} Instances}
 
@@ -117,3 +127,8 @@ languages and representations and the spells out the specific names for moving
 from one to another.
 
 \TODO{steps}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "source"
+%%% End:

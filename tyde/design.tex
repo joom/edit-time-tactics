@@ -230,7 +230,7 @@ action type and the argument list match, and all arguments can be parsed
 without any errors, then the compiler can run the \Elab{} action, and use
 \fn{toEditor} to serialize the output, and send it back to the editor.
 
-The compiler can use \Elab{} actions whose arguments and return type has
+The compiler can use \Elab{} actions whose arguments and return type have
 \Editorable{} instances as custom editor actions. The \fn{easy} action from
 figure \ref{fig:motivating-example} is an example of this, and its usage can be
 seen in figure \ref{fig:motivating-example-exec}.
@@ -241,11 +241,11 @@ arguments, \mt{(\fn{list} \dt{"ex1\_impl"})}, which is a singleton list
 containing a string atom. When Idris receives this message, it looks up the
 name \fn{easy} from the context and finds out that it has the type
 \mt{\ty{TTName} -> \ty{Elab TT}}. Therefore it looks up the \Editorable{}
-instance of \ty{TTName} and runs \fn{fromEditor} from it on \dt{"ex1\_impl"}, which
-results in the Idris name for \hole{ex1\_impl}. Then the compiler can run
+instance of \ty{TTName} and runs its \fn{fromEditor} implementation on \dt{"ex1\_impl"}, which
+results in the Idris name for \hole{ex1\_impl}. Then the compiler can execute
 \fn{easy} and get a core language term \dt{()} as a result. Since core
 language terms are represented by the \TT{} type, Idris has to find the
-\Editorable{} instance of \TT{} and run \fn{toEditor} from it on that term,
+\Editorable{} instance of \TT{} and run its implementation of \fn{toEditor} on that term,
 which produces an \sexp{} to be sent back to the editor.
 
 \subsection{Using \Editorable{} in Type-Checking}

@@ -1,6 +1,6 @@
 \section{Applications} \label{sec:applications}
 
-\subsection{Reimplementing the built-in ``add clause'' action}\label{sec:addClause}
+\subsection{Reimplementing the Built-In ``Add Clause'' Action}\label{sec:addClause}
 
 We have seen in \autoref{sec:introduction} how the ``Add initial match clause
 to type declaration'' editor action works. When the cursor is on the type
@@ -8,7 +8,7 @@ signature of a function that does not have any clauses, we can run this editor
 action and get an initial clause for the function.
 
 In this section we implement an editor action for top-level type declarations
-without implicit arguments or interface constraints, using edit-time tactics.
+without implicit arguments or interface constraints, using custom editor actions.
 The Idris code we need to write is in \autoref{code:addClause}.
 
 \begin{figure}[ht]
@@ -79,7 +79,7 @@ For simplicity purposes, we have not covered the type signatures with implicit
 arguments or interface constraints. One can write a tactic to handle
 those cases as well.
 
-\subsection{Theorem prover for intuitionistic propositional logic}\label{sec:hezarfen}
+\subsection{A Theorem Prover for Intuitionistic Propositional Logic}\label{sec:hezarfen}
 
 In this section, we describe the tactic Hezarfen\footnote{ The name is
   pronounced like ``has are fan'', and it means

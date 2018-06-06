@@ -1,11 +1,11 @@
 \section{Conclusion}\label{sec:conclusion}
 
-\subsection{Future work}
+\subsection{Future Work}
 
 We consider the following topics worth pursuing as they will amplify the effects
 of our work.
 
-\subsubsection{Proof simplification}
+\subsubsection{Proof Simplification}
 
 \citet{elabref} showed that elaborator reflection can be used as a tactic
 language for theorem proving. It is possible to use \Elab{} tactics to define
@@ -52,13 +52,13 @@ automation.  We leave that for future work.
 % applications of metaprogramming, especially if the Idris modes of these editors
 % are written in Idris via their respective code generation targets.
 
-\subsubsection{Universe encoding}
+\subsubsection{Universe Encoding}
 \label{sssec:universeEncoding}
 
 \TODO{David's comment on my thesis margins about universe encoding, which
 enables dependently typed editor actions}
 
-\subsection{Final words}
+\subsection{Final Words}
 
 In this paper, we extended the capabilities of the editor interaction mode of
 Idris by allowing users to define new editor actions in Idris itself. We did
@@ -79,15 +79,16 @@ Using this feature, we showed a simple \fn{toy} example, and then the
 \fn{addClause} example that can replace an existing built-in editor action,
 and Hezarfen, which is meant to be a better proof search mechanism than the
 built-in one. We believe there is potential to replace even more of the
-built-in editor actions with edit-time tactics, such as case-splitting and
-lifting a hole into a lemma. We can also add new general edit-time tactics,
-such as renaming a binder, renaming a function within a file, pruning unused
-arguments in a function, etc.
+built-in editor actions with custom editor actions written in Idris, such as
+case-splitting and lifting a hole into a lemma. We can also add new general
+editor actions such as renaming a binder, renaming a function within a file,
+pruning unused arguments in a function, etc.
 
 We also believe that as more decision procedures are coded up in Idris,
-edit-time tactics can become a more popular feature. Especially library and DSL
-authors can ship custom editor actions for their package, which would allow
-library users to write code more easily with that library or DSL.
+custom editor actions based on proof automation can become a more popular
+feature. Especially library and DSL authors can ship custom editor actions for
+their package, which would allow library users to write code more easily with
+that library or DSL.
 
 Hopefully our work will bring dependently-typed languages one step closer to the
 state-of-the-art IDEs, and even give them an edge by allowing the reuse of the

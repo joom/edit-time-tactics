@@ -34,19 +34,23 @@
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
 
+\usepackage{amssymb}
+\newcommand\fakeslant[1]{%
+  \special{pdf: literal 1 0 0.167 1 0 0 cm}#1\special{pdf: literal 1 0 -0.167 1 0 0 cm}}
 % accessible syntax colors picked from vim-dichromatic
 % somewhat close to McBride colors. keywords are still bold black,
 % types are blue, functions are green,
 % constructors and literals are reddish purple,
 % bound variables are lilac, holes are yellow
-\definecolor{IdrisRed}{HTML}{72004D} %more like purple
-\definecolor{IdrisBlue}{HTML}{00004C}
-\definecolor{IdrisGreen}{HTML}{107702}
-\definecolor{IdrisLilac}{HTML}{CB4774}
-\definecolor{IdrisYellow}{HTML}{9FA206}
+
+\definecolor{IdrisRed}{HTML}{ef0078} %more like purple
+\definecolor{IdrisBlue}{HTML}{0000d6}
+\definecolor{IdrisGreen}{HTML}{008b00}
+\definecolor{IdrisLilac}{HTML}{df55f2}
+\definecolor{IdrisYellow}{HTML}{fa8100}
 \newcommand{\IdrisData}[1]{\textcolor{IdrisRed}{#1}}
 \newcommand{\IdrisType}[1]{\textcolor{IdrisBlue}{#1}}
-\newcommand{\IdrisBound}[1]{\textcolor{IdrisLilac}{#1}}
+\newcommand{\IdrisBound}[1]{\textcolor{IdrisLilac}{\fakeslant{#1}}}
 \newcommand{\IdrisFunction}[1]{\textcolor{IdrisGreen}{#1}}
 \newcommand{\IdrisMetavar}[1]{\textcolor{IdrisYellow}{#1}}
 \newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}

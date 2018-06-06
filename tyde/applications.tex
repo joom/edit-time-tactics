@@ -3,6 +3,8 @@
 \subsection{Regular Expression Simplification}
 
 \TODO{should I?}
+One of the most promising benefits of our work is that it allows
+domain-specific custom editor actions.
 
 \subsection{Reimplementing the Built-In ``Add Clause'' Action}\label{sec:addClause}
 
@@ -19,21 +21,21 @@ The Idris code necessary for it is in \autoref{code:addClause}.
 \begin{Verbatim}[framesep=2mm, label=\footnotesize{\normalfont{Idris}}, labelposition=topline]
 \fn{collectTypes} : \ty{TT} -> (\ty{List} \ty{TT}, \ty{TT})
 \fn{collectTypes} (\dt{Bind} _ (\dt{Pi} \bn{ty} _) \bn{t}) =
-  \kw{let} (\bn{xs}, \bn{t'}) = \fn{collectTypes} \bn{t} \kw{in}
+  \kw{let} \dt{(}\bn{xs}\dt{,} \bn{t'}\dt{)} = \fn{collectTypes} \bn{t} \kw{in}
   (\bn{ty} \fn{::} \bn{xs}, \bn{t'})
 \fn{collectTypes} \bn{t} = \dt{([]}, \bn{t})
 
 \kw{%editor}
 \fn{addClause} : \ty{TTName} -> \ty{Elab} (\ty{FunClause} \ty{TT})
 \fn{addClause} \bn{n} =
-  \kw{do} (_, _, \bn{ty}) <- \fn{lookupTyExact} \bn{n}
-     \bn{ty'} <- \fn{normalise} !\fn{getEnv} \bn{ty}
-     \kw{let} (\bn{argTys}, \bn{retTy}) = \fn{collectTypes} \bn{ty'}
+  \kw{do} \dt{(}_\dt{,} _\dt{,} \bn{ty}\dt{)} <- \fn{lookupTyExact} \bn{n}
+     \bn{env} <- \fn{getEnv}
+     \bn{ty'} <- \fn{normalise} \bn{env} \bn{ty}
+     \kw{let} \dt{(}\bn{argTys}\dt{,} \bn{retTy}\dt{)} = \fn{collectTypes} \bn{ty'}
      \bn{argNames} <- \fn{traverse} (\fn{const} \fn{fresh}) \bn{argTys}
      \kw{let} \bn{lhsUntyped} =
        \fn{foldl} \dt{RApp} (\dt{Var} \bn{n}) (\fn{map} \dt{Var} \bn{argNames})
-     \bn{env} <- \fn{getEnv}
-     (\bn{lhsTyped}, _) <- \fn{check} \bn{env} \bn{lhsUntyped}
+     \dt{(}\bn{lhsTyped}\dt{,} _\dt{)} <- \fn{check} \bn{env} \bn{lhsUntyped}
      \bn{holeName} <- \fn{fresh}
      \kw{let} \bn{rhs} = \dt{Bind} \bn{holeName} (\dt{GHole} \bn{retTy}) (\dt{V} \dt{0})
      \fn{pure} (\bn{MkFunClause} \bn{lhsTyped} \bn{rhs})

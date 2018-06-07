@@ -5,7 +5,8 @@
 - [x] Application section, describing Hezarfen
 - [x] Accessible color scheme
 - [x] There should be text after every header (sections, subsections etc)
-- [ ] Syntax colors for Lisp?
+- [x] Syntax colors for Lisp?
+ * JK: I think this is fine for now, we don't have much Lisp anyway.
+- [x] Finish the step by step description of primitive Editorable instances
 - [ ] Too many footnotes
-- [ ] Finish the step by step description of primitive Editorable instances
 - [ ] The universe encoding section in future work

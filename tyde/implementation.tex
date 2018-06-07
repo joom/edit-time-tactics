@@ -7,6 +7,7 @@ completely sufficient to implement extensible type-directed
 editing. Some additional machinery proves to be necessary in practice.
 
 \subsection{Local Contexts}
+\label{ssec:localContext}
 
 Expressions can be understood only in their local context that
 explains the types, and sometimes the values, of their free
@@ -126,7 +127,40 @@ therefore it becomes difficult to use precise terminology.
 languages and representations and the spells out the specific names for moving
 from one to another.
 
-\TODO{steps}
+During the execution of \fn{prim\_\_fromEditor} in the elaborator, it is given
+\bn{arg}, a Haskell representation of an Idris core language term representing
+an \sexp{}, and \bn{ty}, a Haskell representation of an Idris type.
+When the elaborator finishes running \fn{prim\_\_fromEditor}, it should create
+the Haskell representation of an Idris core language term, which should have the
+type \bn{ty}. The elaborator should have a case for each primitive
+\Editorable{} implementation. For brevity, we will only consider the case in
+which \bn{ty} corresponds to the Idris type \TT{}. Then the elaborator should
+
+\begin{enumerate}
+  \item reify \bn{arg} to get a Haskell \sexp{} and make sure it is a string atom
+  \item parse the string inside the \sexp{} and get a high-level language term
+  \item traverse the high-level language term and resolve namespaces for names, for when it is unambiguous
+  \item elaborate the new high-level language term into a core language term, using the local context obtained through \autoref{ssec:localContext}
+  \item reflect the core language term, in order to create a core language term that represents an Idris term of the type \TT{}
+  \item normalize the reflected term to get a syntax tree in canonical form, and return
+\end{enumerate}
+
+During the execution of \fn{prim\_\_toEditor} in the elaborator, it is given
+\bn{ty}, a Haskell representation of an Idris type, and \bn{arg},
+\bn{arg}, a Haskell representation of an Idris core language term representing
+a term of the type \bn{ty}.
+When the elaborator finishes running \fn{prim\_\_toEditor}, it should create
+the Haskell representation of an Idris core language term representing an
+\sexp{}. The \TT{} case for \fn{prim\_\_toEditor} should
+
+\begin{enumerate}
+  \item reify \bn{arg} to get a Haskell representation of an Idris core language term
+  \item delaborate and resugar the core language term into a high-level language term
+  \item use pretty printing to get a string that is a piece of code
+  \item create a string atom \sexp{} with that string
+  \item reflect the \sexp{} to get a Haskell term representing an Idris core language term representing an \sexp{}
+  \item normalize the reflected term to get a syntax tree in canonical form, and return
+\end{enumerate}
 
 %%% Local Variables:
 %%% mode: latex

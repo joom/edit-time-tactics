@@ -106,7 +106,7 @@ The functions \fn{unquote}, \fn{quote}, and \fn{simplify} provide all the
 building blocks needed to define the custom editor action, which are combined in
 \autoref{code:regexElab} to make up the necessary \Elab{} action.
 
-\begin{figure}[H]
+\begin{figure}[ht]
 \begin{Verbatim}
 \kw{\%editor}
 \fn{simplifyInEditor} : \ty{TT} -> \ty{Elab} \ty{TT}
@@ -124,7 +124,7 @@ the \fn{simplifyInEditor} editor action, receives a response from the compiler,
 and replaces the code in the response with the selected region.
 We elide to code for simplicity.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{Verbatim}
 \kw{if} \fn{match} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))})
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}

@@ -294,7 +294,7 @@ discussed in section~\ref{sssec:simplification}.
   \vspace{1em}
 \begin{Verbatim}
 \fn{comm} : (\bn{a}, \bn{b} : \ty{Type}) -> \ty{Either} \bn{a} \bn{b} -> \ty{Either} \bn{b} \bn{a}
-\fn{comm} = \fn{either} \dt{Right} \dt{Left}
+\fn{comm} = \textbackslash\bn{x}, \bn{y} => \fn{either} \dt{Right} \dt{Left}
 \end{Verbatim}
 \caption{Before and after invoking Hezarfen}
   \label{fig:hezarfen-example}

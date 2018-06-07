@@ -46,8 +46,8 @@ It would be useful to have a custom editor action that does the simplification
 automatically for the user, since users would want to such redundancies.
 
 We will not explain the actual regular simplification process, since there are
-many external sources such as \citet{regexSimplification}\todo{any other,
-better sources?}\ that do, and it is not essential to understand how the custom
+many external sources such as \citet{ortizRegex} and \citet{harperRegex}
+ that do, and it is not essential to understand how the custom
 editor action works.
 We will take the function \mt{\fn{simplify} : \ty{Regex} -> \ty{Regex}} as a
 given, and proceed to describe how it can be used to construct an editor
@@ -237,11 +237,11 @@ add-clause editor action in the IDE protocol is replaced by a call to
 
 Using this editor action on the declaration
 \begin{Verbatim}
-\fn{example} : (\bn{name} : \ty{String}) -> (\bn{age} : \ty{Nat}) -> \ty{IO} \ty{()}
+\fn{copy} : (\bn{n} : \ty{Nat}) -> \bn{a} -> \ty{Vect} \bn{n} \bn{a}
 \end{Verbatim}
 results in an initial match clause
 \begin{Verbatim}
-\fn{example} \bn{a} \bn{b} = \hole{c}
+\fn{copy} \bn{a} \bn{b} = \hole{c}
 \end{Verbatim}
 which was just as expected. However, this new version is much more
 readily extensible by users.

@@ -11,4 +11,6 @@
 - [x] The universe encoding section in future work
 - [ ] Too many footnotes
 - [ ] Remove \autoref in favor of explicit {section, figure}~\ref
+- [ ] How does the universe encoding allow dependently typed editor actions?
+- [ ] Add David's grant to acknowledgments
 

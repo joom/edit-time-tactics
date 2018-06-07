@@ -1,4 +1,4 @@
-\documentclass[sigplan, authordraft]{acmart}
+\documentclass[sigplan, review]{acmart}
 
 % Copyright
 %\setcopyright{none}
@@ -48,6 +48,7 @@
 \definecolor{IdrisGreen}{HTML}{008b00}
 \definecolor{IdrisLilac}{HTML}{df55f2}
 \definecolor{IdrisYellow}{HTML}{fa8100}
+\definecolor{IdrisLightBlue}{HTML}{A4CDFF}
 \newcommand{\IdrisData}[1]{\textcolor{IdrisRed}{#1}}
 \newcommand{\IdrisType}[1]{\textcolor{IdrisBlue}{#1}}
 \newcommand{\IdrisBound}[1]{\textcolor{IdrisLilac}{\fakeslant{#1}}}
@@ -77,10 +78,10 @@
 \newcommand{\antiqt}{\kw{\textasciitilde}} %antiquotation ~
 
 % Replicating selecting regions in the editor:
-\newcommand{\select}[1]{\colorbox{yellow}{#1}}
+% \newcommand{\select}[1]{\fcolorbox{black}{IdrisLightBlue}{#1}}
 % A version of select without any space around the box.
 % Hard to see in black & white so I chose the one with the space
-% \newcommand{\select}[1]{{\setlength{\fboxsep}{0pt}\colorbox{yellow}{#1}}}
+\newcommand{\select}[1]{{\setlength{\fboxsep}{0.05cm}\fcolorbox{black}{IdrisLightBlue}{#1}}}
 
 \newcommand{\Red}[1]{{\color{red} #1}}
 \newcommand{\TODO}[1]{{\color{red}{[TODO: #1]}}}

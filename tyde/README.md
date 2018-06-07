@@ -8,5 +8,5 @@
 - [x] Syntax colors for Lisp?
  * JK: I think this is fine for now, we don't have much Lisp anyway.
 - [x] Finish the step by step description of primitive Editorable instances
+- [x] The universe encoding section in future work
 - [ ] Too many footnotes
-- [ ] The universe encoding section in future work

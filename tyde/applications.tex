@@ -117,18 +117,19 @@ building blocks needed to define the custom editor action, which are combined in
 \end{Verbatim}
 \hrulefill
 \begin{Verbatim}
-(defun idris-simplify-regex ()
-  "Replace selection with simplified regex."
-  (interactive)
-  (let* ((regexp (buffer-substring-no-properties
-                  (region-beginning)
-                  (region-end)))
-         (result (idris-elab-edit
-                  "simplifyInEditor" regexp)))
-    (replace-region
-     (region-beginning) (region-end) result)))
+(\kw{defun} \fn{idris-simplify-regex} ()
+  \dt{"Replace selection with simplified regex."}
+  (\fn{interactive})
+  (\kw{let*} ((\bn{regexp} (\fn{buffer-substring-no-properties}
+                  (\fn{region-beginning})
+                  (\fn{region-end})))
+         (\bn{result} (\fn{idris-elab-edit}
+                  \dt{"simplifyInEditor"} \bn{regexp})))
+    (\fn{replace-region}
+     (\fn{region-beginning}) (\fn{region-end}) \bn{result})))
 \end{Verbatim}
-\caption{Definition of the \Elab{} action for regex simplification.}
+\caption{Definition of the \Elab{} action for regex simplification, and the
+  necessary Emacs Lisp support code to run it.}
 \label{code:regexElab}
 \end{figure}
 
@@ -293,7 +294,7 @@ discussed in section~\ref{sssec:simplification}.
   \vspace{1em}
 \begin{Verbatim}
 \fn{comm} : (\bn{a}, \bn{b} : \ty{Type}) -> \ty{Either} \bn{a} \bn{b} -> \ty{Either} \bn{b} \bn{a}
-\fn{comm} = \fn{either} \dt{Right} \dt{Left}
+\fn{comm} = \textbackslash\bn{x}, \bn{y} => \fn{either} \dt{Right} \dt{Left}
 \end{Verbatim}
 \caption{Before and after invoking Hezarfen}
   \label{fig:hezarfen-example}

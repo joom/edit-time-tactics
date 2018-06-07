@@ -10,3 +10,5 @@
 - [x] Finish the step by step description of primitive Editorable instances
 - [x] The universe encoding section in future work
 - [ ] Too many footnotes
+- [ ] Remove \autoref in favor of explicit {section, figure}~\ref
+

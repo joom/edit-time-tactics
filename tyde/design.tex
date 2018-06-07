@@ -226,7 +226,7 @@ a custom action message to Idris. If the compiler receives such a message from
 the editor, it looks up the name and type of the editor action from the
 context. From types of the arguments of the \Elab{} action, it can find the
 necessary \Editorable{} instances and use the \fn{fromEditor} definitions in them
-to parse the \sexp{}s into an Idris values. If the number of arguments in the
+to parse the \sexp{}s into Idris values. If the number of arguments in the
 action type and the argument list match, and all arguments can be parsed
 without any errors, then the compiler can run the \Elab{} action, and use
 \fn{toEditor} to serialize the output, and send it back to the editor.
@@ -255,7 +255,7 @@ which produces an \sexp{} to be sent back to the editor.
 The motivation behind the \ty{Editorable} type class is twofold:
 \begin{enumerate}
 \item to use the \fn{fromEditor} and \fn{toEditor} definitions to serialize
-  and deserialize data before and after an \Elab{} action is run.
+  and deserialize data before and after an \Elab{} action is run; and
 \item to check whether a given \Elab{} action is suitable to be used as an
   editor action.
 \end{enumerate}

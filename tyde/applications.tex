@@ -35,7 +35,7 @@ The most common usage of regular expressions is to determine whether a string is
 For that, users would have to write regular expression literals using the
 \ty{Regex} data type. If the user wants to check whether the string \textit{``aaa''} is in
 the language of the regular expression $a*$, then they would call
-\mt{\fn{match} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))}.
+\mt{\fn{accepts} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))}.
 
 However, there is no guarantee that the user would write the regular expression
 in its simplest form. Especially for more complex regular expressions, it is
@@ -63,7 +63,7 @@ they are ASTs of Idris code that represents regular expressions.
 Simplification, however, is a function from \ty{Regex} to \ty{Regex}, not from
 \ty{TT} to \ty{TT}.
 At the same time, regular expression simplification is vastly easier to implement
-on actual \ty{Regex}es, rather than on their quotations. 
+on actual \ty{Regex}es, rather than on their quotations.
 To implement the editor action, \autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
 that converts between \TT{} and the constructors of \ty{Regex}. The
 conversion from \ty{Regex} to \ty{TT} in the \fn{quote} function cannot fail,
@@ -127,12 +127,12 @@ and replaces the code in the response with the selected region.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-\kw{if} \fn{match} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))})
+\kw{if} \fn{accepts} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))})
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
   \vspace{1em}
 \begin{Verbatim}
-\kw{if} \fn{match} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))
+\kw{if} \fn{accepts} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
 \caption{Before and after invoking regular expression simplification}
@@ -244,10 +244,10 @@ readily extensible by users.
 
 \subsection{A Theorem Prover for Intuitionistic Propositional Logic}\label{sec:hezarfen}
 
-In this section, we describe the procedure Hezarfen\footnote{The name is
+In this section, we describe the procedure Hezarfen,\footnote{The name is
   pronounced ``has are fan'', and it means
     polymath in Turkish. Source code is available at
-    \url{http://github.com/joom/hezarfen}.}, which can decide intuitionistic
+    \url{http://github.com/joom/hezarfen}.} which can decide intuitionistic
 propositional logic theorems, similar to Coq's \texttt{tauto} tactic.
 This procedure will be based on Dyckhoff's LJT~\cite{ljt} and its Haskell
 implementation Djinn~\cite{djinn}, which generates Haskell expressions

@@ -26,6 +26,7 @@ mutual
   simplify (Many Epsilon) = Epsilon
   simplify (Many (Many x)) = simplify (Many (simplify x))
   simplify (Many x) = Many (simplify x)
+  simplify (Or Epsilon (Many y)) = Many (simplify y)
   simplify (Or x (Or y1 y2)) = simplify (Or (Or x y1) y2)
   simplify (Concat x (Concat y1 y2)) = simplify (Concat (Concat x y1) y2)
   simplify (Or x y) =
@@ -79,4 +80,4 @@ simplifyInEditor t =
      pure (quote (simplify r))
 
 r : Regex
-r = Or Epsilon (Many (Lit 'a'))
+r = Many (Lit 'a')

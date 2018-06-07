@@ -9,7 +9,7 @@ editing. Some additional machinery proves to be necessary in practice.
 \subsection{Local Contexts}
 \label{ssec:localContext}
 
-Expressions can be understood only in their local context that
+Expressions can be understood only in a local context that
 explains the types, and sometimes the values, of their free
 variables. Editor actions should have access to the local context of
 bound variables in addition to the global definition context. The
@@ -121,7 +121,7 @@ core syntax trees.
 However, elaborator reflection~\citep{davidphd, elabref} provides new Idris
 data types that correspond to the Haskell data types to represent Idris core
 language terms.
-Outlining how a metaprogramming feature is implemented is one level more meta,
+Outlining how a metaprogramming feature is implemented introduces another layer of metadiscussion,
 therefore it becomes difficult to use precise terminology.
 \autoref{reflectionGraph} describes the relationship between the different
 languages and representations and the spells out the specific names for moving
@@ -137,12 +137,12 @@ type \bn{ty}. The elaborator should have a case for each primitive
 which \bn{ty} corresponds to the Idris type \TT{}. Then the elaborator should
 
 \begin{enumerate}
-  \item reify \bn{arg} to get a Haskell \sexp{} and make sure it is a string atom
-  \item parse the string inside the \sexp{} and get a high-level language term
-  \item traverse the high-level language term and resolve namespaces for names, for when it is unambiguous
-  \item elaborate the new high-level language term into a core language term, using the local context obtained through section~\ref{ssec:localContext}
-  \item reflect the core language term, in order to create a core language term that represents an Idris term of the type \TT{}
-  \item normalize the reflected term to get a syntax tree in canonical form, and return
+  \item reify \bn{arg} to get a Haskell \sexp{} and make sure it is a string atom;
+  \item parse the string inside the \sexp{} and get a high-level language term;
+  \item traverse the high-level language term and resolve namespaces for names, for when it is unambiguous;
+  \item elaborate the new high-level language term into a core language term, using the local context obtained through section~\ref{ssec:localContext};
+  \item reflect the core language term, in order to create a core language term that represents an Idris term of the type \TT{}; and finally
+  \item normalize the reflected term to get a syntax tree in canonical form, and return it.
 \end{enumerate}
 
 During the execution of \fn{prim\_\_toEditor} in the elaborator, it is given
@@ -154,13 +154,16 @@ the Haskell representation of an Idris core language term representing an
 \sexp{}. The \TT{} case for \fn{prim\_\_toEditor} should
 
 \begin{enumerate}
-  \item reify \bn{arg} to get a Haskell representation of an Idris core language term
-  \item delaborate and resugar the core language term into a high-level language term
-  \item use pretty printing to get a string that is a piece of code
-  \item create a string atom \sexp{} with that string
-  \item reflect the \sexp{} to get a Haskell term representing an Idris core language term representing an \sexp{}
-  \item normalize the reflected term to get a syntax tree in canonical form, and return
+  \item reify \bn{arg} to get a Haskell representation of an Idris core language term;
+  \item delaborate and resugar the core language term into a high-level language term;
+  \item use pretty printing to get a string that is a piece of code;
+  \item create a string atom \sexp{} with that string;
+  \item reflect the \sexp{} to get a Haskell term representing an Idris core language term representing an \sexp{}; and finally
+  \item normalize the reflected term to get a syntax tree in canonical form, and return it.
 \end{enumerate}
+
+\noindent
+The other primitive instances behave similarly.
 
 %%% Local Variables:
 %%% mode: latex

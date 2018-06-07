@@ -20,3 +20,4 @@
 
 - [ ] Make a Web page for the paper with an archive of a version of Idris that works, plus the example code
 - [ ] Update links to code to point at this page
+- [ ] Link to Brian McKenna's screenshot on paper web page - mirror it

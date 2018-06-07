@@ -59,6 +59,32 @@ automation.  We leave that for future work.
 \TODO{David's comment on my thesis margins about universe encoding, which
 enables dependently typed editor actions}
 
+\begin{figure}[H]
+\begin{Verbatim}
+\kw{data} \ty{Act} : \ty{Type} \kw{where}
+  \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
+  \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act} -> \ty{Act}
+
+\fn{actTy} : \ty{Act} -> \ty{Type}
+\fn{actTy} (\dt{Done} \bn{a} _) = \ty{Elab} \bn{a}
+\fn{actTy} (\dt{Arg} \ty{a} _ \bn{e}) = \bn{a} -> \fn{actTy} \bn{e}
+\end{Verbatim}
+\caption{Universe encoding of types feasible to be treated as editor actions.}
+\label{code:universe}
+\end{figure}
+
+
+\begin{figure}[H]
+\begin{Verbatim}
+\fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))
+\fn{easy} \bn{n} = \cm{\{- elided, same as before -\}}
+\end{Verbatim}
+\caption{\fn{easy} from \autoref{fig:motivating-example} rewritten as a universe encoded editor action.}
+\label{code:universe-example}
+\end{figure}
+
+\TODO{How does this allow dependent editor actions?}
+
 \subsection{Final Words}
 
 In this paper, we extended the capabilities of the editor interaction mode of

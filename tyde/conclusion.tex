@@ -56,8 +56,15 @@ automation.  We leave that for future work.
 \subsubsection{Universe Encoding}
 \label{sssec:universeEncoding}
 
-\TODO{David's comment on my thesis margins about universe encoding, which
-enables dependently typed editor actions}
+Subsection~\ref{ssec:typechecking} described how the compiler should check if all
+components of an editor action type have an instance of the \Editorable{} type
+class. However, it is not necessary to implement this as a part of type checking,
+it would suffice to encode it as a universe type~\cite{genericDep} and a
+function from that universe to \ty{Type}.
+The universe type would serve as a a wrapper around the arrow type that checks
+if the type on the left of the arrow has an \Editorable{} instance.
+\autoref{code:universe} shows a possible universe type and
+defines a function to map the members of a universe to Idris types.
 
 \begin{figure}[H]
 \begin{Verbatim}
@@ -66,22 +73,28 @@ enables dependently typed editor actions}
   \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act} -> \ty{Act}
 
 \fn{actTy} : \ty{Act} -> \ty{Type}
-\fn{actTy} (\dt{Done} \bn{a} _) = \ty{Elab} \bn{a}
-\fn{actTy} (\dt{Arg} \ty{a} _ \bn{e}) = \bn{a} -> \fn{actTy} \bn{e}
+\fn{actTy} (\dt{Done} \bn{a}) = \ty{Elab} \bn{a}
+\fn{actTy} (\dt{Arg} \bn{a} \bn{e}) = \bn{a} -> \fn{actTy} \bn{e}
 \end{Verbatim}
 \caption{Universe encoding of types feasible to be treated as editor actions.}
 \label{code:universe}
 \end{figure}
 
+\autoref{code:universe-example} shows how the type of the \fn{easy} editor
+action from \autoref{fig:motivating-example} would change with this encoding.
 
 \begin{figure}[H]
 \begin{Verbatim}
 \fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))
 \fn{easy} \bn{n} = \cm{\{- elided, same as before -\}}
 \end{Verbatim}
-\caption{\fn{easy} from \autoref{fig:motivating-example} rewritten as a universe encoded editor action.}
+\caption{\fn{easy}  rewritten as a universe encoded editor action.}
 \label{code:universe-example}
 \end{figure}
+
+Observe that \mt{\fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))} evaluates
+to \mt{\ty{TTName} -> \Elab{} \TT}, therefore the definition of \fn{easy} does
+not have to change.
 
 \TODO{How does this allow dependent editor actions?}
 

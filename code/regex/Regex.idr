@@ -80,4 +80,4 @@ simplifyInEditor t =
      pure (quote (simplify r))
 
 r : Regex
-r = Many (Lit 'a')
+r = Or Epsilon (Many (Lit 'a'))

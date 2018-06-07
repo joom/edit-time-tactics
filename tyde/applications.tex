@@ -271,18 +271,18 @@ Instead, Hezarfen is a library that provides an \Elab\ action
 that can be used as a tactic in proofs, and a custom editor action to be run
 when the built-in proof search mechanism does not suffice.
 
-The prover consists of a couple mutually recursive functions that try to break
+The prover consists of mutually recursive functions that try to break
 the goal type down into components, recursively finds terms that satisfy the
 components, and then glues them together based on the initial matched goal
 type.
 
 Later in the prover there is also a term simplifier, similar to Haskell's
 pointfree style
-converter.\footnote{\url{http://hackage.haskell.org/package/pointfree}} It does
-eta reduction, removes unused \kw{let} bindings, and applies similar
-simplification steps repeatedly.
+converter.\footnote{\url{http://hackage.haskell.org/package/pointfree}} It performs
+$\eta$-reduction, removes unused \kw{let} bindings, and similar
+simplification steps repeatedly until it reaches a fixed point.
 However, this simplifier is tailored for Hezarfen's proof terms; it is not
-general purpose.  The necessity of further work on a general purpose one is
+general-purpose.  The necessity of further work on a general purpose one is
 discussed in section~\ref{sssec:simplification}.
 
 \begin{figure}[h]
@@ -300,11 +300,11 @@ discussed in section~\ref{sssec:simplification}.
 \end{figure}
 
 Figure~\ref{fig:hezarfen-example} displays the results of
-executing this editor action on a hole.
-Hezarfen finds a term that satisfies that the type of the hole.
-Observe that the type of \fn{comm} corresponds to the logical proposition
-$(a \lor b) \to (b \lor a)$, and by finding a term of the type Hezarfen proves
-that proposition.
+executing this editor action on a hole:
+Hezarfen finds a term with the desired type in which \fn{either} is a non-dependent eliminator for \ty{Either}.
+Observe that the type of \fn{comm} corresponds to the proposition
+$(a \lor b) \to (b \lor a)$, and by finding the term, Hezarfen proves
+the proposition.
 
 %%% Local Variables:
 %%% mode: latex

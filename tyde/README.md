@@ -10,9 +10,9 @@
 - [x] Finish the step by step description of primitive Editorable instances
 - [x] The universe encoding section in future work
 - [x] Remove \autoref in favor of explicit {section, figure}~\ref
-- [ ] Too many footnotes
-- [ ] How does the universe encoding allow dependently typed editor actions?
-- [ ] Add David's grant to acknowledgments
+- [x] Too many footnotes
+- [x] How does the universe encoding allow dependently typed editor actions?
+- [x] Add David's grant to acknowledgments
 
 
 

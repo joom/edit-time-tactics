@@ -65,12 +65,13 @@ Simplification, however, is a function from \ty{Regex} to \ty{Regex}, not from
 At the same time, regular expression simplification is vastly easier to implement
 on actual \ty{Regex}es, rather than on their quotations. 
 To implement the editor action, \autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
-that converts \TT{} and canonical forms of \ty{Regex} to one another. The
+that converts between \TT{} and the constructors of \ty{Regex}. The
 conversion from \ty{Regex} to \ty{TT} in the \fn{quote} function cannot fail,
 since all regexes must have a core language representation. However, the
 conversion from \TT{} to \ty{Regex} can fail in the \fn{unquote} function,
 since if \fn{unquote} can be given any core language term, including ones that
-represent ill-typed Idris terms or ones that have types other than \ty{Regex}.
+represent ill-typed Idris terms, ones that have types other than \ty{Regex}, or \ty{Regex}es
+that contain free variables.
 
 \begin{figure}
 \begin{Verbatim}
@@ -122,7 +123,7 @@ The Emacs Lisp support code required to run the custom editor action gets the
 region selected in the editor by the user, sends it as the first argument for
 the \fn{simplifyInEditor} editor action, receives a response from the compiler,
 and replaces the code in the response with the selected region.
-We elide to code for simplicity.
+
 
 \begin{figure}[ht]
 \begin{Verbatim}

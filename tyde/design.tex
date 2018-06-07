@@ -260,7 +260,7 @@ The motivation behind the \ty{Editorable} type class is twofold:
   editor action.
 \end{enumerate}
 
-The first motivation is already covered by the previous subsections.
+The first motivation is already covered in the previous sections.
 When Idris encounters a definition that is tagged with the \kw{\%editor}
 keyword as an editor action, it first elaborates the type.
 The next step is to check whether this type is suitable as an editor action.
@@ -268,7 +268,7 @@ It does this by ensuring that each argument type has an \Editorable{} instance,
 that the return type has \Elab{} at its head, and that the argument to \Elab{}
 is also \Editorable{}.
 Note that this rules out dependent types for editor
-actions---\autoref{sssec:universeEncoding} discusses a potential way to lift
+actions---section~\ref{sssec:universeEncoding} discusses a potential way to lift
 this restriction in the future.
 
 %%% Local Variables:

@@ -9,8 +9,8 @@
  * JK: I think this is fine for now, we don't have much Lisp anyway.
 - [x] Finish the step by step description of primitive Editorable instances
 - [x] The universe encoding section in future work
+- [x] Remove \autoref in favor of explicit {section, figure}~\ref
 - [ ] Too many footnotes
-- [ ] Remove \autoref in favor of explicit {section, figure}~\ref
 - [ ] How does the universe encoding allow dependently typed editor actions?
 - [ ] Add David's grant to acknowledgments
 

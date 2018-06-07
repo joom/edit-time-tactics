@@ -115,6 +115,19 @@ building blocks needed to define the custom editor action, which are combined in
   \kw{do} \bn{r} <- \fn{unquote} \bn{t}
      \fn{pure} (\fn{quote} (\fn{simplify} \bn{r}))
 \end{Verbatim}
+\hrulefill
+\begin{Verbatim}
+(defun idris-simplify-regex ()
+  "Replace selection with simplified regex."
+  (interactive)
+  (let* ((regexp (buffer-substring-no-properties
+                  (region-beginning)
+                  (region-end)))
+         (result (idris-elab-edit
+                  "simplifyInEditor" regexp)))
+    (replace-region
+     (region-beginning) (region-end) result)))
+\end{Verbatim}
 \caption{Definition of the \Elab{} action for regex simplification.}
 \label{code:regexElab}
 \end{figure}

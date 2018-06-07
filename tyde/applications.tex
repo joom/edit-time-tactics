@@ -8,7 +8,7 @@ logic.
 \subsection{Regular Expression Simplification}
 
 One of the most promising benefits of our work is that it allows authors of
-embedded domain-specific languages (hereinafter eDSL) to write domain-specific
+embedded domain-specific languages~\cite{dsel} (or eDSLs) to write domain-specific
 custom editor actions that assist eDSL users.
 One such language that most programmers are already familiar with is regular
 expressions.
@@ -31,23 +31,22 @@ regexes has constructors for $\varnothing$, $\varepsilon$, literal
 characters, concatenation ($\cdot$), alternation ($+$) and the Kleene star ($*$),
 as seen in \autoref{code:regex}.
 
-The most common usage of regular expressions is to match them against a string,
-and for that, users would have to write regular expression literals using the
-\ty{Regex} data type. If the user wants to check if the string $"aaa"$ is in
+The most common usage of regular expressions is to determine whether a string is in its language.
+For that, users would have to write regular expression literals using the
+\ty{Regex} data type. If the user wants to check whether the string \textit{``aaa''} is in
 the language of the regular expression $a*$, then they would call
 \mt{\fn{match} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))}.
 
 However, there is no guarantee that the user would write the regular expression
 in its simplest form. Especially for more complex regular expressions, it is
 easy to overlook simpler versions. For instance, a user might write the regex
-term \mt{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))} representing
-$\varepsilon + a*$, instead \mt{\dt{Many} (\dt{Lit 'a'})} representing $a*$.
-It would be useful to have a custom editor action that does the simplification
-automatically for the user, since users would want to such redundancies.
+term \mt{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))}, representing
+$\varepsilon + a*$, instead \mt{\dt{Many} (\dt{Lit 'a'})}, representing $a*$.
+A custom editor action can perform this simplification automatically.
 
-We will not explain the actual regular simplification process, since there are
+For reasons of space, we will not explain the actual simplification algorithm, since there are
 many external sources such as \citet{ortizRegex} and \citet{harperRegex}
- that do, and it is not essential to understand how the custom
+ that do, and it is not essential to the understanding how the custom
 editor action works.
 We will take the function \mt{\fn{simplify} : \ty{Regex} -> \ty{Regex}} as a
 given, and proceed to describe how it can be used to construct an editor

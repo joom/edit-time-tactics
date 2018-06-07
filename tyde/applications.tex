@@ -53,22 +53,18 @@ given, and proceed to describe how it can be used to construct an editor
 action.\footnote{Full source code is available at
 \url{http://github.com/joom/edit-time-tactics/tree/master/code/regex}.}
 
-The custom editor action to simplify regexes should act on a regex and return a
-simpler regex back. However, when the editor sends expressions to the compiler,
-it sends them as string containing pieces of code, which is then parsed and
-elaborated in the compiler. This means the editor will send a string that
-consists of code, and also receive a string that consists of code.  Based on
-the discussion in section~\ref{sssec:primitiveEditorable}, this means the \Elab{}
-action would have the type \mt{\TT{} -> \Elab{} \TT{}}, so the input and output
-would be core language representations of regular expressions.
+The custom editor action to simplify regexes should consume a regex, returning a
+potentially simpler regex. However, when the editor sends expressions to the compiler,
+it sends them as strings containing snippets of code, which are then parsed and
+elaborated in the compiler.  The editor action should therefore have the type
+\mt{\TT{} -> \Elab{} \TT{}}. The input and output are not regular expressions;
+they are ASTs of Idris code that represents regular expressions.
 
-Note that there is a gap between a core
-language representation of a regular expression, which would be an Idris term
-of the type \TT{}, and an Idris term representing the regular expression, which
-would be of the type \ty{Regex}.
-The custom editor action would need to convert these to one another, but
-currently there is no mechanism that does that.
-\autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
+Simplification, however, is a function from \ty{Regex} to \ty{Regex}, not from
+\ty{TT} to \ty{TT}.
+At the same time, regular expression simplification is vastly easier to implement
+on actual \ty{Regex}es, rather than on their quotations. 
+To implement the editor action, \autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
 that converts \TT{} and canonical forms of \ty{Regex} to one another. The
 conversion from \ty{Regex} to \ty{TT} in the \fn{quote} function cannot fail,
 since all regexes must have a core language representation. However, the

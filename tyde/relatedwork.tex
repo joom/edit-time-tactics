@@ -5,13 +5,15 @@ Type-directed editing and metaprogramming are not unique to Idris.
 
 \subsection{In Lean}
 
-Lean~\cite{lean}, which has a tactic metaprogramming
-system~\cite{leanmeta} that is similar to Idris's elaborator
-reflection, also supports the use of tactics to implement editor
-actions.  Lean's editor actions work only in the context of a
-hole. They allow the contents of the hole to be transformed into an
-arbitrary string, which replaces the hole. Using the pretty-printing
-features of the tactic system, terms can be placed in holes.
+
+Lean~\cite{lean} has a tactic metaprogramming system~\cite{leanmeta}
+that is similar to Idris's elaborator reflection.  During a visit to
+Microsoft Research, Leonardo de Moura and the second author added
+support to Lean for \emph{hole commands}, which are tactics that implement
+editor actions, but only in the context of a hole. They allow the
+contents of the hole to be transformed into an arbitrary string, which
+replaces the hole. Using the pretty-printing features of the tactic
+system, terms can be placed in holes.
 
 Because Lean's editor actions only work in the context of a hole, and
 can only take quoted terms as arguments, no Emacs Lisp is necessary to

@@ -140,8 +140,8 @@ which \bn{ty} corresponds to the Idris type \TT{}. Then the elaborator should
   \item reify \bn{arg} to get a Haskell \sexp{} and make sure it is a string atom;
   \item parse the string inside the \sexp{} and get a high-level language term;
   \item traverse the high-level language term and resolve namespaces for names, for when it is unambiguous;
-  \item elaborate the new high-level language term into a core language term, using the local context obtained through \autoref{ssec:localContext};
-  \item reflect the core language term, in order to create a core language term that represents an Idris term of the type \TT{}; and finally 
+  \item elaborate the new high-level language term into a core language term, using the local context obtained through section~\ref{ssec:localContext};
+  \item reflect the core language term, in order to create a core language term that represents an Idris term of the type \TT{}; and finally
   \item normalize the reflected term to get a syntax tree in canonical form, and return it.
 \end{enumerate}
 

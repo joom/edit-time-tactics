@@ -58,7 +58,7 @@ simpler regex back. However, when the editor sends expressions to the compiler,
 it sends them as string containing pieces of code, which is then parsed and
 elaborated in the compiler. This means the editor will send a string that
 consists of code, and also receive a string that consists of code.  Based on
-the discussion in \autoref{sssec:primitiveEditorable}, this means the \Elab{}
+the discussion in section~\ref{sssec:primitiveEditorable}, this means the \Elab{}
 action would have the type \mt{\TT{} -> \Elab{} \TT{}}, so the input and output
 would be core language representations of regular expressions.
 
@@ -273,7 +273,7 @@ eta reduction, removes unused \kw{let} bindings, and applies similar
 simplification steps repeatedly.
 However, this simplifier is tailored for Hezarfen's proof terms; it is not
 general purpose.  The necessity of further work on a general purpose one is
-discussed in \autoref{sssec:simplification}.
+discussed in section~\ref{sssec:simplification}.
 
 \begin{figure}[h]
 \begin{Verbatim}

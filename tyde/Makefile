@@ -28,6 +28,7 @@ open:
 
 clean:
 	@rm *.aux
+	@rm *.log
 	@rm $(FILENAME).*
 
 preview: compile open clean

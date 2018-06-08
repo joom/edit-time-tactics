@@ -24,7 +24,7 @@ debug:
 	mv $(FILENAME).pdf $(OUTPUTNAME).pdf
 
 open:
-	@open $(OUTPUTNAME).pdf
+	@preview $(OUTPUTNAME).pdf
 
 clean:
 	@rm *.aux

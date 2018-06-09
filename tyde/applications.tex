@@ -193,7 +193,7 @@ implements this editor action can be seen in \autoref{code:addClause}.
 \kw{%editor}
 \fn{addClause} : \ty{TTName} -> \ty{Elab} (\ty{FunClause} \ty{TT})
 \fn{addClause} \bn{n} =
-  \kw{do} \dt{(}_\dt{,} _\dt{,} \bn{ty}\dt{)} <- \fn{lookupTyExact} \bn{n}
+  \kw{do} \bn{ty} <- \fn{getType} \bn{n}
      \bn{env} <- \fn{getEnv}
      \bn{ty'} <- \fn{normalise} \bn{env} \bn{ty}
      \kw{let} \dt{(}\bn{argTys}\dt{,} \bn{retTy}\dt{)} = \fn{collectTypes} \bn{ty'}

@@ -82,7 +82,7 @@ the equality type.
 \kw{%editor}
 \fn{easy} : \ty{TTName} -> \ty{Elab} \ty{TT}
 \fn{easy} \bn{n} =
-  \kw{do} \dt{(}_\dt{,} _\dt{,} \bn{ty}\dt{)} <- \fn{lookupTyExact} \bn{n}
+  \kw{do} \bn{ty} <- \fn{getType} \bn{n}
      \kw{case} \bn{ty} \kw{of}
        \kw{`(}\ty{()} \kw{:} \ty{Type}\kw{)} \kw{=>}
          \fn{pure} \kw{`(}\dt{()} \kw{:} \ty{()}\kw{)}
@@ -114,12 +114,11 @@ elaboration-time side effects. It is passed a name because Idris holes
 are identified by name.
 
 The first step is to look up the type of the hole to be replaced,
-using \fn{lookupTyExact}, which returns a triple consisting of the
-fully-qualified version of the name, whether it is a local variable,
-top-level reference, data constructor, or type constructor, and the
-name's type. If the name is ambiguous, \fn{lookupTyExact} fails.
-Having discovered the name's type, it then pattern-matches on said
-type, using Idris's quasiquotation syntax~\citep{idrisQuotation}.
+using \fn{getType}, which takes a name and returns the type of the definition
+associated with that name.
+If the name is ambiguous, \fn{getType} fails.  Having discovered the name's
+type, it then pattern-matches on said type, using Idris's quasiquotation
+syntax~\citep{idrisQuotation}.
 
 The first case to be considered is the unit type. In this pattern, a
 type annotation is needed due to the Haskell-style overloading of the

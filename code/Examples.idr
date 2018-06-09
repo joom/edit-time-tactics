@@ -4,10 +4,15 @@ import Language.Reflection.Editor
 
 %language ElabReflection
 
+getType : TTName -> Elab TT
+getType n =
+  do (_, _, ty) <- lookupTyExact n
+     pure ty
+
 %editor
 easy : TTName -> Elab TT
 easy n =
-  do (_, _, ty) <- lookupTyExact n
+  do ty <- getType n
      case ty of
        `(() : Type) =>
          pure `(() : ())

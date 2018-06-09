@@ -20,7 +20,7 @@ expressions.
            | \dt{Lit} \ty{Char}
            | \dt{Concat} \ty{Regex} \ty{Regex}
            | \dt{Or} \ty{Regex} \ty{Regex}
-           | \dt{Many} \ty{Regex}
+           | \dt{Star} \ty{Regex}
 \end{Verbatim}
 \caption{Definition of regular expressions.}
 \label{code:regex}
@@ -28,20 +28,20 @@ expressions.
 
 Mirroring the formal definition of regular expressions, the Idris definition of
 regexes has constructors for $\varnothing$, $\varepsilon$, literal
-characters, concatenation ($\cdot$), alternation ($+$) and the Kleene star ($*$),
+characters, concatenation ($\cdot$), alternation ($|$) and the Kleene star ($*$),
 as seen in \autoref{code:regex}.
 
 The most common usage of regular expressions is to determine whether a string is in its language.
 For that, users would have to write regular expression literals using the
 \ty{Regex} data type. If the user wants to check whether the string \textit{``aaa''} is in
 the language of the regular expression $a*$, then they would call
-\mt{\fn{accepts} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))}.
+\mt{\fn{accepts} \dt{"aaa"} (\dt{Star} (\dt{Lit 'a'}))}.
 
 However, there is no guarantee that the user would write the regular expression
 in its simplest form. Especially for more complex regular expressions, it is
 easy to overlook simpler versions. For instance, a user might write the regex
-term \mt{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))}, representing
-$\varepsilon + a*$, instead \mt{\dt{Many} (\dt{Lit 'a'})}, representing $a*$.
+term \mt{\dt{Or} \dt{Epsilon} (\dt{Star} (\dt{Lit 'a'}))}, representing
+$\varepsilon | a*$, instead \mt{\dt{Star} (\dt{Lit 'a'})}, representing $a*$.
 A custom editor action can perform this simplification automatically.
 
 For reasons of space, we will not explain the actual simplification algorithm, since there are
@@ -86,8 +86,8 @@ that contain free variables.
 \fn{unquote} \qt{\dt{Or} \antiqt\bn{x} \antiqt\bn{y}} = \kw{do} \bn{x'} <- \fn{unquote} \bn{x}
                          \bn{y'} <- \fn{unquote} \bn{y}
                          \fn{pure} (\dt{Or} \bn{x'} \bn{y'})
-\fn{unquote} \qt{\dt{Many} \antiqt\bn{x}} = \kw{do} \bn{x'} <- \fn{unquote} \bn{x}
-                        \fn{pure} (\dt{Many} \bn{x'})
+\fn{unquote} \qt{\dt{Star} \antiqt\bn{x}} = \kw{do} \bn{x'} <- \fn{unquote} \bn{x}
+                        \fn{pure} (\dt{Star} \bn{x'})
 \fn{unquote} \bn{t} = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
 
 \fn{quote} : \ty{Regex} -> \ty{TT}
@@ -97,7 +97,7 @@ that contain free variables.
 \fn{quote} (\dt{Concat} \bn{x} \bn{y}) =
   \qt{\dt{Concat} \antiqt(\dt{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
 \fn{quote} (\dt{Or} \bn{x} \bn{y}) = \qt{\dt{Or} \antiqt(\fn{quote} \bn{x}) \antiqt(\fn{quote} \bn{y})}
-\fn{quote} (\dt{Many} \bn{x}) = \qt{\dt{Many} \antiqt(\fn{quote} \bn{x})}
+\fn{quote} (\dt{Star} \bn{x}) = \qt{\dt{Star} \antiqt(\fn{quote} \bn{x})}
 \end{Verbatim}
 \caption{Functions to convert between values of the \ty{Regex} type and their representation in the core language.}
 \label{code:regexQuote}
@@ -141,12 +141,12 @@ and replaces the code in the response with the selected region.
 
 \begin{figure}[ht]
 \begin{Verbatim}
-\kw{if} \fn{accepts} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Many} (\dt{Lit 'a'}))})
+\kw{if} \fn{accepts} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Star} (\dt{Lit 'a'}))})
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
   \vspace{1em}
 \begin{Verbatim}
-\kw{if} \fn{accepts} \dt{"aaa"} (\dt{Many} (\dt{Lit 'a'}))
+\kw{if} \fn{accepts} \dt{"aaa"} (\dt{Star} (\dt{Lit 'a'}))
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
 \caption{Before and after invoking regular expression simplification}

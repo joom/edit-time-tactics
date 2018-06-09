@@ -6,13 +6,13 @@ import Unquote
 
 import Language.Reflection.Editor
 
-data Regex = Lit Char | Concat Regex Regex | Or Regex Regex | Many Regex | Epsilon | Empty
+data Regex = Lit Char | Concat Regex Regex | Or Regex Regex | Star Regex | Epsilon | Empty
 
 implementation Eq Regex where
   (Lit c) == (Lit c') = c == c'
   (Concat a b) == (Concat a' b') = a == a' && b == b'
   (Or a b) == (Or a' b') = a == a' && b == b'
-  (Many a) == (Many a') = a == a'
+  (Star a) == (Star a') = a == a'
   Epsilon == Epsilon = True
   Empty == Empty = True
   _ == _ = False
@@ -22,11 +22,11 @@ mutual
   simplify Empty = Empty
   simplify Epsilon = Epsilon
   simplify (Lit c) = Lit c
-  simplify (Many Empty) = Epsilon
-  simplify (Many Epsilon) = Epsilon
-  simplify (Many (Many x)) = simplify (Many (simplify x))
-  simplify (Many x) = Many (simplify x)
-  simplify (Or Epsilon (Many y)) = Many (simplify y)
+  simplify (Star Empty) = Epsilon
+  simplify (Star Epsilon) = Epsilon
+  simplify (Star (Star x)) = simplify (Star (simplify x))
+  simplify (Star x) = Star (simplify x)
+  simplify (Or Epsilon (Star y)) = Star (simplify y)
   simplify (Or x (Or y1 y2)) = simplify (Or (Or x y1) y2)
   simplify (Concat x (Concat y1 y2)) = simplify (Concat (Concat x y1) y2)
   simplify (Or x y) =
@@ -59,7 +59,7 @@ implementation Quotable Regex TT where
   quote (Lit c) = `(Lit ~(quote c))
   quote (Concat x y) = `(Concat ~(quote x) ~(quote y))
   quote (Or x y) = `(Or ~(quote x) ~(quote y))
-  quote (Many x) = `(Many ~(quote x))
+  quote (Star x) = `(Star ~(quote x))
   quote Epsilon = `(Epsilon)
   quote Empty = `(Empty)
 
@@ -67,7 +67,7 @@ implementation Unquotable TT Regex where
   unquote `(Lit ~c) = Lit <$> unquote c
   unquote `(Concat ~x ~y) = Concat <$> unquote x <*> unquote y
   unquote `(Or ~x ~y) = Or <$> unquote x <*> unquote y
-  unquote `(Many ~x) = Many <$> unquote x
+  unquote `(Star ~x) = Star <$> unquote x
   unquote `(Epsilon) = pure Epsilon
   unquote `(Empty) = pure Empty
   unquote t = fail [ TextPart "Failed to unquote", TermPart t
@@ -80,4 +80,4 @@ simplifyInEditor t =
      pure (quote (simplify r))
 
 r : Regex
-r = Or Epsilon (Many (Lit 'a'))
+r = Or Epsilon (Star (Lit 'a'))

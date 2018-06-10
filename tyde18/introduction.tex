@@ -130,7 +130,7 @@ The second case to be considered is the equality type, which is
 heterogeneous~\citep{mcbridephd} in the Idris standard library.  The
 equality type requires two implicit arguments~\citep{pollack}, called
 \bn{A} and \bn{B}, as well as explicit arguments \bn{x} and \bn{y}.
-When \bn{A} and \bn{B} are the same type, and \bn{x} and \bn{y} are
+When \bn{A} and \bn{B} are the same type, and \bn{x} and \bn{y}
 can be judged to be equal according to that type, \dt{Refl} proves the
 equality. The \fn{converts} action checks whether two quoted terms are
 judgmentally equal, and fails if they are not. Having checked that the

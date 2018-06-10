@@ -47,8 +47,8 @@ When initializing the reflected elaboration monad prior to executing
 an editor action, the local context is initialized with the one that
 corresponds to the cursor location sent by the editor. The compiler
 can use that information in the elaboration of terms depending on the
-local context, such as \mt{\fn{not} \bn{a}}. Note that this constrains
-editor actions to have a single privileged source position. This
+local context, such as \mt{\fn{not} \bn{a}}. This constrains
+editor actions to have a single privileged source position; this
 constraint has not proven difficult in practice, but it could be
 lifted by making source positions \ty{Editorable} and providing any
 number of them as ordinary arguments. Editor actions could then have a
@@ -124,7 +124,7 @@ language terms.
 Outlining how a metaprogramming feature is implemented introduces another layer of metadiscussion,
 therefore it becomes difficult to use precise terminology.
 \autoref{reflectionGraph} describes the relationship between the different
-languages and representations and the spells out the specific names for moving
+languages and representations and spells out the specific names for moving
 from one to another.
 
 During the execution of \fn{prim\_\_fromEditor} in the elaborator, it is given

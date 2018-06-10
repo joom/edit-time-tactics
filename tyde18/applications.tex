@@ -2,7 +2,7 @@
 
 In this section, we present a custom domain-specific editor action, an editor
 action that is meant to replace a built-in Idris IDE mode feature, and an
-editor action that improves on Idris's proof search mechanism in specific
+editor action that improves on Idris's proof search mechanism in a specific
 logic.
 
 \subsection{Regular Expression Simplification}
@@ -13,7 +13,7 @@ custom editor actions that assist eDSL users.
 One such language that most programmers are already familiar with is regular
 expressions.
 
-\begin{figure}[H]
+\begin{figure}[ht]
 \begin{Verbatim}
 \kw{data} \ty{Regex} = \dt{Empty}
            | \dt{Epsilon}
@@ -35,7 +35,7 @@ The most common usage of regular expressions is to determine whether a string is
 For that, users would have to write regular expression literals using the
 \ty{Regex} data type. If the user wants to check whether the string \textit{``aaa''} is in
 the language of the regular expression $a*$, then they would call
-\mt{\fn{accepts} \dt{"aaa"} (\dt{Star} (\dt{Lit 'a'}))}.
+\mt{\fn{accepts} (\dt{Star} (\dt{Lit 'a'})) \dt{"aaa"}}.
 
 However, there is no guarantee that the user would write the regular expression
 in its simplest form. Especially for more complex regular expressions, it is
@@ -46,9 +46,9 @@ A custom editor action can perform this simplification automatically.
 
 For reasons of space, we will not explain the actual simplification algorithm, since there are
 many external sources such as \citet{ortizRegex} and \citet{harperRegex}
- that do, and it is not essential to the understanding how the custom
+ that do, and it is not essential to understanding how the custom
 editor action works.
-We will take the function \mt{\fn{simplify} : \ty{Regex} -> \ty{Regex}} as a
+We take the function \mt{\fn{simplify} : \ty{Regex} -> \ty{Regex}} as a
 given, and proceed to describe how it can be used to construct an editor
 action.\footnote{Full source code is available at
 \url{http://github.com/joom/edit-time-tactics/tree/master/code/regex}.}
@@ -73,7 +73,7 @@ since if \fn{unquote} can be given any core language term, including ones that
 represent ill-typed Idris terms, ones that have types other than \ty{Regex}, or \ty{Regex}es
 that contain free variables.
 
-\begin{figure}
+\begin{figure}[ht]
 \begin{Verbatim}
 \fn{unquote} : \ty{TT} -> \ty{Elab} \ty{Regex}
 \fn{unquote} \qt{\dt{Empty}} = \fn{pure} \dt{Empty}
@@ -107,7 +107,12 @@ The functions \fn{unquote}, \fn{quote}, and \fn{simplify} provide all the
 building blocks needed to define the custom editor action, which are combined in
 \autoref{code:regexElab} to make up the necessary \Elab{} action.
 
-\begin{figure}[ht]
+The Emacs Lisp support code required to run the custom editor action gets the
+region selected in the editor by the user, sends it as the first argument for
+the \fn{simplifyInEditor} editor action, receives a response from the compiler,
+and replaces the code in the response with the selected region.
+
+\begin{figure}[H]
 \begin{Verbatim}
 \kw{\%editor}
 \fn{simplifyInEditor} : \ty{TT} -> \ty{Elab} \ty{TT}
@@ -128,25 +133,20 @@ building blocks needed to define the custom editor action, which are combined in
     (\fn{replace-region}
      (\fn{region-beginning}) (\fn{region-end}) \bn{result})))
 \end{Verbatim}
-\caption{Definition of the \Elab{} action for regex simplification, and the
-  necessary Emacs Lisp support code to run it.}
+\caption{Definition of \Elab{} action for regex simplification, and the
+  necessary Emacs Lisp support code to run.}
 \label{code:regexElab}
 \end{figure}
-
-The Emacs Lisp support code required to run the custom editor action gets the
-region selected in the editor by the user, sends it as the first argument for
-the \fn{simplifyInEditor} editor action, receives a response from the compiler,
-and replaces the code in the response with the selected region.
 
 
 \begin{figure}[ht]
 \begin{Verbatim}
-\kw{if} \fn{accepts} \dt{"aaa"} (\select{\dt{Or} \dt{Epsilon} (\dt{Star} (\dt{Lit 'a'}))})
+\kw{if} \fn{accepts} (\select{\dt{Or} \dt{Epsilon} (\dt{Star} (\dt{Lit 'a'}))}) \dt{"aaa"}
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
   \vspace{1em}
 \begin{Verbatim}
-\kw{if} \fn{accepts} \dt{"aaa"} (\dt{Star} (\dt{Lit 'a'}))
+\kw{if} \fn{accepts} (\dt{Star} (\dt{Lit 'a'})) \dt{"aaa"}
   \kw{then} \cm{\{- elided -\}} \kw{else} \cm{\{- elided -\}}
 \end{Verbatim}
 \caption{Before and after invoking regular expression simplification}
@@ -211,7 +211,7 @@ implements this editor action can be seen in \autoref{code:addClause}.
 
 The \fn{collectTypes} function takes a type and dissects it into components, and returns
 a pair of the list of inputs and the output type. For instance,
-\mt{\fn{collectTypes} \kw{\`{}(}\ty{Nat} -> \ty{Bool} -> \ty{String}\kw{)}}
+calling \fn{collectTypes} with the input \mt{\kw{\`{}(}\ty{Nat} -> \ty{Bool} -> \ty{String}\kw{)}}
 returns \mt{\dt{(}\dt{[}\kw{\`{}(}\ty{Nat}\kw{)}\dt{,}
 \kw{\`{}(}\ty{Bool}\kw{)}\dt{]}\dt{,}\kw{\`{}(}\ty{String}\kw{)}\dt{)}}.
 
@@ -220,7 +220,7 @@ the function declaration for which an initial clause has been
 requested.  Using this name, it looks up the type of that function,
 normalizes the type, and gets its components using \fn{collectTypes}.
 The list of input types is named \bn{argTys}, and the output type is
-named \bn{retTy}. For each of member of \bn{argTys}, it generates a
+named \bn{retTy}. For each member of \bn{argTys}, it generates a
 new user-accessible name using \fn{fresh}. A more featureful
 implementation would attempt to preserve names from the type
 signature, only generating fresh names when the user had not provided
@@ -240,7 +240,7 @@ refers back to this new hole.
 
 
 The Emacs Lisp code necessary to run \fn{addClause} as a custom editor
-action is the almost identical to the existing add-clause editor
+action is almost identical to the existing add-clause editor
 action.  The only difference is that the call to the primitive
 add-clause editor action in the IDE protocol is replaced by a call to
 \fn{addClause}.

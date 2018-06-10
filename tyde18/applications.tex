@@ -33,15 +33,15 @@ as seen in \autoref{code:regex}.
 
 The most common usage of regular expressions is to determine whether a string is in its language.
 For that, users would have to write regular expression literals using the
-\ty{Regex} data type. If the user wants to check whether the string \textit{``aaa''} is in
-the language of the regular expression $a*$, then they would call
+\ty{Regex} data type. If the user wants to check whether the regular expression
+$a*$ accepts the string \textit{``aaa''}, they would call
 \mt{\fn{accepts} (\dt{Star} (\dt{Lit 'a'})) \dt{"aaa"}}.
 
 However, there is no guarantee that the user would write the regular expression
 in its simplest form. Especially for more complex regular expressions, it is
 easy to overlook simpler versions. For instance, a user might write the regex
 term \mt{\dt{Or} \dt{Epsilon} (\dt{Star} (\dt{Lit 'a'}))}, representing
-$\varepsilon | a*$, instead \mt{\dt{Star} (\dt{Lit 'a'})}, representing $a*$.
+$\varepsilon | a*$, instead of \mt{\dt{Star} (\dt{Lit 'a'})}, representing $a*$.
 A custom editor action can perform this simplification automatically.
 
 For reasons of space, we will not explain the actual simplification algorithm, since there are

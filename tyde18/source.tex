@@ -1,10 +1,10 @@
-\documentclass[sigplan, review]{acmart}
+\documentclass[sigplan, review, timestamp]{acmart}
 
 % Copyright
 %\setcopyright{none}
 %\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-\setcopyright{rightsretained}
+\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
 %\setcopyright{usgov}
 %\setcopyright{usgovmixed}
 %\setcopyright{cagov}
@@ -103,20 +103,21 @@
 
 \author{Joomy Korkut}
 \orcid{0000-0001-6784-7108}
+\authornote{Author's current affiliation: Princeton University}
 \affiliation{
   \institution{Wesleyan University}
-  \city{Middletown}
-  \state{Connecticut}
-  \country{USA}
+  % \city{Middletown}
+  % \state{Connecticut}
+  % \country{USA}
 }
 \email{ckorkut@wesleyan.edu}
 
 \author{David Thrane Christiansen}
 \affiliation{
-  \institution{Galois Inc.}
-  \city{Portland}
-  \state{Oregon}
-  \country{USA}
+  \institution{Galois, Inc.}
+  % \city{Portland}
+  % \state{Oregon}
+  % \country{USA}
 }
 \email{dtc@galois.com}
 
@@ -125,7 +126,7 @@
 \renewcommand{\shortauthors}{Joomy Korkut and David Christiansen}
 
 \begin{abstract}
-  Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that make use of informative types to assist users with the construction of programs. However, these interactive environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.
+  Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that use informative types to assist users with the construction of programs. However, these interactive environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.
 \end{abstract}
 
 %
@@ -150,7 +151,7 @@
 \ccsdesc[300]{Software and its engineering~Functional languages}
 \ccsdesc[300]{Software and its engineering~Language features}
 
-\keywords{Metaprogramming, dependent types, editor interaction}
+\keywords{Metaprogramming, dependent types, editors}
 
 \maketitle
 
@@ -172,6 +173,8 @@ second author began working on this project during a postdoctoral at
 Indiana University, where he was supported by the United States
 National Science Foundation grant 1540276. Galois, Inc.\ has
 generously supported further work.
+We would also like to thank Daniel P.\ Friedman and Austin Tasato for their
+comments on our draft.
 
 
 \bibliographystyle{ACM-Reference-Format}

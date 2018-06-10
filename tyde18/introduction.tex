@@ -19,7 +19,7 @@ typed languages and maintain those extensions so that they continue to
 work as compilers are improved.
 
 The Idris elaborator~\citep{idris} translates programs written in
-Idris into a much smaller core type theory, called \textsf{TT}.
+Idris into a smaller core type theory, called \textsf{TT}.
 The elaborator is written
 in Haskell, making use of an elaboration monad to track the
 complicated state that is involved. The high-level Idris language is
@@ -30,7 +30,6 @@ elaborator reflection extends Idris with a primitive monad
 \Elab{}. Just as values in \IO{} describe effectful programs to be
 executed by the run-time system, \Elab{} actions describe effectful
 programs to be run during elaboration.
-% \todo{insert ref to lean paper elsewhere}
 
 We have extended Idris's implementation of elaborator reflection with
 new primitives that enable it to be used to construct \emph{editor

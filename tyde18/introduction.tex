@@ -63,7 +63,6 @@ We make the following contributions in this paper:
   reimplementing a feature that constructs initial implementations of
   functions, based on their type signatures.
 \end{itemize}
-%there's space for two more lines on the first page
 
 \subsection{Editor Interaction}
 
@@ -78,7 +77,7 @@ type-directed program construction to \emph{any} sufficiently
 extensible text editor. While this protocol is based on the Swank
 protocol used by Common Lisp and Dylan implementations since 2003, it
 is also somewhat similar to the more recent Language Server Protocol
-used in Visual Studio Code. 
+used in Visual Studio Code.
 
 Using this protocol, client editors can invoke the type checker,
 request that the compiler perform a case split on a pattern variable,
@@ -86,7 +85,9 @@ generate initial implementations for functions based on their type
 signature, discover the callers of a function, or request
 documentation. The protocol even allows interactive environments to
 request the normal form of an expression displayed in an error
-message, allowing in-place evaluation.
+message, allowing in-place evaluation. However, the file that is being edited
+has to be loaded to the compiler, which allows the compiler to use the context
+in the file for the editor actions above.
 
 At the time of writing, there are Idris editing modes for GNU Emacs,
 Atom, Sublime Text, and Visual Studio Code that communicate with the
@@ -97,16 +98,7 @@ commands. Because the Idris mode for GNU Emacs is the most featureful,
 we use it as our running example, but there is nothing inherently
 Emacs-specific about this technique.
 
-
-When the user invokes an editor action, the editor has to tell the
-Idris compiler what to run. Since the editor and the compiler run in
-separate processes, for each interaction the editor has to send a
-message to the compiler, and the compiler has to send a one or more
-replies back to the editor, as seen in \autoref{editorDiagram}.  For
-ease of parsing, these messages are formatted as
-\citeauthor{mccarthy}'s \sexp{}s~\citep{mccarthy}.
-
-\begin{figure}
+\begin{figure}[H]
 \begin{tikzcd}
 \mlnode{Editor\\ (Emacs, Vim, etc.)}
   \arrow[rr, "\text{request \sexp}", shift left=3] &  &
@@ -117,10 +109,18 @@ ease of parsing, these messages are formatted as
 \label{editorDiagram}
 \end{figure}
 
+When the user invokes an editor action, the editor has to tell the
+Idris compiler what to run. Since the editor and the compiler run in
+separate processes, for each interaction the editor has to send a
+message to the compiler, and the compiler has to send a one or more
+replies back to the editor, as seen in figure~\ref{editorDiagram}.  For
+ease of parsing, these messages are formatted as
+\citeauthor{mccarthy}'s \sexp{}s~\citep{mccarthy}.
+
 The Idris compiler, including its editing commands, is written in
 Haskell.  Traditionally, implementing a new command required extending
 the compiler, updating the IDE protocol, and then finally extending
-the user interface of the editor modes. 
+the user interface of the editor modes.
 
 \subsection{Extending An Editor in Idris}
 

@@ -119,7 +119,7 @@ data types that correspond to the Haskell data types to represent Idris core
 language terms.
 Outlining how a metaprogramming feature is implemented introduces another layer of metadiscussion,
 therefore it becomes difficult to use precise terminology.
-\autoref{reflectionGraph} describes the relationship between the different
+Figure~\ref{reflectionGraph} describes the relationship between the different
 languages and representations and spells out the specific names for moving
 from one to another.
 
@@ -143,7 +143,7 @@ which \bn{ty} corresponds to the Idris type \TT{}. Then the elaborator should
 
 During the execution of \fn{prim\_\_toEditor} in the elaborator, it is given
 \bn{ty}, a Haskell representation of an Idris type, and \bn{arg},
-\bn{arg}, a Haskell representation of an Idris core language term representing
+a Haskell representation of an Idris core language term representing
 a term of the type \bn{ty}.
 When the elaborator finishes running \fn{prim\_\_toEditor}, it should create
 the Haskell representation of an Idris core language term representing an

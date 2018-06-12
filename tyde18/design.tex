@@ -109,7 +109,7 @@ In particular, functions and infinite coinductive datatypes do not, in general, 
 In other cases, the constructor-based representation requires too much work to encode and decode in editors.
 For instance, Idris names have a rich structure, but users know them by their syntax rather than by their internal representation.
 The \Editorable{} instance for the type of quoted Idris
-names, \ty{TTName}, which appeared in \autoref{fig:motivating-example}, represents names using their user-facing syntax.
+names, \ty{TTName}, which appeared in figure~\ref{fig:motivating-example}, represents names using their user-facing syntax.
 For instance, the Idris name \fn{Prelude.Bool.not}, which has the
 data type representation \mt{\dt{NS "not" ["Bool"}, \dt{"Prelude"]}}, is
 represented by a string atom \sexp{}, namely \dt{"Prelude.Bool.not"}.
@@ -171,7 +171,7 @@ for \fn{fromEditor} and one for \fn{toEditor} suffice; polymorphic
 primitives constrained by an indexed family provide a principled
 way to manage the primitive instances of \Editorable{}.
 
-\begin{figure}[H]
+\begin{figure}
 \begin{Verbatim}
 \kw{data} \ty{HasPrim} : \ty{Type} -> \ty{Type} \kw{where}
   \dt{HasTT}        : \ty{HasPrim} \ty{TT}

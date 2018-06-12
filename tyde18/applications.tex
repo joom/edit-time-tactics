@@ -29,7 +29,7 @@ expressions.
 Mirroring the formal definition of regular expressions, the Idris definition of
 regexes has constructors for $\varnothing$, $\varepsilon$, literal
 characters, concatenation ($\cdot$), alternation ($|$) and the Kleene star ($*$),
-as seen in \autoref{code:regex}.
+as seen in figure~\ref{code:regex}.
 
 The most common usage of regular expressions is to determine whether a string is in its language.
 For that, users would have to write regular expression literals using the
@@ -64,7 +64,7 @@ Simplification, however, is a function from \ty{Regex} to \ty{Regex}, not from
 \ty{TT} to \ty{TT}.
 At the same time, regular expression simplification is vastly easier to implement
 on actual \ty{Regex}es, rather than on their quotations.
-To implement the editor action, \autoref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
+To implement the editor action, figure~\ref{code:regexQuote} defines two functions \fn{unquote} and \fn{quote}
 that converts between \TT{} and the constructors of \ty{Regex}. The
 conversion from \ty{Regex} to \ty{TT} in the \fn{quote} function cannot fail,
 since all regexes must have a core language representation. However, the
@@ -105,7 +105,7 @@ that contain free variables.
 
 The functions \fn{unquote}, \fn{quote}, and \fn{simplify} provide all the
 building blocks needed to define the custom editor action, which are combined in
-\autoref{code:regexElab} to make up the necessary \Elab{} action.
+figure~\ref{code:regexElab} to make up the necessary \Elab{} action.
 
 The Emacs Lisp support code required to run the custom editor action gets the
 region selected in the editor by the user, sends it as the first argument for
@@ -153,7 +153,7 @@ and replaces the code in the response with the selected region.
   \label{fig:regex-example}
 \end{figure}
 
-\autoref{fig:regex-example} shows an example editor session using the regex
+Figure~\ref{fig:regex-example} shows an example editor session using the regex
 simplification editor action. The user selects a region containing an
 expression and executes the Emacs Lisp function, which replaces the selected
 expression with the simplified version of the same regex.
@@ -180,7 +180,7 @@ editor action in Idris itself that generates initial clauses for top-level
 type declarations without implicit arguments or interface
 constraints. A version that handles these additional features is
 longer, but involves no additional concepts. The complete Idris code that
-implements this editor action can be seen in \autoref{code:addClause}.
+implements this editor action can be seen in figure~\ref{code:addClause}.
 
 \begin{figure}[ht]
 \begin{Verbatim}

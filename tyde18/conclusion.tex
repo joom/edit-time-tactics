@@ -42,11 +42,11 @@ to implement this as an additional step during elaboration: it would suffice to
 encode the allowed types of editor actions as a universe à la
 Tarski~\cite{genericDep}.  The universe type would serve as a wrapper around the
 arrow type that checks if the type on the left of the arrow has an
-\Editorable{} instance. \autoref{code:universe} shows a possible
+\Editorable{} instance. Figure~\ref{code:universe} shows a possible
 universe type and defines a function to map the members of a universe
 to their Idris types.
 
-\begin{figure}[H]
+\begin{figure}[b]
 \begin{Verbatim}
 \kw{data} \ty{Act} : \ty{Type} \kw{where}
   \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
@@ -60,10 +60,10 @@ to their Idris types.
 \label{code:universe}
 \end{figure}
 
-\autoref{code:universe-example} shows how the type of the \fn{easy} editor
-action from \autoref{fig:motivating-example} would change with this encoding.
+Figure~\ref{code:universe-example} shows how the type of the \fn{easy} editor
+action from figure~\ref{fig:motivating-example} would change with this encoding.
 
-\begin{figure}[H]
+\begin{figure}
 \begin{Verbatim}
 \fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))
 \fn{easy} \bn{n} = \cm{\{- elided, same as before -\}}

@@ -1,38 +1,5 @@
 \section{Design}\label{sec:design}
 
-The current Idris implementation of the editor interaction mode is a part of
-the Idris compiler, and is written in Haskell.  The editor runs an instance of
-the \mt{idris} executable in IDE mode, which allows socket communication
-through a machine-readable syntax.
-
-Currently there are plugins for Emacs, Vim, Sublime Text, Atom, and Visual
-Studio Code that communicate with the Idris compiler and allow type-directed
-editor actions.
-Adding another command to the compiler necessitates adding the command to the
-user interface, so some code needs to be written in the extension language of
-an editor.
-In this paper, we focus on Emacs since it has the most featureful Idris mode.
-Therefore we use its extension language, Emacs Lisp, but we might as well have
-used VimL or JavaScript to support one of the other editors.
-
-When the user invokes an editor action, the editor has to tell the Idris
-compiler what to run. Since the editor and the compiler run in different processes,
-for each interaction the editor has to send a message to the compiler,
-and the compiler has to send a message back to the editor, as seen in \autoref{editorDiagram}.
-These messages are formatted as \citeauthor{mccarthy}'s \sexp{}s~\citep{mccarthy}.
-
-\begin{figure}
-\begin{tikzcd}
-\mlnode{Editor\\ (Emacs, Vim, etc.)}
-  \arrow[rr, "\text{request \sexp}", shift left=3] &  &
-  \mlnode{the Idris compiler\\ in IDE mode}
-  \arrow[ll, "\text{response \sexp}", shift left=3]
-\end{tikzcd}
-\caption{The communication between the editor and the compiler for an editor action.}
-\label{editorDiagram}
-\end{figure}
-
-
 The \Elab{} monad in Idris primitively keeps track of a state
 involving a potentially incomplete expression, its type, and any new declarations generated as
 side effects during elaboration.

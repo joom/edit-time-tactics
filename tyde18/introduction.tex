@@ -25,10 +25,10 @@ in Haskell, making use of an elaboration monad to track the
 complicated state that is involved. The high-level Idris language is
 extensible using \emph{elaborator reflection}~\citep{davidphd,
   elabref}, which directly exposes the elaboration monad to Idris
-programs, so that Idris can be extended in itself. Concretely,
+programs so that Idris can be extended in itself. Concretely,
 elaborator reflection extends Idris with a primitive monad
 \Elab{}. Just as values in \IO{} describe effectful programs to be
-executed by the run-time system, \Elab{} actions describe effectful
+executed by the run-time system, values in \Elab{} describe effectful
 programs to be run during elaboration.
 
 We have extended Idris's implementation of elaborator reflection with
@@ -41,7 +41,7 @@ domain-specific editor actions for embedded domain-specific
 languages~\citep{dsel} and to replace parts of the compiler with
 customizable library code written in Idris. Even more importantly,
 users who were previously stuck with whatever the developers provided
-are now empowered to make not only their language, but also their
+are now empowered to make not only their language, but also their programming
 environment, their own.
 
 % \subsection*{Contributions}
@@ -71,12 +71,12 @@ components: the Idris compiler, which is responsible for type checking
 and code generation, and a text editor, which provides an interface in
 which users can write programs. While some IDEs tightly couple the
 text editor component to the compiler component, requiring them to run
-in the same process and be written in the same language, Idris
+in the same process and to be written in the same language, Idris
 provides an interaction protocol that can be used to bring
 type-directed program construction to \emph{any} sufficiently
 extensible text editor. While this protocol is based on the Swank
 protocol used by Common Lisp and Dylan implementations since 2003, it
-is also somewhat similar to the more recent Language Server Protocol
+is also similar to the more recent Language Server Protocol
 used in Visual Studio Code.
 
 Using this protocol, client editors can invoke the type checker,
@@ -189,7 +189,7 @@ When \bn{A} and \bn{B} are the same type, and \bn{x} and \bn{y}
 can be judged to be equal according to that type, \dt{Refl} proves the
 equality. The \fn{converts} action checks whether two quoted terms are
 judgmentally equal, and fails if they are not. Having checked that the
-types and their inhabitants are equal, the second case returns \dt{Refl}.
+types and their inhabitants coincide, the second case returns \dt{Refl}.
 
 The third and final case matches any other goal, and it
 fails. Additional cases could be added on an \emph{ad hoc} basis, or a

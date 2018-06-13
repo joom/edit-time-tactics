@@ -95,13 +95,15 @@ the symbol \dt{:Nothing}. This can be implemented as follows:
 \caption{\ty{Maybe} instance of the \ty{Editorable} type class.}
 \end{figure}
 
-The idea that is introduced here can be used to define an \Editorable{}
-instance for any data type that has exported constructors. Constructors that do
-not take any argument are represented as symbol atoms, and the ones that do
-take arguments are represented as a list \sexp{}, in which the first element is
-a symbol atom and the other elements represent the arguments that the
-constructor takes. We will call this the \emph{constructor-based \sexp{}
-representation} of a type.
+The idea that is introduced here can be used to define an
+\Editorable{} instance for any inductively-defined data type, so long
+as the arguments to its constructors are also inductively
+defined. Constructors that do not take any argument are represented as
+symbol atoms, and the ones that do take arguments are represented as a
+list \sexp{}, in which the first element is a symbol atom and the
+other elements represent the arguments that the constructor takes. We
+will call this the \emph{constructor-based \sexp{} representation} of
+a type.
 
 It is not, however, possible to use the constructor-based representation for every type.
 In particular, functions and infinite coinductive datatypes do not, in general, admit finite serializations.

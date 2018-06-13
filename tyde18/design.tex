@@ -21,6 +21,14 @@ A simple editor action that only needs to send a number back
 to the editor should return an \mbox{\ty{Elab Nat}}, where \ty{Nat} is the
 type of natural numbers.
 
+Using the \TT{} type to send and receive Idris expressions from the editor is a
+deliberate design choice that allows users to reuse existing \Elab{} scripts in
+custom editor actions. However, since \TT{} denotes core Idris terms, editor
+actions cannot return an exact concrete syntax. We explain our solution for the
+gap between the core language terms in \Elab{} actions and the concrete syntax
+used in the editor in sections~\ref{sssec:primitiveEditorable}
+and~\ref{ssec:hardcodingEditorable}.
+
 \subsection{The \Editorable{} Type Class}
 \label{ssec:editorable}
 
@@ -136,7 +144,7 @@ each editor when it already exists in the Idris compiler. Therefore,
 for these core datatypes, the editor sends and receive concrete
 syntax.
 
-On the other hand, if the compiler receives concrete syntax and needs to run \Elab{}
+If the compiler receives concrete syntax and needs to run \Elab{}
 actions on that, there are many missing steps in between, most important of
 which is elaboration from a high-level language to the core language.
 Similarly, if the compiler needs to send back concrete syntax after

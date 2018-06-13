@@ -21,8 +21,8 @@ A simple editor action that only needs to send a number back
 to the editor should return an \mbox{\ty{Elab Nat}}, where \ty{Nat} is the
 type of natural numbers.
 
-Using the \TT{} type to send and receive Idris expressions from the editor is a
-deliberate design choice that allows users to reuse existing \Elab{} scripts in
+
+Using the \TT{} type to send and receive Idris expressions from the editor allows users to reuse existing \Elab{} scripts in
 custom editor actions. However, since \TT{} denotes core Idris terms, editor
 actions cannot return an exact concrete syntax. We explain our solution for the
 gap between the core language terms in \Elab{} actions and the concrete syntax

@@ -76,7 +76,22 @@ Observe that \mt{\fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))} evaluates
 to \mt{\ty{TTName} -> \Elab{} \TT}, therefore the definition of \fn{easy} does
 not have to change.
 
-%%% TODO for another time: Try to remember what I meant about using a universe for dependent editor actions
+\subsection{Surface-Language Syntax}
+
+Editor actions presently accept and produce representations of \TT{},
+rather than high-level Idris, which greatly simplifies the
+implementation and maintenance of editor actions. For many
+applications, this does not matter, because the \emph{meaning} of an
+expression is more important than how it is written. In some cases,
+however, this lack of expressive power might be a problem. For
+instance, it is presently impossible to define an editor action that
+converts a use of idiom brackets~\citep{Applicative} into the
+equivalent \kw{do}-notation, as both expressions have the same
+representation in the core language. In the future, it would be
+interesting to explore representations of the syntax of high-level
+Idris that are robust in the face of change and extension.
+
+
 
 \section{Conclusion}\label{sec:conclusion}
 

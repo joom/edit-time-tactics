@@ -22,11 +22,19 @@ to the editor should return an \mbox{\ty{Elab Nat}}, where \ty{Nat} is the
 type of natural numbers.
 
 
-Using the \TT{} type to send and receive Idris expressions from the editor allows users to reuse existing \Elab{} scripts in
-custom editor actions. However, since \TT{} denotes core Idris terms, editor
-actions cannot return an exact concrete syntax. We explain our solution for the
-gap between the core language terms in \Elab{} actions and the concrete syntax
-used in the editor in sections~\ref{sssec:primitiveEditorable}
+Using the \ty{TT} datatype to send and receive Idris expressions from
+the editor instead of a precise representation of the concrete syntax
+of high-level Idris allows programmers to reuse existing \Elab{}
+scripts in custom editor actions. Additionally, \ty{TT} works with the
+existing elaboration infrastructure, including type checking and
+evaluation, and we expect it to be far more robust in the face of
+future changes to Idris, because the high-level language changes much
+more frequently than the core language. However, since \ty{TT}
+represents terms and declarations in \TT{} rather than high-level
+Idris, editor actions cannot return an exact concrete syntax. We
+explain our solution for the gap between the core language terms in
+\Elab{} actions and the concrete syntax used in the editor in
+sections~\ref{sssec:primitiveEditorable}
 and~\ref{ssec:hardcodingEditorable}.
 
 \subsection{The \Editorable{} Type Class}

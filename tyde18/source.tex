@@ -1,27 +1,16 @@
-\documentclass[sigplan, review, timestamp]{acmart}
+\documentclass[sigplan, screen]{acmart}
 
 % Copyright
-%\setcopyright{none}
 %\setcopyright{acmcopyright}
 \setcopyright{acmlicensed}
-%\setcopyright{rightsretained}
-%\setcopyright{usgov}
-%\setcopyright{usgovmixed}
-%\setcopyright{cagov}
-%\setcopyright{cagovmixed}
-
-% DOI
-\acmDOI{}
-
-% ISBN
-\acmISBN{}
-
-%Conference
-\acmConference[TyDe'18]{the 3rd ACM SIGPLAN International Workshop on Type-Driven Development}{September 27, 2018}{St. Louis, MO, USA}
+% \setcopyright{ACMUNKNOWN}
+\acmPrice{15.00}
+\acmDOI{10.1145/3240719.3241791}
 \acmYear{2018}
 \copyrightyear{2018}
-\acmPrice{15.00}
-\acmSubmissionID{}
+\acmISBN{978-1-4503-5825-5/18/09}
+\acmConference[TyDe '18]{Proceedings of the 3rd ACM SIGPLAN International Workshop on Type-Driven Development}{September 27, 2018}{St. Louis, MO, USA}
+\acmBooktitle{Proceedings of the 3rd ACM SIGPLAN International Workshop on Type-Driven Development (TyDe '18), September 27, 2018, St. Louis, MO, USA}
 
 \usepackage{enumerate, enumitem}
 \usepackage{fancyvrb}
@@ -31,6 +20,9 @@
 \usepackage{todonotes}
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
+
+% balanced columns on the last page, camera-ready requirement
+\usepackage{flushend}
 % Idris
 % in REPL run `:pp latex 80 <expr>` to get the colored verbatim
 
@@ -111,18 +103,24 @@
 %\authornote{Author's current affiliation: Princeton University}
 \affiliation{
   \institution{Wesleyan University}
-  % \city{Middletown}
-  % \state{Connecticut}
-  % \country{USA}
+  \city{Middletown}
+  \state{Connecticut}
+  \country{USA}
 }
+% \additionalaffiliation{ % Princeton pays for my travel and conference fees so they should be here
+%   \institution{Princeton University, USA}
+%   \city{Princeton}
+%   \state{New Jersey}
+%   \country{USA}
+% }
 \email{ckorkut@wesleyan.edu}
 
 \author{David Thrane Christiansen}
 \affiliation{
   \institution{Galois, Inc.}
-  % \city{Portland}
-  % \state{Oregon}
-  % \country{USA}
+  \city{Portland}
+  \state{Oregon}
+  \country{USA}
 }
 \email{dtc@galois.com}
 
@@ -131,7 +129,7 @@
 \renewcommand{\shortauthors}{Joomy Korkut and David Christiansen}
 
 \begin{abstract}
-  Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that use informative types to assist users with the construction of programs. However, these interactive environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.
+  Dependently typed programming languages, such as Idris and Agda, feature rich interactive environments that use informative types to assist users with the construction of programs. However, these environments have been provided by the authors of the language, and users have not had an easy way to extend and customize them. We address this problem by extending Idris's metaprogramming facilities with primitives for describing new type-directed editing features, making Idris's editors as extensible as its elaborator.
 \end{abstract}
 
 %

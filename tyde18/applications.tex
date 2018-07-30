@@ -73,6 +73,12 @@ since if \fn{unquote} can be given any core language term, including ones that
 represent ill-typed Idris terms, ones that have types other than \ty{Regex}, or \ty{Regex}es
 that contain free variables.
 
+The \fn{unquote} and \fn{quote} functions are boilerplate code that should
+eventually either be derived\footnote{\url{http://github.com/david-christiansen/derive-all-the-instances}}~\cite{davidphd}
+or added as polymorphic primitives in the \Elab{} monad that directly reflect
+the internal term, similar to Agda's \ty{TC} monad~\cite{agdachangelogTC}.
+We leave either of these for future work.
+
 \begin{figure}[ht]
 \begin{Verbatim}
 \fn{unquote} : \ty{TT} -> \ty{Elab} \ty{Regex}
@@ -197,7 +203,7 @@ implements this editor action can be seen in figure~\ref{code:addClause}.
      \bn{env} <- \fn{getEnv}
      \bn{ty'} <- \fn{normalise} \bn{env} \bn{ty}
      \kw{let} \dt{(}\bn{argTys}\dt{,} \bn{retTy}\dt{)} = \fn{collectTypes} \bn{ty'}
-     \bn{argNames} <- \fn{traverse} (\fn{const} \fn{fresh}) \bn{argTys}
+     \bn{argNames} <- \fn{for} \bn{argTys} (\fn{const} \fn{fresh})
      \kw{let} \bn{lhsUntyped} =
        \fn{foldl} \dt{RApp} (\dt{Var} \bn{n}) (\fn{map} \dt{Var} \bn{argNames})
      \dt{(}\bn{lhsTyped}\dt{,} _\dt{)} <- \fn{check} \bn{env} \bn{lhsUntyped}

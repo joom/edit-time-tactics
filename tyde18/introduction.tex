@@ -27,8 +27,8 @@ extensible using \emph{elaborator reflection}~\citep{davidphd,
   elabref}, which directly exposes the elaboration monad to Idris
 programs so that Idris can be extended in itself. Concretely,
 elaborator reflection extends Idris with a primitive monad
-\Elab{}. Just as values in \IO{} describe effectful programs to be
-executed by the run-time system, values in \Elab{} describe effectful
+\Elab{}. Just as \IO{} values describe effectful programs to be
+executed by the run-time system, \Elab{} values describe effectful
 programs to be run during elaboration.
 
 We have extended Idris's implementation of elaborator reflection with
@@ -48,7 +48,7 @@ environment, their own.
 
 We make the following contributions in this paper:
 
-\begin{itemize}[topsep=0pt] % , leftmargin=10pt]
+\begin{itemize}[topsep=0pt , leftmargin=10pt]
 \item We explore the features that are necessary to use
   \mbox{elaborator reflection} to implement editor actions.
 \item We describe a concrete realization of this design, and the

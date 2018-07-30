@@ -50,11 +50,12 @@ to their Idris types.
 \begin{Verbatim}
 \kw{data} \ty{Act} : \ty{Type} \kw{where}
   \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
-  \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act} -> \ty{Act}
+  \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => (\bn{ty} -> \ty{Act})
+     -> \ty{Act}
 
 \fn{actTy} : \ty{Act} -> \ty{Type}
-\fn{actTy} (\dt{Done} \bn{a}) = \ty{Elab} \bn{a}
-\fn{actTy} (\dt{Arg} \bn{a} \bn{e}) = \bn{a} -> \fn{actTy} \bn{e}
+\fn{actTy} (\dt{Done} \bn{ty}) = \ty{Elab} \bn{ty}
+\fn{actTy} (\dt{Arg} \bn{ty} \bn{f}) = (\bn{v} : \bn{ty}) -> \fn{actTy} (\bn{f} \bn{v})
 \end{Verbatim}
 \caption{Universe encoding of types feasible to be treated as editor actions.}
 \label{code:universe}
@@ -65,16 +66,43 @@ action from figure~\ref{fig:motivating-example} would change with this encoding.
 
 \begin{figure}
 \begin{Verbatim}
-\fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))
+\fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\textbackslash\bn{n} => \dt{Done} \TT))
 \fn{easy} \bn{n} = \cm{\{- elided, same as before -\}}
 \end{Verbatim}
-\caption{\fn{easy}  rewritten as a universe encoded editor action.}
+\caption{\fn{easy} rewritten as a universe encoded editor action.}
 \label{code:universe-example}
 \end{figure}
 
 Observe that \mt{\fn{actTy} (\dt{Arg} \ty{TTName} (\dt{Done} \TT))} evaluates
 to \mt{\ty{TTName} -> \Elab{} \TT}, therefore the definition of \fn{easy} does
 not have to change.
+
+The most important outcome of this change would be the increase in the
+expressiveness of editor action types. Our current implementation rules out
+dependently typed editor actions, however this universe encoding would allow
+them. Figure ~\ref{code:universe-dependent} shows a hypothetical editor action that
+takes a vector of some length that contains function names and returns a
+vector of the same length that contains the types found for the function names.
+
+\begin{figure}
+\begin{Verbatim}
+\kw{implementation} \ty{Editorable} \bn{a}
+            => \ty{Editorable} (\ty{Vect} \bn{n} \bn{a}) \kw{where}
+  \cm{\{- elided -\}}
+
+\fn{getTypes} : \fn{actTy} (\dt{Arg} \ty{Nat} (\textbackslash\bn{n} =>
+                    \dt{Arg} (\ty{Vect} \bn{n} \ty{TTName}) (\textbackslash{}_ =>
+                      \dt{Done} (\ty{Vect} \bn{n} (\ty{Maybe} \ty{TT})))))
+\fn{getTypes} \bn{n} \bn{v} =
+  \fn{for} \bn{v} (\textbackslash\bn{n} =>
+    \kw{do} \bn{l} <- \fn{lookupTy} \bn{n}
+       \kw{case} \bn{l} \kw{of}
+         \dt{[(}_\dt{,} _\dt{,} \bn{ty}\dt{)]} => \fn{pure} (\dt{Just} \bn{ty})
+         _ => \fn{pure} \dt{Nothing})
+\end{Verbatim}
+\caption{A dependently typed editor action that would be possible with the universe encoding.}
+\label{code:universe-dependent}
+\end{figure}
 
 \subsection{Surface-Language Syntax}
 

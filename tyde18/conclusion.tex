@@ -50,8 +50,8 @@ to their Idris types.
 \begin{Verbatim}
 \kw{data} \ty{Act} : \ty{Type} \kw{where}
   \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
-  \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => (\bn{ty} -> \ty{Act})
-     -> \ty{Act}
+  \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} =>
+     (\bn{ty} -> \ty{Act}) -> \ty{Act}
 
 \fn{actTy} : \ty{Act} -> \ty{Type}
 \fn{actTy} (\dt{Done} \bn{ty}) = \ty{Elab} \bn{ty}
@@ -80,15 +80,13 @@ not have to change.
 The most important outcome of this change would be the increase in the
 expressiveness of editor action types. Our current implementation rules out
 dependently typed editor actions, however this universe encoding would allow
-them. Figure ~\ref{code:universe-dependent} shows a hypothetical editor action that
-takes a vector of some length that contains function names and returns a
-vector of the same length that contains the types found for the function names.
+them. Figure ~\ref{code:universe-dependent} shows a
+hypothetical editor action that takes a vector of some length that contains
+function names and returns a vector of the same length that contains the types
+found for the function names.
 
 \begin{figure}
 \begin{Verbatim}
-\kw{implementation} \ty{Editorable} \bn{a}
-            => \ty{Editorable} (\ty{Vect} \bn{n} \bn{a}) \kw{where}
-  \cm{\{- elided -\}}
 
 \fn{getTypes} : \fn{actTy} (\dt{Arg} \ty{Nat} (\textbackslash\bn{n} =>
                     \dt{Arg} (\ty{Vect} \bn{n} \ty{TTName}) (\textbackslash{}_ =>
@@ -103,6 +101,32 @@ vector of the same length that contains the types found for the function names.
 \caption{A dependently typed editor action that would be possible with the universe encoding.}
 \label{code:universe-dependent}
 \end{figure}
+
+% I'm not sure if we need this paragraph... we can remove it later
+However, writing editor actions with dependent data types would require writing
+more complex \Editorable{} instances.  Figure ~\ref{code:editorable-vect} shows the
+\Editorable{} instance for length-indexed vectors, which uses lists to denote
+vectors and hence has to check if the lengths match in every deserialization.
+
+\begin{figure}
+\begin{Verbatim}
+\kw{implementation} \ty{Editorable} \bn{a}
+            => \ty{Editorable} (\ty{Vect} \bn{n} \bn{a}) \kw{where}
+  \fn{fromEditor} \{\bn{a}\} \{\bn{n}\} (\dt{SExpList} \bn{l}) =
+    \kw{do} \bn{l'} <- \fn{traverse} (\fn{fromEditor} \{a = \bn{a}\}) \bn{l}
+             \fn{<|>} \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
+       \kw{case} \fn{decEq} (\fn{length} \bn{l'}) \bn{n} \kw{of}
+         \dt{Yes} \bn{pf} =>
+           \fn{pure} (\fn{replace} \{P = (\kw{\`}\ty{Vect}\kw{\`}\} \bn{a})\} \bn{pf}
+                         (\fn{fromList} \bn{l'}))
+         \dt{No} _ => \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
+  \fn{fromEditor} _ = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
+  \fn{toEditor} \bn{v} = \fn{toEditor} (\fn{toList} \bn{v})
+\end{Verbatim}
+\caption{\Editorable{} instance for length-indexed vectors.}
+\label{code:editorable-vect}
+\end{figure}
+
 
 \subsection{Surface-Language Syntax}
 

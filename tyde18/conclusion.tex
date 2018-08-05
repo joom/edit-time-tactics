@@ -117,8 +117,8 @@ vectors and hence has to check if the lengths match in every deserialization.
              \fn{<|>} \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
        \kw{case} \fn{decEq} (\fn{length} \bn{l'}) \bn{n} \kw{of}
          \dt{Yes} \bn{pf} =>
-           \fn{pure} (\fn{replace} \{P = (\kw{\`}\ty{Vect}\kw{\`}\} \bn{a})\} \bn{pf}
-                         (\fn{fromList} \bn{l'}))
+           \fn{pure} (\fn{replace} \{P = (\kw{\`}\ty{Vect}\kw{\`}\} \bn{a})\}
+                         \bn{pf} (\fn{fromList} \bn{l'}))
          \dt{No} _ => \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
   \fn{fromEditor} _ = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
   \fn{toEditor} \bn{v} = \fn{toEditor} (\fn{toList} \bn{v})

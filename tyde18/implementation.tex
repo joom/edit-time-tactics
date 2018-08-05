@@ -1,70 +1,6 @@
 \section{Implementation Concerns}\label{sec:implementation}
 
-% \TODO{The main goal of this section will be to provide enough information about the implementation so that someone else can add this feature to their dependently typed language. What were the big challenges? Think of things like the need for the local context to be preserved and how that gets associated with commands, as well as document the interesting challenges that arose.}
-
-The overall design described in section~\ref{sec:design} is not
-completely sufficient to implement extensible type-directed
-editing. Some additional machinery proves to be necessary in practice.
-
-\subsection{Local Contexts}
-\label{ssec:localContext}
-
-Expressions can be understood only in a local context that
-explains the types, and sometimes the values, of their free
-variables. Editor actions should have access to the local context of
-bound variables in addition to the global definition context. The
-design in section~\ref{sec:design}, however, has no means of providing
-them with this local context.
-
-For example, the editor might send an expression like \mt{\fn{not}
-  \bn{a}} to the compiler, where \bn{a} is bound in the local context.
-The compiler can parse this expression, but it cannot elaborate it,
-because without the local context, \bn{a} is meaningless. In a call to
-a custom editor action, expressions stand alone; they do not come with
-a context. It can deal with \fn{not}, which is defined in the global
-context, but when it comes to the local context, elaboration is doomed
-to fail.
-
-Editor actions have, thus far, been provided with their arguments
-explicitly. However, local contexts do not have a concrete
-representation in Idris's syntax, so they cannot be selected directly.
-
-To solve this problem, we take advantage of the fact that lexical
-contexts correspond closely to source spans. Each local binding form
-has a defined scope; this scope corresponds to a production of the
-abstract syntax tree that originates from a specific range of
-positions in the editor buffer. We extended the protocol for custom
-editor actions so that the editor sends a source position along with
-the action name and its arguments.
-
-The next step was to extend the internal compiler state with an
-interval map that connects ranges of source positions to the local
-context that corresponds to the process of elaborating the expression
-found in that range. We used the standard Haskell finger tree
-implementation of interval maps~\cite{fingertrees}.
-
-When initializing the reflected elaboration monad prior to executing
-an editor action, the local context is initialized with the one that
-corresponds to the cursor location sent by the editor. The compiler
-can use that information in the elaboration of terms depending on the
-local context, such as \mt{\fn{not} \bn{a}}. This constrains
-editor actions to have a single privileged source position; this
-constraint has not proven difficult in practice, but it could be
-lifted by making source positions \ty{Editorable} and providing any
-number of them as ordinary arguments. Editor actions could then have a
-primitive to enter the lexical scope corresponding to a source
-position, and to check whether a source span is contained within a
-particular scope.
-
-We expect that the remembered association between source spans and
-contexts will enable additional editor features, such as displaying
-the local context as the user navigates a source file, but we have not
-yet implemented these features.
-
-\subsection{Hard-Coding \Editorable{} Instances}
-\label{ssec:hardcodingEditorable}
-
-\begin{figure*}
+\begin{figure*}[!b]
 \begin{tikzcd}
   \mlnode{
     Haskell terms\\ \medskip \footnotesize such as the \ty{()} term\\
@@ -107,6 +43,75 @@ yet implemented these features.
 \label{reflectionGraph}
 \end{figure*}
 
+% \TODO{The main goal of this section will be to provide enough information about the implementation so that someone else can add this feature to their dependently typed language. What were the big challenges? Think of things like the need for the local context to be preserved and how that gets associated with commands, as well as document the interesting challenges that arose.}
+
+The overall design described in section~\ref{sec:design} is not
+completely sufficient to implement extensible type-directed
+editing. Some additional machinery proves to be necessary in practice.
+
+\subsection{Local Contexts}
+\label{ssec:localContext}
+
+Expressions can be understood only in a local context that
+explains the types, and sometimes the values, of their free
+variables. Editor actions should have access to the local context of
+bound variables in addition to the global definition context. The
+design in section~\ref{sec:design}, however, has no means of providing
+them with this local context.
+
+For example, the editor might send an expression like \mt{\fn{not}
+  \bn{a}} to the compiler, where \bn{a} is bound in the local context.
+The compiler can parse this expression, but it cannot elaborate it,
+because without the local context, \bn{a} is meaningless. In a call to
+a custom editor action, expressions stand alone; they do not come with
+a context. It can deal with \fn{not}, which is defined in the global
+context, but when it comes to the local context, elaboration is doomed
+to fail.
+
+Editor actions have, thus far, been provided with their arguments
+explicitly. However, local contexts do not have a concrete
+representation in Idris's syntax, so they cannot be selected directly.
+
+To solve this problem, we take advantage of the fact that lexical
+contexts correspond closely to source spans. Each local binding form
+has a defined scope; this scope corresponds to a production of the
+abstract syntax tree that originates from a specific range of
+positions in the editor buffer. We extended the protocol for custom
+editor actions so that the editor sends a source position along with
+the action name and its arguments.
+
+Prior to our work, local context information was only available for holes, and
+they were tied to names of the holes, not their source positions. To be able to
+keep track of the correspondence between source positions of all expressions
+and their local contexts, we extended the internal compiler state with an
+interval map that connects ranges of source positions to the local
+context that corresponds to the process of elaborating the expression
+found in that range. We used the standard Haskell finger tree
+implementation of interval maps~\cite{fingertrees}.
+Entries in interval maps are accumulated during elaboration and saved, to be
+used later in editor interaction.
+
+When initializing the reflected elaboration monad prior to executing
+an editor action, the local context is initialized with the one that
+corresponds to the cursor location sent by the editor. The compiler
+can use that information in the elaboration of terms depending on the
+local context, such as \mt{\fn{not} \bn{a}}. This constrains
+editor actions to have a single privileged source position; this
+constraint has not proven difficult in practice, but it could be
+lifted by making source positions \ty{Editorable} and providing any
+number of them as ordinary arguments. Editor actions could then have a
+primitive to enter the lexical scope corresponding to a source
+position, and to check whether a source span is contained within a
+particular scope.
+
+We expect that the remembered association between source spans and
+contexts will enable additional editor features, such as displaying
+the local context as the user navigates a source file, but we have not
+yet implemented these features.
+
+\subsection{Hard-Coding \Editorable{} Instances}
+\label{ssec:hardcodingEditorable}
+
 Implementing hard-coded instances of the \Editorable{} type class in the
 compiler is challenging to describe since there are many languages involved in
 different ways. Idris's compiler is written in Haskell, hence there is a
@@ -133,7 +138,7 @@ type \bn{ty}. The elaborator should have a case for each primitive
 \Editorable{} implementation. For brevity, we will only consider the case in
 which \bn{ty} corresponds to the Idris type \TT{}. Then the elaborator should
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=10pt]
   \item reify \bn{arg} to get a Haskell \sexp{} and make sure it is a string atom;
   \item parse the string inside the \sexp{} and get a high-level language term;
   \item traverse the high-level language term and resolve namespaces for names, for when it is unambiguous;
@@ -150,7 +155,7 @@ When the elaborator finishes running \fn{prim\_\_toEditor}, it should create
 the Haskell representation of an Idris core language term representing an
 \sexp{}. The \TT{} case for \fn{prim\_\_toEditor} should
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=10pt]
   \item reify \bn{arg} to get a Haskell representation of an Idris core language term;
   \item delaborate and resugar the core language term into a high-level language term;
   \item use pretty printing to get a string that is a piece of code;

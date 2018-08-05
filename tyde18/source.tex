@@ -1,9 +1,10 @@
 \documentclass[sigplan, screen]{acmart}
 
-% Copyright
-%\setcopyright{acmcopyright}
+%%% The following is specific to TyDe '18 and the paper
+%%% 'Extensible Type-Directed Editing'
+%%% by Joomy Korkut and David Thrane Christiansen.
+%%%
 \setcopyright{acmlicensed}
-% \setcopyright{ACMUNKNOWN}
 \acmPrice{15.00}
 \acmDOI{10.1145/3240719.3241791}
 \acmYear{2018}
@@ -20,6 +21,7 @@
 \usepackage{todonotes}
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
+\usepackage{dblfloatfix}
 
 % balanced columns on the last page, camera-ready requirement
 \usepackage{flushend}
@@ -100,19 +102,12 @@
 
 \author{Joomy Korkut}
 \orcid{0000-0001-6784-7108}
-%\authornote{Author's current affiliation: Princeton University}
 \affiliation{
   \institution{Wesleyan University}
   \city{Middletown}
   \state{Connecticut}
   \country{USA}
 }
-% \additionalaffiliation{ % Princeton pays for my travel and conference fees so they should be here
-%   \institution{Princeton University, USA}
-%   \city{Princeton}
-%   \state{New Jersey}
-%   \country{USA}
-% }
 \email{ckorkut@wesleyan.edu}
 
 \author{David Thrane Christiansen}

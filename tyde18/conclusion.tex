@@ -46,7 +46,7 @@ arrow type that checks if the type on the left of the arrow has an
 universe type and defines a function to map the members of a universe
 to their Idris types.
 
-\begin{figure}[b]
+\begin{figure}[H]
 \begin{Verbatim}
 \kw{data} \ty{Act} : \ty{Type} \kw{where}
   \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
@@ -64,7 +64,7 @@ to their Idris types.
 Figure~\ref{code:universe-example} shows how the type of the \fn{easy} editor
 action from figure~\ref{fig:motivating-example} would change with this encoding.
 
-\begin{figure}
+\begin{figure}[H]
 \begin{Verbatim}
 \fn{easy} : \fn{actTy} (\dt{Arg} \ty{TTName} (\textbackslash\bn{n} => \dt{Done} \TT))
 \fn{easy} \bn{n} = \cm{\{- elided, same as before -\}}
@@ -85,7 +85,7 @@ hypothetical editor action that takes a vector of some length that contains
 function names and returns a vector of the same length that contains the types
 found for the function names.
 
-\begin{figure}
+\begin{figure}[H]
 \begin{Verbatim}
 
 \fn{getTypes} : \fn{actTy} (\dt{Arg} \ty{Nat} (\textbackslash\bn{n} =>
@@ -108,7 +108,7 @@ more complex \Editorable{} instances.  Figure ~\ref{code:editorable-vect} shows 
 \Editorable{} instance for length-indexed vectors, which uses lists to denote
 vectors and hence has to check if the lengths match in every deserialization.
 
-\begin{figure}
+\begin{figure}[H]
 \begin{Verbatim}
 \kw{implementation} \ty{Editorable} \bn{a}
             => \ty{Editorable} (\ty{Vect} \bn{n} \bn{a}) \kw{where}
@@ -126,7 +126,6 @@ vectors and hence has to check if the lengths match in every deserialization.
 \caption{\Editorable{} instance for length-indexed vectors.}
 \label{code:editorable-vect}
 \end{figure}
-
 
 \subsection{Surface-Language Syntax}
 

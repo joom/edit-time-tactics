@@ -77,12 +77,15 @@ not have to change.
 
 
 The most important outcome of this change would be the increase in the
-expressiveness of editor action types. The current implementation rules out
-dependently typed editor actions, while this universe encoding would allow
-them. Figure ~\ref{code:universe-dependent} shows a
-hypothetical editor action that takes a vector of some length that contains
-function names and returns a vector of the \emph{same} length that contains the types
-found for the function names.
+expressiveness of editor action types, enabling interesting dependent
+types to be used for editor actions. The current
+implementation rules out dependently typed editor actions, while this
+universe encoding would allow them. Figure
+~\ref{code:universe-dependent} shows a hypothetical editor action that
+takes a vector of some length that contains function names and returns
+a vector of the \emph{same} length that contains the types found for
+the function names.
+
 
 \begin{figure}
 \begin{Verbatim}

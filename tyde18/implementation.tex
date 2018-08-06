@@ -73,7 +73,7 @@ explicitly. However, local contexts do not have a concrete
 representation in Idris's syntax, so they cannot be selected directly.
 
 To solve this problem, we take advantage of the fact that lexical
-contexts correspond closely to source spans. Each local binding form
+contexts correspond to source spans. Each local binding form
 has a defined scope; this scope corresponds to a production of the
 abstract syntax tree that originates from a specific range of
 positions in the editor buffer. We extended the protocol for custom

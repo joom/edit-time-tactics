@@ -104,6 +104,8 @@ However, writing editor actions with dependent data types would require writing
 more complex \Editorable{} instances.  Figure ~\ref{code:editorable-vect} shows the
 \Editorable{} instance for length-indexed vectors, which uses lists to denote
 vectors and hence has to check if the lengths match in every deserialization.
+\citet{foundations-dep-interop} provide a solution to this problem that could be
+adopted in Idris.
 
 \begin{figure}[H]
 \begin{Verbatim}

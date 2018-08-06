@@ -49,7 +49,7 @@ Figure~\ref{code:universe} demonstrates an implementation of this universe.
 \kw{data} \ty{Act} : \ty{Type} \kw{where}
   \dt{Done} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} => \ty{Act}
   \dt{Arg} : (\bn{a} : \ty{Type}) -> \ty{Editorable} \bn{a} =>
-     (\bn{ty} -> \ty{Act}) -> \ty{Act}
+     (\bn{a} -> \ty{Act}) -> \ty{Act}
 
 \fn{actTy} : \ty{Act} -> \ty{Type}
 \fn{actTy} (\dt{Done} \bn{ty}) = \ty{Elab} \bn{ty}

@@ -38,11 +38,11 @@ checks whether all components of an editor action type have an
 instance of the \Editorable{} type class. However, it is not necessary
 to implement this as an additional step during elaboration: it would suffice to
 encode the allowed types of editor actions as a universe à la
-Tarski~\cite{genericDep}.  The universe type would serve as a wrapper around the
-arrow type that checks if the type on the left of the arrow has an
-\Editorable{} instance. Figure~\ref{code:universe} shows a possible
-universe type and defines a function to map the members of a universe
-to their Idris types.
+Tarski~\cite{genericDep}.  The universe would include only those functions whose domains
+have \Editorable{} instances and whose ranges are in the universe, as well as
+other types that have \Editorable{} instances.
+Figure~\ref{code:universe} demonstrates an implementation of this universe.
+
 
 \begin{figure}[H]
 \begin{Verbatim}
@@ -76,16 +76,15 @@ to \mt{\ty{TTName} -> \Elab{} \TT}, therefore the definition of \fn{easy} does
 not have to change.
 
 The most important outcome of this change would be the increase in the
-expressiveness of editor action types. Our current implementation rules out
-dependently typed editor actions, however this universe encoding would allow
+expressiveness of editor action types. The current implementation rules out
+dependently typed editor actions, while this universe encoding would allow
 them. Figure ~\ref{code:universe-dependent} shows a
 hypothetical editor action that takes a vector of some length that contains
-function names and returns a vector of the same length that contains the types
+function names and returns a vector of the \emph{same} length that contains the types
 found for the function names.
 
 \begin{figure}[H]
 \begin{Verbatim}
-
 \fn{getTypes} : \fn{actTy} (\dt{Arg} \ty{Nat} (\textbackslash\bn{n} =>
                     \dt{Arg} (\ty{Vect} \bn{n} \ty{TTName}) (\textbackslash{}_ =>
                       \dt{Done} (\ty{Vect} \bn{n} (\ty{Maybe} \ty{TT})))))
@@ -115,7 +114,7 @@ vectors and hence has to check if the lengths match in every deserialization.
              \fn{<|>} \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
        \kw{case} \fn{decEq} (\fn{length} \bn{l'}) \bn{n} \kw{of}
          \dt{Yes} \bn{pf} =>
-           \fn{pure} (\fn{replace} \{P = (\kw{\`}\ty{Vect}\kw{\`}\} \bn{a})\}
+           \fn{pure} (\fn{replace} \{P = \textbackslash{}\bn{k} => \ty{Vect} \bn{k} \bn{a}\}
                          \bn{pf} (\fn{fromList} \bn{l'}))
          \dt{No} _ => \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}
   \fn{fromEditor} _ = \fn{fail} \dt{[}\cm{\{- elided -\}}\dt{]}

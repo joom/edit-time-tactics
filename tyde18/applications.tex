@@ -74,7 +74,7 @@ represent ill-typed Idris terms, ones that have types other than \ty{Regex}, or 
 that contain free variables.
 
 The \fn{unquote} and \fn{quote} functions are boilerplate code that should
-eventually either be derived\footnote{\url{http://github.com/david-christiansen/derive-all-the-instances}}~\cite{davidphd}
+eventually either be derived~\cite{davidphd}
 or added as polymorphic primitives in the \Elab{} monad that directly reflect
 the internal term, similar to Agda's \ty{TC} monad~\cite{agdachangelogTC}.
 We leave either of these for future work.
@@ -274,7 +274,7 @@ implementation Djinn~\cite{djinn}, which generates Haskell expressions
 for a given type.
 Djinn is a standalone program that takes commands
 interactively, and when it generates an expression it prints it on the screen.
-Instead, Hezarfen is a library that provides an \Elab\ action
+Hezarfen, on the other hand, is a library that provides an \Elab\ action
 that can be used as a tactic in proofs, and a custom editor action to be run
 when the built-in proof search mechanism does not suffice.
 

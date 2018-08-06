@@ -14,11 +14,11 @@ Microsoft Research, Leonardo de Moura and the second author added
 support to Lean for \emph{hole commands}, which are tactics that implement
 editor actions, but only in the context of a hole. They allow the
 contents of the hole to be transformed into an arbitrary string, which
-replaces the hole. Using the pretty-printing features of the tactic
+replaces the hole. Using the pretty-printing features of Lean's tactic
 system, terms can be placed in holes.
 
 Because Lean's editor actions only work in the context of a hole, and
-can only take quoted terms as arguments, no Emacs Lisp is necessary to
+can only take quoted terms as arguments, no custom Emacs Lisp is necessary to
 invoke them. The user simply right-clicks a hole, and a list of
 commands appears.  In comparison to our custom editor action mechanism
 presented in our work, Lean's system is less expressive, but more
@@ -92,8 +92,8 @@ Racket is a language that focuses on the paradigm of
 problems are solved by first constructing the most appropriate
 language to solve them. One part of this process is extensible,
 metaprogrammable tooling, especially the DrRacket~\cite{revenge}
-IDE. For instance, \citet{feltey2016languages} demonstrate a
-surprisingly concise Java-like language, including refactoring tools.
+IDE.\ For instance, \citet{feltey2016languages} demonstrate a
+quite concise implementation of a Java-like language, including refactoring tools.
 It is certainly possible to implement dependently typed languages in
 the Racket ecosystem: both Cur~\cite{cur} and
 Pie~\cite{theLittleTyper} already exist, and the latter includes a

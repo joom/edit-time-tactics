@@ -85,9 +85,12 @@ generate initial implementations for functions based on their type
 signature, discover the callers of a function, or request
 documentation. The protocol even allows interactive environments to
 request the normal form of an expression displayed in an error
-message, allowing in-place evaluation. However, the file that is being edited
-has to be loaded to the compiler, which allows the compiler to use the context
-in the file for the editor actions above.
+message, allowing in-place evaluation. However, the file that is being
+edited has to be loaded to the compiler, which allows the compiler to
+use the context in the file for the editor actions above. Idris does
+not yet support a mode of interaction similar to that of Lean, which
+incrementally type checks the buffer as users type; like Agda, the
+Idris type checker must be explicitly invoked.
 
 At the time of writing, there are Idris editing modes for GNU Emacs,
 Atom, Sublime Text, and Visual Studio Code that communicate with the

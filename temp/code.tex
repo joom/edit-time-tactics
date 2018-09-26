@@ -1,0 +1,65 @@
+\documentclass{article}
+\usepackage{fancyvrb}
+\fvset{commandchars=\\\{\}}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{fontspec}
+\setromanfont{Iosevka}
+\setmonofont{Iosevka}
+
+% balanced columns on the last page, camera-ready requirement
+\usepackage{flushend}
+% Idris
+% in REPL run `:pp latex 80 <expr>` to get the colored verbatim
+
+\usepackage{amssymb}
+\newcommand\fakeslant[1]{%
+  \special{pdf: literal 1 0 0.167 1 0 0 cm}#1\special{pdf: literal 1 0 -0.167 1 0 0 cm}}
+\definecolor{IdrisRed}{HTML}{BC0045}
+\definecolor{IdrisBlue}{HTML}{0000d6}
+\definecolor{IdrisGreen}{HTML}{008b00}
+\definecolor{IdrisLilac}{HTML}{AC22BF}
+\definecolor{IdrisYellow}{HTML}{E16800}
+\definecolor{IdrisLightBlue}{HTML}{A4CDFF}
+\newcommand{\IdrisData}[1]{\textcolor{IdrisRed}{#1}}
+\newcommand{\IdrisType}[1]{\textcolor{IdrisBlue}{#1}}
+\newcommand{\IdrisBound}[1]{\textcolor{IdrisLilac}{\fakeslant{#1}}}
+\newcommand{\IdrisFunction}[1]{\textcolor{IdrisGreen}{#1}}
+\newcommand{\IdrisMetavar}[1]{\textcolor{IdrisYellow}{#1}}
+\newcommand{\IdrisKeyword}[1]{{\textbf{#1}}}
+\newcommand{\IdrisImplicit}[1]{{\itshape \IdrisBound{#1}}}
+\newcommand{\ty}[1]{\IdrisType{\texttt{#1}}}
+\newcommand{\kw}[1]{\IdrisKeyword{\texttt{#1}}}
+\newcommand{\fn}[1]{\IdrisFunction{\texttt{#1}}}
+\newcommand{\dt}[1]{\IdrisData{\texttt{#1}}}
+\newcommand{\bn}[1]{\IdrisBound{\texttt{#1}}}
+\newcommand{\cm}[1]{\textcolor{darkgray}{\texttt{#1}}}
+\newcommand{\hole}[1]{\IdrisMetavar{\texttt{?}\IdrisMetavar{\texttt{#1}}}}
+\newcommand{\Elab}{\ty{Elab}}
+\newcommand{\IO}{\ty{IO}}
+\newcommand{\String}{\ty{String}}
+\newcommand{\TT}{\ty{TT}}
+\newcommand{\Raw}{\ty{Raw}}
+\newcommand{\Editorable}{\ty{Editorable}}
+\newcommand{\TyDecl}{\ty{TyDecl}}
+\newcommand{\FunDefn}{\ty{FunDefn}}
+\newcommand{\FunClause}{\ty{FunClause}}
+\newcommand{\sexp}{\mbox{S-expression}} %don't hyphenate
+\newcommand{\mt}[1]{\mbox{\texttt{#1}}}
+\newcommand{\qt}[1]{\kw{\`{}(}{#1}\kw{)}} %quotation `(...)
+\newcommand{\antiqt}{\kw{\textasciitilde}} %antiquotation ~
+
+% Replicating selecting regions in the editor:
+% \newcommand{\select}[1]{\fcolorbox{black}{IdrisLightBlue}{#1}}
+% A version of select without any space around the box.
+% Hard to see in black & white so I chose the one with the space
+\newcommand{\select}[1]{{\setlength{\fboxsep}{0.05cm}\fcolorbox{black}{IdrisLightBlue}{#1}}}
+
+\begin{document}
+\begin{Verbatim}
+\kw{implementation} \ty{Editorable} \ty{String} \kw{where}
+  \fn{fromEditor} (\dt{StringAtom} \bn{s}) = \fn{pure} \bn{s}
+  \fn{fromEditor} \bn{x} = \fn{fail} \dt{[}\dt{TextPart} \dt{"Failed"]}
+  \fn{toEditor} \bn{s} = \fn{pure} (\dt{StringAtom} \bn{s})
+\end{Verbatim}
+\end{document}
